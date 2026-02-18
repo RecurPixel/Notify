@@ -1,0 +1,44 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="coverlet.collector" Version="6.0.4" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.14.1" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="10.0.3" />
+    <PackageReference Include="Microsoft.Extensions.Logging" Version="10.0.3" />
+    <PackageReference Include="Moq" Version="4.20.72" />
+    <PackageReference Include="xunit" Version="2.9.3" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="3.1.4" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Using Include="Xunit" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\RecurPixel.Notify.Core\RecurPixel.Notify.Core.csproj" />
+    <ProjectReference Include="..\..\src\RecurPixel.Notify.Email.SendGrid\RecurPixel.Notify.Email.SendGrid.csproj" />
+    <ProjectReference Include="..\..\src\RecurPixel.Notify.Email.Smtp\RecurPixel.Notify.Email.Smtp.csproj" />
+    <ProjectReference Include="..\..\src\RecurPixel.Notify.Sms.Twilio\RecurPixel.Notify.Sms.Twilio.csproj" />
+    <ProjectReference Include="..\..\src\RecurPixel.Notify.Orchestrator\RecurPixel.Notify.Orchestrator.csproj" />
+    <ProjectReference Include="..\..\src\RecurPixel.Notify.Push.Fcm\RecurPixel.Notify.Push.Fcm.csproj" />
+    <ProjectReference Include="..\..\src\RecurPixel.Notify.Push.Apns\RecurPixel.Notify.Push.Apns.csproj" />
+    <ProjectReference Include="..\..\src\RecurPixel.Notify.WhatsApp.Twilio\RecurPixel.Notify.WhatsApp.Twilio.csproj" />
+    <ProjectReference Include="..\..\src\RecurPixel.Notify.WhatsApp.MetaCloud\RecurPixel.Notify.WhatsApp.MetaCloud.csproj" />
+    <ProjectReference Include="..\..\src\RecurPixel.Notify.Slack\RecurPixel.Notify.Slack.csproj" />
+    <ProjectReference Include="..\..\src\RecurPixel.Notify.Discord\RecurPixel.Notify.Discord.csproj" />
+    <ProjectReference Include="..\..\src\RecurPixel.Notify.Teams\RecurPixel.Notify.Teams.csproj" />
+    <ProjectReference Include="..\..\src\RecurPixel.Notify.Telegram\RecurPixel.Notify.Telegram.csproj" />
+    <ProjectReference Include="..\..\src\RecurPixel.Notify.Facebook\RecurPixel.Notify.Facebook.csproj" />
+    <ProjectReference Include="..\..\src\RecurPixel.Notify.Line\RecurPixel.Notify.Line.csproj" />
+    <ProjectReference Include="..\..\src\RecurPixel.Notify.Viber\RecurPixel.Notify.Viber.csproj" />
+    <ProjectReference Include="..\..\src\RecurPixel.Notify.InApp\RecurPixel.Notify.InApp.csproj" />
+  </ItemGroup>
+
+</Project>
