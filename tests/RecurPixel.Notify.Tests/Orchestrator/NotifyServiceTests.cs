@@ -1,9 +1,5 @@
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Options;
-using Moq;
 using RecurPixel.Notify.Core.Channels;
-using RecurPixel.Notify.Core.Models;
-using RecurPixel.Notify.Core.Options;
 using RecurPixel.Notify.Core.Options.Channels;
 using RecurPixel.Notify.Orchestrator.Extensions;
 using RecurPixel.Notify.Orchestrator.Options;

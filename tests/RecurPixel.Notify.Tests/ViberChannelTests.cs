@@ -1,17 +1,4 @@
-using System;
-using System.Net;
-using System.Net.Http;
-using System.Text.Json;
-using System.Threading;
-using System.Threading.Tasks;
-using Microsoft.Extensions.Logging.Abstractions;
-using Microsoft.Extensions.Options;
-using Moq;
-using Moq.Protected;
-using RecurPixel.Notify.Core.Models;
-using RecurPixel.Notify.Core.Options;
 using RecurPixel.Notify.Viber;
-using Xunit;
 
 namespace RecurPixel.Notify.Tests;
 
@@ -19,21 +6,21 @@ public sealed class ViberChannelTests
 {
     private static ViberOptions DefaultOptions => new()
     {
-        BotAuthToken    = "test-bot-auth-token",
-        SenderName      = "TestBot",
+        BotAuthToken = "test-bot-auth-token",
+        SenderName = "TestBot",
         SenderAvatarUrl = null
     };
 
     private static NotificationPayload DefaultPayload => new()
     {
-        To      = "viber-user-id-abc123",
+        To = "viber-user-id-abc123",
         Subject = "Hello",
-        Body    = "World"
+        Body = "World"
     };
 
     private static HttpClient MakeClient(HttpStatusCode status, object responseBody)
     {
-        var json    = JsonSerializer.Serialize(responseBody);
+        var json = JsonSerializer.Serialize(responseBody);
         var handler = new Mock<HttpMessageHandler>();
 
         handler
@@ -45,7 +32,7 @@ public sealed class ViberChannelTests
             .ReturnsAsync(new HttpResponseMessage
             {
                 StatusCode = status,
-                Content    = new StringContent(json)
+                Content = new StringContent(json)
             });
 
         return new HttpClient(handler.Object);
@@ -58,9 +45,9 @@ public sealed class ViberChannelTests
     {
         var response = new
         {
-            status         = 0,
+            status = 0,
             status_message = "ok",
-            message_token  = 5098034272012345678L
+            message_token = 5098034272012345678L
         };
 
         var channel = new ViberChannel(
@@ -83,16 +70,16 @@ public sealed class ViberChannelTests
     {
         var payload = new NotificationPayload
         {
-            To      = "viber-user-id-abc123",
+            To = "viber-user-id-abc123",
             Subject = "",
-            Body    = "Body only"
+            Body = "Body only"
         };
 
         var response = new
         {
-            status         = 0,
+            status = 0,
             status_message = "ok",
-            message_token  = 111L
+            message_token = 111L
         };
 
         var handler = new Mock<HttpMessageHandler>();
@@ -111,7 +98,7 @@ public sealed class ViberChannelTests
             .ReturnsAsync(new HttpResponseMessage
             {
                 StatusCode = HttpStatusCode.OK,
-                Content    = new StringContent(JsonSerializer.Serialize(response))
+                Content = new StringContent(JsonSerializer.Serialize(response))
             });
 
         var channel = new ViberChannel(
@@ -132,9 +119,9 @@ public sealed class ViberChannelTests
     {
         var response = new
         {
-            status         = 0,
+            status = 0,
             status_message = "ok",
-            message_token  = 111L
+            message_token = 111L
         };
 
         var handler = new Mock<HttpMessageHandler>();
@@ -154,7 +141,7 @@ public sealed class ViberChannelTests
             .ReturnsAsync(new HttpResponseMessage
             {
                 StatusCode = HttpStatusCode.OK,
-                Content    = new StringContent(JsonSerializer.Serialize(response))
+                Content = new StringContent(JsonSerializer.Serialize(response))
             });
 
         var channel = new ViberChannel(
@@ -174,9 +161,9 @@ public sealed class ViberChannelTests
     {
         var response = new
         {
-            status         = 6,
+            status = 6,
             status_message = "Not subscribed",
-            message_token  = 0L
+            message_token = 0L
         };
 
         var channel = new ViberChannel(
@@ -256,9 +243,9 @@ public sealed class ViberChannelTests
     {
         var response = new
         {
-            status         = 0,
+            status = 0,
             status_message = "ok",
-            message_token  = 999L
+            message_token = 999L
         };
 
         var channel = new ViberChannel(
@@ -276,9 +263,9 @@ public sealed class ViberChannelTests
     {
         var response = new
         {
-            status         = 0,
+            status = 0,
             status_message = "ok",
-            message_token  = 999L
+            message_token = 999L
         };
 
         var channel = new ViberChannel(

@@ -1,9 +1,5 @@
-using System;
 using RecurPixel.Notify.Core.Extensions;
-using RecurPixel.Notify.Core.Options;
 using RecurPixel.Notify.Core.Options.Channels;
-using RecurPixel.Notify.Core.Options.Providers;
-using Xunit;
 
 namespace RecurPixel.Notify.Tests.Core;
 

@@ -1,8 +1,3 @@
-using Microsoft.Extensions.Logging.Abstractions;
-using Microsoft.Extensions.Options;
-using Moq;
-using RecurPixel.Notify.Core.Models;
-using RecurPixel.Notify.Core.Options.Providers;
 using RecurPixel.Notify.WhatsApp.MetaCloud;
 
 namespace RecurPixel.Notify.Tests.WhatsApp;
@@ -15,7 +10,7 @@ public class MetaCloudWhatsAppChannelTests
         new(
             Options.Create(new MetaCloudOptions
             {
-                AccessToken   = "test_token",
+                AccessToken = "test_token",
                 PhoneNumberId = "1234567890"
             }),
             client,
@@ -66,10 +61,10 @@ public class MetaCloudWhatsAppChannelTests
     public async Task SendAsync_Success_ReturnsSuccessResult()
     {
         var channel = MakeChannel(MakeSuccessMock("wamid_xyz").Object);
-        var result  = await channel.SendAsync(MakePayload());
+        var result = await channel.SendAsync(MakePayload());
 
         Assert.True(result.Success);
-        Assert.Equal("whatsapp",  result.Channel);
+        Assert.Equal("whatsapp", result.Channel);
         Assert.Equal("metacloud", result.Provider);
         Assert.Equal("wamid_xyz", result.ProviderId);
     }
@@ -78,7 +73,7 @@ public class MetaCloudWhatsAppChannelTests
     public async Task SendAsync_Success_RecipientMatchesPayloadTo()
     {
         var channel = MakeChannel(MakeSuccessMock().Object);
-        var result  = await channel.SendAsync(MakePayload("+1112223333"));
+        var result = await channel.SendAsync(MakePayload("+1112223333"));
 
         Assert.Equal("+1112223333", result.Recipient);
     }
@@ -86,9 +81,9 @@ public class MetaCloudWhatsAppChannelTests
     [Fact]
     public async Task SendAsync_Success_SentAtIsRecentUtc()
     {
-        var before  = DateTime.UtcNow.AddSeconds(-1);
+        var before = DateTime.UtcNow.AddSeconds(-1);
         var channel = MakeChannel(MakeSuccessMock().Object);
-        var result  = await channel.SendAsync(MakePayload());
+        var result = await channel.SendAsync(MakePayload());
 
         Assert.True(result.SentAt >= before);
         Assert.True(result.SentAt <= DateTime.UtcNow.AddSeconds(1));
@@ -97,12 +92,12 @@ public class MetaCloudWhatsAppChannelTests
     [Fact]
     public async Task SendAsync_Success_PassesToAndBodyToClient()
     {
-        var mock    = MakeSuccessMock();
+        var mock = MakeSuccessMock();
         var channel = MakeChannel(mock.Object);
 
         await channel.SendAsync(new NotificationPayload
         {
-            To   = "+9998887777",
+            To = "+9998887777",
             Body = "specific message"
         });
 
@@ -119,10 +114,10 @@ public class MetaCloudWhatsAppChannelTests
     public async Task SendAsync_ApiFailure_ReturnsFailureResult()
     {
         var channel = MakeChannel(MakeFailureMock("rate limited").Object);
-        var result  = await channel.SendAsync(MakePayload());
+        var result = await channel.SendAsync(MakePayload());
 
         Assert.False(result.Success);
-        Assert.Equal("whatsapp",  result.Channel);
+        Assert.Equal("whatsapp", result.Channel);
         Assert.Equal("metacloud", result.Provider);
         Assert.Contains("rate limited", result.Error);
     }
@@ -131,7 +126,7 @@ public class MetaCloudWhatsAppChannelTests
     public async Task SendAsync_ApiFailure_RecipientStillSet()
     {
         var channel = MakeChannel(MakeFailureMock().Object);
-        var result  = await channel.SendAsync(MakePayload("fail-recipient"));
+        var result = await channel.SendAsync(MakePayload("fail-recipient"));
 
         Assert.Equal("fail-recipient", result.Recipient);
     }
@@ -153,7 +148,7 @@ public class MetaCloudWhatsAppChannelTests
     public async Task SendAsync_ClientThrows_DoesNotPropagate()
     {
         var channel = MakeChannel(MakeThrowingMock().Object);
-        var ex      = await Record.ExceptionAsync(() => channel.SendAsync(MakePayload()));
+        var ex = await Record.ExceptionAsync(() => channel.SendAsync(MakePayload()));
 
         Assert.Null(ex);
     }
@@ -162,7 +157,7 @@ public class MetaCloudWhatsAppChannelTests
     public async Task SendAsync_ClientThrows_RecipientStillSet()
     {
         var channel = MakeChannel(MakeThrowingMock().Object);
-        var result  = await channel.SendAsync(MakePayload("throw-recipient"));
+        var result = await channel.SendAsync(MakePayload("throw-recipient"));
 
         Assert.Equal("throw-recipient", result.Recipient);
     }
@@ -172,7 +167,7 @@ public class MetaCloudWhatsAppChannelTests
     [Fact]
     public async Task SendBulkAsync_ThreePayloads_ClientCalledThreeTimes()
     {
-        var mock    = MakeSuccessMock();
+        var mock = MakeSuccessMock();
         var channel = MakeChannel(mock.Object);
 
         var payloads = Enumerable.Range(1, 3)
@@ -192,7 +187,7 @@ public class MetaCloudWhatsAppChannelTests
     [Fact]
     public async Task SendBulkAsync_UsedNativeBatch_IsFalse()
     {
-        var channel  = MakeChannel(MakeSuccessMock().Object);
+        var channel = MakeChannel(MakeSuccessMock().Object);
         var payloads = new[]
         {
             new NotificationPayload { To = "+1111111111", Body = "b" }
@@ -206,7 +201,7 @@ public class MetaCloudWhatsAppChannelTests
     [Fact]
     public async Task SendBulkAsync_EmptyList_ReturnsEmptyResult()
     {
-        var mock    = MakeSuccessMock();
+        var mock = MakeSuccessMock();
         var channel = MakeChannel(mock.Object);
 
         var result = await channel.SendBulkAsync(Array.Empty<NotificationPayload>());

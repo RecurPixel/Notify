@@ -1,12 +1,7 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
-using Moq;
 using RecurPixel.Notify.Core.Channels;
-using RecurPixel.Notify.Core.Models;
-using RecurPixel.Notify.Core.Options;
 using RecurPixel.Notify.Core.Options.Channels;
-using RecurPixel.Notify.Core.Options.Providers;
 using RecurPixel.Notify.Email.Smtp;
 using RecurPixel.Notify.Orchestrator.Extensions;
 using RecurPixel.Notify.Orchestrator.Options;
@@ -53,15 +48,15 @@ public class DeliveryHookAndLoggingTests
     private static (INotifyService service, List<NotifyResult> hookResults) BuildService(
         Action<OrchestratorOptions> configureOrch,
         Action<NotifyOptions>? configureNotify = null,
-        Mock<INotificationChannel>? emailMock  = null,
-        Mock<INotificationChannel>? smsMock    = null)
+        Mock<INotificationChannel>? emailMock = null,
+        Mock<INotificationChannel>? smsMock = null)
     {
         var hookResults = new List<NotifyResult>();
 
         var notifyOptions = new NotifyOptions
         {
             Email = new EmailOptions { Provider = "sendgrid" },
-            Sms   = new SmsOptions   { Provider = "twilio"   }
+            Sms = new SmsOptions { Provider = "twilio" }
         };
         configureNotify?.Invoke(notifyOptions);
 
@@ -89,9 +84,9 @@ public class DeliveryHookAndLoggingTests
 
     private static Mock<INotificationChannel> MakeMock(
         string channel,
-        bool success      = true,
-        string? error     = null,
-        string? provider  = null,
+        bool success = true,
+        string? error = null,
+        string? provider = null,
         string? recipient = null)
     {
         var mock = new Mock<INotificationChannel>();
@@ -101,12 +96,12 @@ public class DeliveryHookAndLoggingTests
                 It.IsAny<CancellationToken>()))
             .ReturnsAsync(new NotifyResult
             {
-                Success    = success,
-                Channel    = channel,
-                Provider   = provider ?? channel,
-                Recipient  = recipient,
-                Error      = error,
-                SentAt     = DateTime.UtcNow
+                Success = success,
+                Channel = channel,
+                Provider = provider ?? channel,
+                Recipient = recipient,
+                Error = error,
+                SentAt = DateTime.UtcNow
             });
         return mock;
     }
@@ -123,12 +118,12 @@ public class DeliveryHookAndLoggingTests
                 It.IsAny<CancellationToken>()))
             .ReturnsAsync(new NotifyResult
             {
-                Success    = true,
-                Channel    = "email",
-                Provider   = "sendgrid",
+                Success = true,
+                Channel = "email",
+                Provider = "sendgrid",
                 ProviderId = "msg_abc123",
-                Recipient  = "user@example.com",
-                SentAt     = DateTime.UtcNow
+                Recipient = "user@example.com",
+                SentAt = DateTime.UtcNow
             });
 
         var (svc, hook) = BuildService(
@@ -137,17 +132,17 @@ public class DeliveryHookAndLoggingTests
 
         await svc.TriggerAsync("order.placed", new NotifyContext
         {
-            User     = new NotifyUser { UserId = "u1" },
+            User = new NotifyUser { UserId = "u1" },
             Channels = new() { ["email"] = new() { To = "user@example.com", Subject = "s", Body = "b" } }
         });
 
         Assert.Single(hook);
         var result = hook[0];
         Assert.True(result.Success);
-        Assert.Equal("email",           result.Channel);
-        Assert.Equal("sendgrid",        result.Provider);
-        Assert.Equal("msg_abc123",      result.ProviderId);
-        Assert.Equal("user@example.com",result.Recipient);
+        Assert.Equal("email", result.Channel);
+        Assert.Equal("sendgrid", result.Provider);
+        Assert.Equal("msg_abc123", result.ProviderId);
+        Assert.Equal("user@example.com", result.Recipient);
         Assert.Null(result.Error);
         Assert.False(result.UsedFallback);
     }
@@ -167,24 +162,24 @@ public class DeliveryHookAndLoggingTests
 
         await svc.TriggerAsync("order.placed", new NotifyContext
         {
-            User     = new NotifyUser { UserId = "u1" },
+            User = new NotifyUser { UserId = "u1" },
             Channels = new() { ["email"] = new() { To = "fail@example.com", Subject = "s", Body = "b" } }
         });
 
         Assert.Single(hook);
         var result = hook[0];
         Assert.False(result.Success);
-        Assert.Equal("email",              result.Channel);
-        Assert.Equal("sendgrid",           result.Provider);
+        Assert.Equal("email", result.Channel);
+        Assert.Equal("sendgrid", result.Provider);
         Assert.Equal("connection refused", result.Error);
-        Assert.Equal("fail@example.com",   result.Recipient);
+        Assert.Equal("fail@example.com", result.Recipient);
         Assert.False(result.UsedFallback);
     }
 
     [Fact]
     public async Task Hook_SentAt_IsRecentUtc()
     {
-        var before    = DateTime.UtcNow.AddSeconds(-1);
+        var before = DateTime.UtcNow.AddSeconds(-1);
         var emailMock = MakeMock("email");
 
         var (svc, hook) = BuildService(
@@ -193,7 +188,7 @@ public class DeliveryHookAndLoggingTests
 
         await svc.TriggerAsync("order.placed", new NotifyContext
         {
-            User     = new NotifyUser { UserId = "u1" },
+            User = new NotifyUser { UserId = "u1" },
             Channels = new() { ["email"] = new() { To = "a@b.com", Subject = "s", Body = "b" } }
         });
 
@@ -208,7 +203,7 @@ public class DeliveryHookAndLoggingTests
     public async Task Hook_MultipleChannels_EachResultHasCorrectChannel()
     {
         var emailMock = MakeMock("email", provider: "sendgrid");
-        var smsMock   = MakeMock("sms",   provider: "twilio");
+        var smsMock = MakeMock("sms", provider: "twilio");
 
         var (svc, hook) = BuildService(
             o => o.DefineEvent("order.placed", e => e.UseChannels("email", "sms")),
@@ -220,18 +215,18 @@ public class DeliveryHookAndLoggingTests
             User = new NotifyUser { UserId = "u1" },
             Channels = new()
             {
-                ["email"] = new() { To = "a@b.com",    Subject = "s", Body = "b" },
-                ["sms"]   = new() { To = "+1234567890",               Body = "s" }
+                ["email"] = new() { To = "a@b.com", Subject = "s", Body = "b" },
+                ["sms"] = new() { To = "+1234567890", Body = "s" }
             }
         });
 
         Assert.Equal(2, hook.Count);
 
         var emailResult = hook.Single(r => r.Channel == "email");
-        var smsResult   = hook.Single(r => r.Channel == "sms");
+        var smsResult = hook.Single(r => r.Channel == "sms");
 
         Assert.Equal("sendgrid", emailResult.Provider);
-        Assert.Equal("twilio",   smsResult.Provider);
+        Assert.Equal("twilio", smsResult.Provider);
         Assert.All(hook, r => Assert.True(r.Success));
     }
 
@@ -248,7 +243,7 @@ public class DeliveryHookAndLoggingTests
 
         await svc.TriggerAsync("order.placed", new NotifyContext
         {
-            User     = new NotifyUser { UserId = "u1" },
+            User = new NotifyUser { UserId = "u1" },
             Channels = new() { ["email"] = new() { To = "a@b.com", Subject = "s", Body = "b" } }
         });
 
@@ -269,7 +264,9 @@ public class DeliveryHookAndLoggingTests
         // Direct send bypasses the event system and therefore the hook
         await svc.Email.SendAsync(new NotificationPayload
         {
-            To = "direct@example.com", Subject = "s", Body = "b"
+            To = "direct@example.com",
+            Subject = "s",
+            Body = "b"
         });
 
         Assert.Empty(hook);
@@ -283,19 +280,21 @@ public class DeliveryHookAndLoggingTests
     [Fact]
     public async Task SmtpChannel_AttemptLoggedAtDebug()
     {
-        var logger  = new TestLogger<SmtpChannel>();
+        var logger = new TestLogger<SmtpChannel>();
         var channel = new SmtpChannel(
             Options.Create(new SmtpOptions
             {
-                Host      = "localhost",
-                Port      = 2525,
+                Host = "localhost",
+                Port = 2525,
                 FromEmail = "from@example.com"
             }),
             logger);
 
         await channel.SendAsync(new NotificationPayload
         {
-            To = "to@example.com", Subject = "s", Body = "b"
+            To = "to@example.com",
+            Subject = "s",
+            Body = "b"
         });
 
         // Attempt log must always fire, regardless of outcome
@@ -305,19 +304,21 @@ public class DeliveryHookAndLoggingTests
     [Fact]
     public async Task SmtpChannel_FailureLoggedAtDebug()
     {
-        var logger  = new TestLogger<SmtpChannel>();
+        var logger = new TestLogger<SmtpChannel>();
         var channel = new SmtpChannel(
             Options.Create(new SmtpOptions
             {
-                Host      = "127.0.0.1",
-                Port      = 19999,       // nothing listening here — will throw
+                Host = "127.0.0.1",
+                Port = 19999,       // nothing listening here — will throw
                 FromEmail = "from@example.com"
             }),
             logger);
 
         var result = await channel.SendAsync(new NotificationPayload
         {
-            To = "to@example.com", Subject = "s", Body = "b"
+            To = "to@example.com",
+            Subject = "s",
+            Body = "b"
         });
 
         Assert.False(result.Success);
@@ -330,19 +331,21 @@ public class DeliveryHookAndLoggingTests
     [Fact]
     public async Task SmtpChannel_RecipientInLogMessages()
     {
-        var logger  = new TestLogger<SmtpChannel>();
+        var logger = new TestLogger<SmtpChannel>();
         var channel = new SmtpChannel(
             Options.Create(new SmtpOptions
             {
-                Host      = "127.0.0.1",
-                Port      = 19999,
+                Host = "127.0.0.1",
+                Port = 19999,
                 FromEmail = "from@example.com"
             }),
             logger);
 
         await channel.SendAsync(new NotificationPayload
         {
-            To = "recipient@example.com", Subject = "s", Body = "b"
+            To = "recipient@example.com",
+            Subject = "s",
+            Body = "b"
         });
 
         // Recipient must appear in at least one log entry for traceability
@@ -353,24 +356,26 @@ public class DeliveryHookAndLoggingTests
     [Fact]
     public async Task SmtpChannel_ResultContainsRecipient()
     {
-        var logger  = new TestLogger<SmtpChannel>();
+        var logger = new TestLogger<SmtpChannel>();
         var channel = new SmtpChannel(
             Options.Create(new SmtpOptions
             {
-                Host      = "127.0.0.1",
-                Port      = 19999,
+                Host = "127.0.0.1",
+                Port = 19999,
                 FromEmail = "from@example.com"
             }),
             logger);
 
         var result = await channel.SendAsync(new NotificationPayload
         {
-            To = "fail@example.com", Subject = "s", Body = "b"
+            To = "fail@example.com",
+            Subject = "s",
+            Body = "b"
         });
 
         // Recipient must be set on the result so the delivery hook can surface it
         Assert.Equal("fail@example.com", result.Recipient);
-        Assert.Equal("smtp",             result.Provider);
-        Assert.Equal("email",            result.Channel);
+        Assert.Equal("smtp", result.Provider);
+        Assert.Equal("email", result.Channel);
     }
 }

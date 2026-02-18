@@ -45,4 +45,8 @@ public class AwsSnsOptions
     public string AccessKey { get; set; } = string.Empty;
     public string SecretKey { get; set; } = string.Empty;
     public string Region { get; set; } = string.Empty;
+    /// <summary>Optional SMS type: "Transactional" (default) or "Promotional".</summary>
+    public string? SmsType { get; set; }
+    /// <summary>Optional sender ID (may not be supported in all regions).</summary>
+    public string? SenderId { get; set; }
 }

@@ -1,8 +1,3 @@
-using System;
-using System.Collections.Generic;
-using RecurPixel.Notify.Core.Models;
-using Xunit;
-
 namespace RecurPixel.Notify.Tests.Core;
 
 public class BulkNotifyResultTests

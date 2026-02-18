@@ -1,7 +1,3 @@
-using Microsoft.Extensions.Logging.Abstractions;
-using Microsoft.Extensions.Options;
-using RecurPixel.Notify.Core.Models;
-using RecurPixel.Notify.Core.Options.Providers;
 using RecurPixel.Notify.WhatsApp.Twilio;
 
 namespace RecurPixel.Notify.Tests.WhatsApp;
@@ -22,7 +18,7 @@ public class TwilioWhatsAppChannelTests
             Options.Create(new TwilioOptions
             {
                 AccountSid = "ACtest",
-                AuthToken  = "test_token",
+                AuthToken = "test_token",
                 FromNumber = fromNumber
             }),
             NullLogger<TwilioWhatsAppChannel>.Instance);
@@ -44,12 +40,12 @@ public class TwilioWhatsAppChannelTests
     public async Task SendAsync_InvalidCredentials_ReturnsFailureResult()
     {
         var channel = MakeChannel();
-        var result  = await channel.SendAsync(MakePayload());
+        var result = await channel.SendAsync(MakePayload());
 
         // Twilio Init with fake creds throws on first API call
         Assert.False(result.Success);
         Assert.Equal("whatsapp", result.Channel);
-        Assert.Equal("twilio",   result.Provider);
+        Assert.Equal("twilio", result.Provider);
         Assert.NotNull(result.Error);
     }
 
@@ -57,7 +53,7 @@ public class TwilioWhatsAppChannelTests
     public async Task SendAsync_InvalidCredentials_RecipientSet()
     {
         var channel = MakeChannel();
-        var result  = await channel.SendAsync(MakePayload("+1111111111"));
+        var result = await channel.SendAsync(MakePayload("+1111111111"));
 
         Assert.Equal("+1111111111", result.Recipient);
     }
@@ -66,16 +62,16 @@ public class TwilioWhatsAppChannelTests
     public async Task SendAsync_InvalidCredentials_DoesNotThrow()
     {
         var channel = MakeChannel();
-        var ex      = await Record.ExceptionAsync(() => channel.SendAsync(MakePayload()));
+        var ex = await Record.ExceptionAsync(() => channel.SendAsync(MakePayload()));
         Assert.Null(ex);
     }
 
     [Fact]
     public async Task SendAsync_InvalidCredentials_SentAtIsRecentUtc()
     {
-        var before  = DateTime.UtcNow.AddSeconds(-1);
+        var before = DateTime.UtcNow.AddSeconds(-1);
         var channel = MakeChannel();
-        var result  = await channel.SendAsync(MakePayload());
+        var result = await channel.SendAsync(MakePayload());
 
         Assert.True(result.SentAt >= before);
         Assert.True(result.SentAt <= DateTime.UtcNow.AddSeconds(1));
@@ -88,7 +84,7 @@ public class TwilioWhatsAppChannelTests
     {
         // Channel must not throw when normalising the whatsapp: prefix
         var channel = MakeChannel(fromNumber: "+1234567890");
-        var ex      = await Record.ExceptionAsync(() => channel.SendAsync(MakePayload()));
+        var ex = await Record.ExceptionAsync(() => channel.SendAsync(MakePayload()));
         Assert.Null(ex);
     }
 
@@ -96,7 +92,7 @@ public class TwilioWhatsAppChannelTests
     public async Task SendAsync_FromNumberAlreadyHasPrefix_DoesNotThrow()
     {
         var channel = MakeChannel(fromNumber: "whatsapp:+1234567890");
-        var ex      = await Record.ExceptionAsync(() => channel.SendAsync(MakePayload()));
+        var ex = await Record.ExceptionAsync(() => channel.SendAsync(MakePayload()));
         Assert.Null(ex);
     }
 
@@ -105,7 +101,7 @@ public class TwilioWhatsAppChannelTests
     [Fact]
     public async Task SendBulkAsync_UsedNativeBatch_IsFalse()
     {
-        var channel  = MakeChannel();
+        var channel = MakeChannel();
         var payloads = new[]
         {
             new NotificationPayload { To = "+1111111111", Body = "msg 1" },
@@ -123,7 +119,7 @@ public class TwilioWhatsAppChannelTests
     public async Task SendBulkAsync_EmptyList_ReturnsEmptyResult()
     {
         var channel = MakeChannel();
-        var result  = await channel.SendBulkAsync(Array.Empty<NotificationPayload>());
+        var result = await channel.SendBulkAsync(Array.Empty<NotificationPayload>());
 
         Assert.Equal(0, result.Total);
         Assert.True(result.AllSucceeded);

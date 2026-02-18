@@ -34,4 +34,5 @@ public class EmailOptions
     public ResendOptions? Resend { get; set; }
     public PostmarkOptions? Postmark { get; set; }
     public AwsSesOptions? AwsSes { get; set; }
+    public AzureCommEmailOptions? AzureCommEmail { get; set; }
 }

@@ -1,18 +1,5 @@
-using System;
-using System.Net;
-using System.Net.Http;
 using System.Net.Http.Headers;
-using System.Text.Json;
-using System.Threading;
-using System.Threading.Tasks;
-using Microsoft.Extensions.Logging.Abstractions;
-using Microsoft.Extensions.Options;
-using Moq;
-using Moq.Protected;
-using RecurPixel.Notify.Core.Models;
-using RecurPixel.Notify.Core.Options;
 using RecurPixel.Notify.Line;
-using Xunit;
 
 namespace RecurPixel.Notify.Tests;
 
@@ -25,9 +12,9 @@ public sealed class LineChannelTests
 
     private static NotificationPayload DefaultPayload => new()
     {
-        To      = "line-user-id-abc123",
+        To = "line-user-id-abc123",
         Subject = "Hello",
-        Body    = "World"
+        Body = "World"
     };
 
     private static HttpClient MakeClient(
@@ -35,13 +22,13 @@ public sealed class LineChannelTests
         object responseBody,
         string? requestId = "line-request-id-xyz")
     {
-        var json    = JsonSerializer.Serialize(responseBody);
+        var json = JsonSerializer.Serialize(responseBody);
         var handler = new Mock<HttpMessageHandler>();
 
         var httpResponse = new HttpResponseMessage
         {
             StatusCode = status,
-            Content    = new StringContent(json)
+            Content = new StringContent(json)
         };
 
         if (requestId is not null)
@@ -97,9 +84,9 @@ public sealed class LineChannelTests
     {
         var payload = new NotificationPayload
         {
-            To      = "line-user-id-abc123",
+            To = "line-user-id-abc123",
             Subject = "",
-            Body    = "Body only"
+            Body = "Body only"
         };
 
         var handler = new Mock<HttpMessageHandler>();
@@ -108,7 +95,7 @@ public sealed class LineChannelTests
         var httpResponse = new HttpResponseMessage
         {
             StatusCode = HttpStatusCode.OK,
-            Content    = new StringContent("{}")
+            Content = new StringContent("{}")
         };
         httpResponse.Headers.Add("X-Line-Request-Id", "req-id-1");
 
@@ -146,7 +133,7 @@ public sealed class LineChannelTests
         var httpResponse = new HttpResponseMessage
         {
             StatusCode = HttpStatusCode.OK,
-            Content    = new StringContent("{}")
+            Content = new StringContent("{}")
         };
         httpResponse.Headers.Add("X-Line-Request-Id", "req-id-1");
 

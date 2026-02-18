@@ -1,18 +1,4 @@
-using System;
-using System.Net;
-using System.Net.Http;
-using System.Text.Json;
-using System.Threading;
-using System.Threading.Tasks;
-using Microsoft.Extensions.Logging.Abstractions;
-using Microsoft.Extensions.Options;
-using Moq;
-using Moq.Protected;
-using RecurPixel.Notify.Core.Models;
-using RecurPixel.Notify.Core.Options;
-using RecurPixel.Notify.Core.Options.Providers;
 using RecurPixel.Notify.Facebook;
-using Xunit;
 
 namespace RecurPixel.Notify.Tests;
 

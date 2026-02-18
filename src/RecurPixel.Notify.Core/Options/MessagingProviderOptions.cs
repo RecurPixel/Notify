@@ -32,3 +32,65 @@ public class InAppOptions
     /// </summary>
     public Func<RecurPixel.Notify.Core.Models.NotificationPayload, System.Threading.CancellationToken, System.Threading.Tasks.Task<RecurPixel.Notify.Core.Models.NotifyResult>>? Handler { get; set; }
 }
+
+/// <summary>Vonage WhatsApp Business messaging credentials.</summary>
+public class VonageWhatsAppOptions
+{
+    /// <summary>Vonage API key from the Vonage Dashboard.</summary>
+    public string ApiKey { get; set; } = string.Empty;
+
+    /// <summary>Vonage API secret from the Vonage Dashboard.</summary>
+    public string ApiSecret { get; set; } = string.Empty;
+
+    /// <summary>WhatsApp sender number registered with Vonage.</summary>
+    public string FromNumber { get; set; } = string.Empty;
+}
+
+/// <summary>Azure Communication Services Email credentials.</summary>
+public class AzureCommEmailOptions
+{
+    /// <summary>Azure Communication Services connection string.</summary>
+    public string ConnectionString { get; set; } = string.Empty;
+
+    /// <summary>Sender email address registered in ACS.</summary>
+    public string FromEmail { get; set; } = string.Empty;
+
+    /// <summary>Optional display name for the sender.</summary>
+    public string? FromName { get; set; }
+}
+
+/// <summary>Azure Communication Services SMS credentials.</summary>
+public class AzureCommSmsOptions
+{
+    /// <summary>Azure Communication Services connection string.</summary>
+    public string ConnectionString { get; set; } = string.Empty;
+
+    /// <summary>Phone number purchased from ACS to send from.</summary>
+    public string FromNumber { get; set; } = string.Empty;
+}
+
+/// <summary>Mattermost incoming webhook credentials.</summary>
+public class MattermostOptions
+{
+    /// <summary>Incoming webhook URL from Mattermost integrations settings.</summary>
+    public string WebhookUrl { get; set; } = string.Empty;
+
+    /// <summary>Optional override for the bot username shown in Mattermost.</summary>
+    public string? Username { get; set; }
+
+    /// <summary>Optional override for the channel to post to (e.g. "town-square").</summary>
+    public string? Channel { get; set; }
+}
+
+/// <summary>Rocket.Chat incoming webhook credentials.</summary>
+public class RocketChatOptions
+{
+    /// <summary>Incoming webhook URL from Rocket.Chat administration settings.</summary>
+    public string WebhookUrl { get; set; } = string.Empty;
+
+    /// <summary>Optional override for the bot username shown in Rocket.Chat.</summary>
+    public string? Username { get; set; }
+
+    /// <summary>Optional override for the channel to post to (e.g. "#general").</summary>
+    public string? Channel { get; set; }
+}

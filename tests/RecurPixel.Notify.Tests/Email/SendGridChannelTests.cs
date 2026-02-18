@@ -1,7 +1,3 @@
-using Microsoft.Extensions.Logging.Abstractions;
-using Microsoft.Extensions.Options;
-using RecurPixel.Notify.Core.Models;
-using RecurPixel.Notify.Core.Options.Providers;
 using RecurPixel.Notify.Email.SendGrid;
 
 namespace RecurPixel.Notify.Tests.Email;

@@ -39,6 +39,22 @@
     <ProjectReference Include="..\..\src\RecurPixel.Notify.Line\RecurPixel.Notify.Line.csproj" />
     <ProjectReference Include="..\..\src\RecurPixel.Notify.Viber\RecurPixel.Notify.Viber.csproj" />
     <ProjectReference Include="..\..\src\RecurPixel.Notify.InApp\RecurPixel.Notify.InApp.csproj" />
+    <ProjectReference Include="..\..\src\RecurPixel.Notify.Email.Mailgun\RecurPixel.Notify.Email.Mailgun.csproj" />
+    <ProjectReference Include="..\..\src\RecurPixel.Notify.Email.Resend\RecurPixel.Notify.Email.Resend.csproj" />
+    <ProjectReference Include="..\..\src\RecurPixel.Notify.Email.Postmark\RecurPixel.Notify.Email.Postmark.csproj" />
+    <ProjectReference Include="..\..\src\RecurPixel.Notify.Email.AwsSes\RecurPixel.Notify.Email.AwsSes.csproj" />
+    <ProjectReference Include="..\..\src\RecurPixel.Notify.Sms.Vonage\RecurPixel.Notify.Sms.Vonage.csproj" />
+    <ProjectReference Include="..\..\src\RecurPixel.Notify.Sms.Plivo\RecurPixel.Notify.Sms.Plivo.csproj" />
+    <ProjectReference Include="..\..\src\RecurPixel.Notify.Sms.Sinch\RecurPixel.Notify.Sms.Sinch.csproj" />
+    <ProjectReference Include="..\..\src\RecurPixel.Notify.Sms.MessageBird\RecurPixel.Notify.Sms.MessageBird.csproj" />
+    <ProjectReference Include="..\..\src\RecurPixel.Notify.Sms.AwsSns\RecurPixel.Notify.Sms.AwsSns.csproj" />
+    <ProjectReference Include="..\..\src\RecurPixel.Notify.Push.OneSignal\RecurPixel.Notify.Push.OneSignal.csproj" />
+    <ProjectReference Include="..\..\src\RecurPixel.Notify.Push.Expo\RecurPixel.Notify.Push.Expo.csproj" />
+    <ProjectReference Include="..\..\src\RecurPixel.Notify.WhatsApp.Vonage\RecurPixel.Notify.WhatsApp.Vonage.csproj" />
+    <ProjectReference Include="..\..\src\RecurPixel.Notify.Email.AzureCommEmail\RecurPixel.Notify.Email.AzureCommEmail.csproj" />
+    <ProjectReference Include="..\..\src\RecurPixel.Notify.Sms.AzureCommSms\RecurPixel.Notify.Sms.AzureCommSms.csproj" />
+    <ProjectReference Include="..\..\src\RecurPixel.Notify.Mattermost\RecurPixel.Notify.Mattermost.csproj" />
+    <ProjectReference Include="..\..\src\RecurPixel.Notify.RocketChat\RecurPixel.Notify.RocketChat.csproj" />
   </ItemGroup>
 
 </Project>

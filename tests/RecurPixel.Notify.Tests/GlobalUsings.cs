@@ -1,0 +1,9 @@
+global using System.Net;
+global using System.Text.Json;
+global using Microsoft.Extensions.Logging.Abstractions;
+global using Microsoft.Extensions.Options;
+global using Moq;
+global using Moq.Protected;
+global using RecurPixel.Notify.Core.Models;
+global using RecurPixel.Notify.Core.Options;
+global using RecurPixel.Notify.Core.Options.Providers;

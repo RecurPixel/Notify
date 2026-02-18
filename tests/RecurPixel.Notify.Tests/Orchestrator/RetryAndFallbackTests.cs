@@ -1,9 +1,5 @@
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Options;
-using Moq;
 using RecurPixel.Notify.Core.Channels;
-using RecurPixel.Notify.Core.Models;
-using RecurPixel.Notify.Core.Options;
 using RecurPixel.Notify.Core.Options.Channels;
 using RecurPixel.Notify.Orchestrator.Extensions;
 using RecurPixel.Notify.Orchestrator.Options;
@@ -23,7 +19,7 @@ public class RetryAndFallbackTests
         Action<OrchestratorOptions> configureOrch,
         Action<NotifyOptions>? configureNotify = null,
         Mock<INotificationChannel>? emailMock = null,
-        Mock<INotificationChannel>? smsMock   = null,
+        Mock<INotificationChannel>? smsMock = null,
         Mock<INotificationChannel>? slackMock = null)
     {
         var hookResults = new List<NotifyResult>();
@@ -31,7 +27,7 @@ public class RetryAndFallbackTests
         var notifyOptions = new NotifyOptions
         {
             Email = new EmailOptions { Provider = "sendgrid" },
-            Sms   = new SmsOptions   { Provider = "twilio"   }
+            Sms = new SmsOptions { Provider = "twilio" }
         };
         configureNotify?.Invoke(notifyOptions);
 
@@ -73,11 +69,11 @@ public class RetryAndFallbackTests
                 It.IsAny<CancellationToken>()))
             .ReturnsAsync(new NotifyResult
             {
-                Success  = success,
-                Channel  = channel,
+                Success = success,
+                Channel = channel,
                 Provider = channel,
-                Error    = error,
-                SentAt   = DateTime.UtcNow
+                Error = error,
+                SentAt = DateTime.UtcNow
             });
         return mock;
     }
@@ -101,11 +97,11 @@ public class RetryAndFallbackTests
                 var succeed = attempt > failCount;
                 return new NotifyResult
                 {
-                    Success  = succeed,
-                    Channel  = channel,
+                    Success = succeed,
+                    Channel = channel,
                     Provider = channel,
-                    Error    = succeed ? null : $"transient error attempt {attempt}",
-                    SentAt   = DateTime.UtcNow
+                    Error = succeed ? null : $"transient error attempt {attempt}",
+                    SentAt = DateTime.UtcNow
                 };
             });
         return mock;
@@ -115,8 +111,8 @@ public class RetryAndFallbackTests
     {
         var channels = new Dictionary<string, NotificationPayload>
         {
-            ["email"] = new() { To = "a@b.com",      Subject = "Hello", Body = "Body" },
-            ["sms"]   = new() { To = "+1234567890",                     Body = "SMS"  }
+            ["email"] = new() { To = "a@b.com", Subject = "Hello", Body = "Body" },
+            ["sms"] = new() { To = "+1234567890", Body = "SMS" }
         };
 
         if (includeSlack)
@@ -124,7 +120,7 @@ public class RetryAndFallbackTests
 
         return new NotifyContext
         {
-            User     = new NotifyUser { UserId = "u1", Email = "a@b.com", Phone = "+1234567890" },
+            User = new NotifyUser { UserId = "u1", Email = "a@b.com", Phone = "+1234567890" },
             Channels = channels
         };
     }
@@ -314,7 +310,7 @@ public class RetryAndFallbackTests
         // Both email and sms are primary channels; fallback chain lists sms first
         // then slack. sms should be skipped — slack should run.
         var emailMock = MakeMock("email", success: false, error: "down");
-        var smsMock   = MakeMock("sms",   success: false, error: "down");
+        var smsMock = MakeMock("sms", success: false, error: "down");
         var slackMock = MakeMock("slack", success: true);
 
         var (svc, _) = BuildService(
@@ -323,7 +319,7 @@ public class RetryAndFallbackTests
                 .WithFallback("sms", "slack")   // sms already dispatched — must be skipped
                 .WithRetry(maxAttempts: 1, delayMs: 0)),
             emailMock: emailMock,
-            smsMock:   smsMock,
+            smsMock: smsMock,
             slackMock: slackMock);
 
         var result = await svc.TriggerAsync("alert", MakeContext(includeSlack: true));
@@ -363,7 +359,7 @@ public class RetryAndFallbackTests
             Channels = new Dictionary<string, NotificationPayload>
             {
                 ["email"] = new() { To = "a@b.com", Subject = "s", Body = "b" },
-                ["slack"] = new() { To = "#alerts",                Body = "fallback" }
+                ["slack"] = new() { To = "#alerts", Body = "fallback" }
             }
         };
 
@@ -402,7 +398,7 @@ public class RetryAndFallbackTests
     public async Task Fallback_HookCalledForEachFallbackAttempt()
     {
         var emailMock = MakeMock("email", success: false, error: "down");
-        var smsMock   = MakeMock("sms",   success: false, error: "down");
+        var smsMock = MakeMock("sms", success: false, error: "down");
         var slackMock = MakeMock("slack", success: true);
 
         // Only email is the primary channel; sms and slack are in the fallback chain
@@ -412,7 +408,7 @@ public class RetryAndFallbackTests
                 .WithFallback("sms", "slack")
                 .WithRetry(maxAttempts: 1, delayMs: 0)),
             emailMock: emailMock,
-            smsMock:   smsMock,
+            smsMock: smsMock,
             slackMock: slackMock);
 
         var ctx = new NotifyContext
@@ -421,8 +417,8 @@ public class RetryAndFallbackTests
             Channels = new Dictionary<string, NotificationPayload>
             {
                 ["email"] = new() { To = "a@b.com", Subject = "s", Body = "b" },
-                ["sms"]   = new() { To = "+1",                      Body = "sms" },
-                ["slack"] = new() { To = "#ch",                     Body = "slack" }
+                ["sms"] = new() { To = "+1", Body = "sms" },
+                ["slack"] = new() { To = "#ch", Body = "slack" }
             }
         };
 

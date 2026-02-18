@@ -25,4 +25,5 @@ public class SmsOptions
     public SinchOptions? Sinch { get; set; }
     public MessageBirdOptions? MessageBird { get; set; }
     public AwsSnsOptions? AwsSns { get; set; }
+    public AzureCommSmsOptions? AzureCommSms { get; set; }
 }

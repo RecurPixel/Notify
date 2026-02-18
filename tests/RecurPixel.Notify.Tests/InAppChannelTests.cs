@@ -1,12 +1,4 @@
-using System;
-using System.Threading;
-using System.Threading.Tasks;
-using Microsoft.Extensions.Logging.Abstractions;
-using Microsoft.Extensions.Options;
-using RecurPixel.Notify.Core.Models;
-using RecurPixel.Notify.Core.Options;
 using RecurPixel.Notify.InApp;
-using Xunit;
 
 namespace RecurPixel.Notify.Tests;
 
@@ -14,9 +6,9 @@ public sealed class InAppChannelTests
 {
     private static NotificationPayload DefaultPayload => new()
     {
-        To      = "user-id-abc123",
+        To = "user-id-abc123",
         Subject = "You have a new message",
-        Body    = "Click here to view it"
+        Body = "Click here to view it"
     };
 
     // ── success ──────────────────────────────────────────────────────────────
@@ -28,7 +20,7 @@ public sealed class InAppChannelTests
         {
             Handler = (payload, _) => Task.FromResult(new NotifyResult
             {
-                Success    = true,
+                Success = true,
                 ProviderId = "db-row-id-999"
             })
         };
@@ -57,7 +49,7 @@ public sealed class InAppChannelTests
             Handler = (_, _) => Task.FromResult(new NotifyResult
             {
                 Success = true,
-                SentAt  = sentAt
+                SentAt = sentAt
             })
         };
 
@@ -80,7 +72,7 @@ public sealed class InAppChannelTests
             Handler = (_, _) => Task.FromResult(new NotifyResult
             {
                 Success = true,
-                SentAt  = default   // channel should fill this in
+                SentAt = default   // channel should fill this in
             })
         };
 
@@ -100,8 +92,8 @@ public sealed class InAppChannelTests
         {
             Handler = (_, _) => Task.FromResult(new NotifyResult
             {
-                Success  = true,
-                Channel  = "something-else",   // should be overwritten
+                Success = true,
+                Channel = "something-else",   // should be overwritten
                 Provider = "something-else"    // should be overwritten
             })
         };
@@ -123,7 +115,7 @@ public sealed class InAppChannelTests
         {
             Handler = (_, _) => Task.FromResult(new NotifyResult
             {
-                Success   = true,
+                Success = true,
                 Recipient = "wrong-recipient"   // should be overwritten
             })
         };
@@ -147,7 +139,7 @@ public sealed class InAppChannelTests
             Handler = (_, _) => Task.FromResult(new NotifyResult
             {
                 Success = false,
-                Error   = "User inbox is full"
+                Error = "User inbox is full"
             })
         };
 

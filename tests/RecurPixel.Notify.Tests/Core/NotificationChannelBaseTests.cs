@@ -1,9 +1,4 @@
-using System.Collections.Generic;
-using System.Threading;
-using System.Threading.Tasks;
 using RecurPixel.Notify.Core.Channels;
-using RecurPixel.Notify.Core.Models;
-using Xunit;
 
 namespace RecurPixel.Notify.Tests.Core;
 

@@ -253,22 +253,40 @@ Teams: post to WebhookUrl. Adaptive Card or simple text body.
 
 ## Phase 12 — Remaining Providers 🔲
 
-- 🔲 `Email.Mailgun`
-- 🔲 `Email.Resend`
-- 🔲 `Email.Postmark`
-- 🔲 `Email.AwsSes`
-- 🔲 `Sms.Vonage` (native bulk SMS API — override SendBulkAsync)
-- 🔲 `Sms.Plivo`
-- 🔲 `Sms.Sinch` (native bulk SMS API — override SendBulkAsync)
-- 🔲 `Sms.MessageBird`
-- 🔲 `Sms.AwsSns`
-- 🔲 `Push.OneSignal` (native bulk — override SendBulkAsync)
-- 🔲 `Push.Expo` (native bulk — override SendBulkAsync)
-- 🔲 `WhatsApp.Vonage`
-- 🔲 Tests for all + `dotnet test` green
+- ✅ `Email.Mailgun`
+- ✅ `Email.Resend`
+- ✅ `Email.Postmark`
+- ✅ `Email.AwsSes`
+- ✅ `Sms.Vonage` (native bulk SMS API — override SendBulkAsync)
+- ✅ `Sms.Plivo`
+- ✅ `Sms.Sinch` (native bulk SMS API — override SendBulkAsync)
+- ✅ `Sms.MessageBird`
+- ✅ `Sms.AwsSns`
+- ✅ `Push.OneSignal` (native bulk — override SendBulkAsync)
+- ✅ `Push.Expo` (native bulk — override SendBulkAsync)
+- ✅ `WhatsApp.Vonage`
+- ✅ Tests for all + `dotnet test` green
 
 ---
 
+
+---
+
+## Phase 12B — Azure Communication Services + Mattermost + RocketChat ✅
+
+- ✅ `Email.AzureCommEmail` (ACS Email SDK, base loop for bulk)
+- ✅ `Sms.AzureCommSms` (ACS SMS SDK, native bulk via batch API)
+- ✅ `Notify.Mattermost` (webhook, base loop)
+- ✅ `Notify.RocketChat` (webhook, base loop)
+- ✅ `VonageWhatsAppOptions` split from `VonageOptions` — credential collision fixed
+- ✅ `IAzureCommEmailClient` + `AzureCommEmailClientWrapper` — testable wrapper pattern
+- ✅ `IAzureCommSmsClient` + `AzureCommSmsClientWrapper` + `AcsSmsResult` — testable wrapper pattern
+- ✅ Options added: `AzureCommEmailOptions`, `AzureCommSmsOptions`, `MattermostOptions`, `RocketChatOptions`
+- ✅ `NotifyOptions` updated: `Line`, `Viber`, `InApp`, `Mattermost`, `RocketChat` added
+- ✅ `EmailOptions` updated: `AzureCommEmail` added
+- ✅ `SmsOptions` updated: `AzureCommSms` added
+- ✅ `WhatsAppOptions.Vonage` retyped to `VonageWhatsAppOptions`
+- ✅ `dotnet test` — all green
 ## Phase 13 — SDK Meta-Package + NuGet Publish 🔲
 
 - 🔲 Create `src/RecurPixel.Notify.Sdk` meta-package project
@@ -306,7 +324,11 @@ Teams: post to WebhookUrl. Adaptive Card or simple text body.
 | Discord  | —         | ❌ No                    | one per webhook            |
 | Teams    | —         | ❌ No                    | one per webhook            |
 | Telegram | —         | ❌ No                    | no bulk DM                 |
-| Facebook | —         | ❌ No                    | per-user Messenger API     |
+| Facebook   | —              | ❌ No                    | per-user Messenger API     |
+| Email    | AzureCommEmail | ❌ No                    | no batch API — base loop   |
+| SMS      | AzureCommSms   | ✅ Yes                   | batch API, 100/call        |
+| Mattermost | —            | ❌ No                    | one per webhook            |
+| RocketChat | —            | ❌ No                    | one per webhook            |
 
 ---
 

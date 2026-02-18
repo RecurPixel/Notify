@@ -21,6 +21,11 @@ public class NotifyOptions
     public TeamsOptions? Teams { get; set; }
     public TelegramOptions? Telegram { get; set; }
     public FacebookOptions? Facebook { get; set; }
+    public LineOptions? Line { get; set; }
+    public ViberOptions? Viber { get; set; }
+    public InAppOptions? InApp { get; set; }
+    public MattermostOptions? Mattermost { get; set; }
+    public RocketChatOptions? RocketChat { get; set; }
 
     // ── Global behaviour ──────────────────────────────────────────────────────
     /// <summary>Global retry settings. Can be overridden per event in the orchestrator.</summary>
