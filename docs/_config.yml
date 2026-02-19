@@ -1,23 +1,131 @@
+# GitHub Pages Configuration for RecurPixel.Notify Documentation
+
+# Theme - Using Just the Docs for automatic sidebar generation
+remote_theme: just-the-docs/just-the-docs
+
+# Site settings
 title: RecurPixel.Notify
 description: A modular, DI-native NuGet notification library for ASP.NET Core.
-baseurl: /RecurPixel.Notify
-url: ""
+baseurl: "/RecurPixel.Notify"
+url: "https://recurpixel.github.io"
 
-theme: just-the-docs
+# Logo and favicon
+logo: "/assets/images/logo.png"
 
-color_scheme: dark
+# Color scheme
+color_scheme: light
 
+# Search
 search_enabled: true
+search:
+  heading_level: 2
+  previews: 3
+  preview_words_before: 5
+  preview_words_after: 10
+  tokenizer_separator: /[\s/]+/
+  rel_url: true
+  button: false
 
+# Heading anchor links
 heading_anchors: true
 
+# Aux links for the upper right navigation
 aux_links:
-  "GitHub":
-    - "https://github.com/nicholasgreatmanufactory/RecurPixel.Notify"
+  "GitHub Repository":
+    - "https://github.com/RecurPixel/Notify"
+  "NuGet Package":
+    - "https://www.nuget.org/packages/Notify"
+
+# Makes Aux links open in a new tab
 aux_links_new_tab: true
 
-footer_content: "MIT License &mdash; RecurPixel.Notify"
+# Footer content
+footer_content: 'RecurPixel.Notify is licensed under the <a href="https://github.com/RecurPixel/Notify/blob/main/LICENSE">MIT License</a>. Built with ❤️ by <a href="https://github.com/RecurPixel">RecurPixel</a>.'
 
+# Footer last edited timestamp
+last_edit_timestamp: true
+last_edit_time_format: "%b %e %Y at %I:%M %p"
+
+# GitHub metadata
+gh_edit_link: true
+gh_edit_link_text: "Edit this page on GitHub"
+gh_edit_repository: "https://github.com/RecurPixel/Notify"
+gh_edit_branch: "main"
+gh_edit_source: docs
+gh_edit_view_mode: "tree"
+
+# Markdown
+markdown: kramdown
+kramdown:
+  input: GFM
+  syntax_highlighter: rouge
+  syntax_highlighter_opts:
+    block:
+      line_numbers: false
+
+# Collections
+collections:
+  docs:
+    output: true
+    permalink: /:collection/:path/
+
+# Just the Docs settings
+callouts_level: quiet
+callouts:
+  warning:
+    title: Warning
+    color: red
+  note:
+    title: Note
+    color: blue
+  tip:
+    title: Tip
+    color: green
+
+# Enable copy button on code blocks
+enable_copy_code_button: true
+
+# Back to top link
+back_to_top: true
+back_to_top_text: "Back to top"
+
+# Exclude from processing
 exclude:
+  - archive/
+  - dev/
+  - reference/
+  - v0.1.0-beta.1/
+  - README.md
   - Gemfile
   - Gemfile.lock
+  - node_modules/
+  - vendor/
+  - "*.gemspec"
+  - "*.gem"
+
+# Include
+include:
+  - _*
+
+# Plugins
+plugins:
+  - jekyll-github-metadata
+  - jekyll-seo-tag
+  - jekyll-relative-links
+
+# Relative links
+relative_links:
+  enabled: true
+  collections: true
+
+# Syntax highlighting
+highlighter: rouge
+
+# Compress HTML
+compress_html:
+  clippings: all
+  comments: all
+  endings: all
+  startings: []
+  blanklines: false
+  profile: false
