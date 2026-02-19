@@ -6,6 +6,12 @@
 # dotenv files
 .env
 
+# Jekyll
+_site/
+.jekyll-cache/
+.jekyll-metadata
+docs/Gemfile.lock
+
 # User-specific files
 *.rsuser
 *.suo
@@ -482,3 +488,7 @@ $RECYCLE.BIN/
 
 # Vim temporary swap files
 *.swp
+
+
+# NEVER commit real credentials
+**/appsettings.integration.json

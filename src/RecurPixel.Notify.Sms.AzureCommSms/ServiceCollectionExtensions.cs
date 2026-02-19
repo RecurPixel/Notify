@@ -15,7 +15,7 @@ public static class ServiceCollectionExtensions
     /// Registers <see cref="AzureCommSmsChannel"/> and its dependencies
     /// into the service collection.
     /// </summary>
-    internal static IServiceCollection AddAzureCommSmsChannel(
+    public static IServiceCollection AddAzureCommSmsChannel(
         this IServiceCollection services,
         AzureCommSmsOptions options)
     {

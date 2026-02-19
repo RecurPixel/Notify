@@ -15,7 +15,7 @@ public static class ServiceCollectionExtensions
     /// Registers <see cref="AzureCommEmailChannel"/> and its dependencies
     /// into the service collection.
     /// </summary>
-    internal static IServiceCollection AddAzureCommEmailChannel(
+    public static IServiceCollection AddAzureCommEmailChannel(
         this IServiceCollection services,
         AzureCommEmailOptions options)
     {

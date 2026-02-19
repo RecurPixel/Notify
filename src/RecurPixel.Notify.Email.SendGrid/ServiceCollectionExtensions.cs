@@ -14,7 +14,7 @@ public static class ServiceCollectionExtensions
     /// Registers the SendGrid email channel adapter keyed as "email:sendgrid".
     /// Called internally by AddRecurPixelNotify() — do not call directly.
     /// </summary>
-    internal static IServiceCollection AddSendGridChannel(
+    public static IServiceCollection AddSendGridChannel(
         this IServiceCollection services,
         SendGridOptions options)
     {

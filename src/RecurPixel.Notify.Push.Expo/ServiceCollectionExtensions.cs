@@ -18,7 +18,7 @@ public static class ServiceCollectionExtensions
     /// <param name="services">The service collection to register into.</param>
     /// <param name="options">The Expo options resolved from <see cref="NotifyOptions"/>.</param>
     /// <returns>The same <see cref="IServiceCollection"/> for chaining.</returns>
-    internal static IServiceCollection AddExpoChannel(
+    public static IServiceCollection AddExpoChannel(
         this IServiceCollection services,
         ExpoOptions options)
     {

@@ -1,0 +1,114 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+
+   <!-- ─── Test Framework ──────────────────────────────────────────── -->
+  <ItemGroup>
+    <PackageReference Include="Microsoft.NET.Test.Sdk"                       Version="17.8.0" />
+    <PackageReference Include="xunit"                                         Version="2.6.4"  />
+    <PackageReference Include="xunit.runner.visualstudio"                     Version="2.5.6"  />
+    <PackageReference Include="Xunit.SkippableFact"                           Version="1.4.13" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Json"       Version="10.0.3"  />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Binder"     Version="10.0.3"  />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection"      Version="10.0.3"  />
+    <PackageReference Include="Microsoft.Extensions.Http"                     Version="10.0.3"  />
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions"     Version="10.0.3"  />
+  </ItemGroup>
+
+  <!-- ─── Core ────────────────────────────────────────────────────── -->
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\RecurPixel.Notify.Core\RecurPixel.Notify.Core.csproj" />
+  </ItemGroup>
+
+  <!-- ─── Phase 2 — Email ─────────────────────────────────────────── -->
+  <ItemGroup Label="Phase 2">
+    <ProjectReference Include="..\..\src\RecurPixel.Notify.Email.SendGrid\RecurPixel.Notify.Email.SendGrid.csproj" />
+    <ProjectReference Include="..\..\src\RecurPixel.Notify.Email.Smtp\RecurPixel.Notify.Email.Smtp.csproj" />
+  </ItemGroup>
+
+  <!-- ─── Phase 3 — SMS ───────────────────────────────────────────── -->
+  <ItemGroup Label="Phase 3">
+    <ProjectReference Include="..\..\src\RecurPixel.Notify.Sms.Twilio\RecurPixel.Notify.Sms.Twilio.csproj" />
+  </ItemGroup>
+
+  <!-- ─── Phase 7 — Push ──────────────────────────────────────────── -->
+  <ItemGroup Label="Phase 7">
+    <ProjectReference Include="..\..\src\RecurPixel.Notify.Push.Fcm\RecurPixel.Notify.Push.Fcm.csproj" />
+    <ProjectReference Include="..\..\src\RecurPixel.Notify.Push.Apns\RecurPixel.Notify.Push.Apns.csproj" />
+  </ItemGroup>
+
+  <!-- ─── Phase 8 — WhatsApp ──────────────────────────────────────── -->
+  <ItemGroup Label="Phase 8">
+    <ProjectReference Include="..\..\src\RecurPixel.Notify.WhatsApp.Twilio\RecurPixel.Notify.WhatsApp.Twilio.csproj" />
+    <ProjectReference Include="..\..\src\RecurPixel.Notify.WhatsApp.MetaCloud\RecurPixel.Notify.WhatsApp.MetaCloud.csproj" />
+  </ItemGroup>
+
+  <!-- ─── Phase 9 — Team Collaboration ───────────────────────────── -->
+  <ItemGroup Label="Phase 9">
+    <ProjectReference Include="..\..\src\RecurPixel.Notify.Slack\RecurPixel.Notify.Slack.csproj" />
+    <ProjectReference Include="..\..\src\RecurPixel.Notify.Discord\RecurPixel.Notify.Discord.csproj" />
+    <ProjectReference Include="..\..\src\RecurPixel.Notify.Teams\RecurPixel.Notify.Teams.csproj" />
+  </ItemGroup>
+
+
+
+  <!-- ─── Phase 10 — Social / Messaging ───────────────────────────── -->
+  <ItemGroup Label="Phase 10">
+    <ProjectReference Include="..\..\src\RecurPixel.Notify.Telegram\RecurPixel.Notify.Telegram.csproj" />
+    <ProjectReference Include="..\..\src\RecurPixel.Notify.Facebook\RecurPixel.Notify.Facebook.csproj" />
+    <ProjectReference Include="..\..\src\RecurPixel.Notify.Line\RecurPixel.Notify.Line.csproj" />
+    <ProjectReference Include="..\..\src\RecurPixel.Notify.Viber\RecurPixel.Notify.Viber.csproj" />
+</ItemGroup>
+  <!-- ─── Phase 11 — InApp ─────────────────────────────────────────── -->
+  <ItemGroup Label="Phase 11">
+    <ProjectReference Include="..\..\src\RecurPixel.Notify.InApp\RecurPixel.Notify.InApp.csproj" />
+  </ItemGroup>
+
+  <!-- ─── Phase 12 — Remaining Email providers ───────────────────────── -->
+  <ItemGroup Label="Phase 12">
+    <ProjectReference Include="..\..\src\RecurPixel.Notify.Email.Mailgun\RecurPixel.Notify.Email.Mailgun.csproj" />
+    <ProjectReference Include="..\..\src\RecurPixel.Notify.Email.Resend\RecurPixel.Notify.Email.Resend.csproj" />
+    <ProjectReference Include="..\..\src\RecurPixel.Notify.Email.Postmark\RecurPixel.Notify.Email.Postmark.csproj" />
+    <ProjectReference Include="..\..\src\RecurPixel.Notify.Email.AwsSes\RecurPixel.Notify.Email.AwsSes.csproj" />
+  </ItemGroup>
+
+  <!-- ─── Phase 12 — Remaining SMS providers ───────────────────────── -->
+  <ItemGroup Label="Phase 12">
+    <ProjectReference Include="..\..\src\RecurPixel.Notify.Sms.Vonage\RecurPixel.Notify.Sms.Vonage.csproj" />
+    <ProjectReference Include="..\..\src\RecurPixel.Notify.Sms.Plivo\RecurPixel.Notify.Sms.Plivo.csproj" />
+    <ProjectReference Include="..\..\src\RecurPixel.Notify.Sms.Sinch\RecurPixel.Notify.Sms.Sinch.csproj" />
+    <ProjectReference Include="..\..\src\RecurPixel.Notify.Sms.MessageBird\RecurPixel.Notify.Sms.MessageBird.csproj" />
+    <ProjectReference Include="..\..\src\RecurPixel.Notify.Sms.AwsSns\RecurPixel.Notify.Sms.AwsSns.csproj" />
+  </ItemGroup>
+
+  <!-- ─── Phase 12 — Remaining Push providers ───────────────────────── -->
+  <ItemGroup Label="Phase 12">
+    <ProjectReference Include="..\..\src\RecurPixel.Notify.Push.OneSignal\RecurPixel.Notify.Push.OneSignal.csproj" />
+    <ProjectReference Include="..\..\src\RecurPixel.Notify.Push.Expo\RecurPixel.Notify.Push.Expo.csproj" />
+  </ItemGroup>
+
+  <!-- ─── Phase 12 — Remaining WhatsApp providers ───────────────────────── -->
+  <ItemGroup Label="Phase 12">
+    <ProjectReference Include="..\..\src\RecurPixel.Notify.WhatsApp.Vonage\RecurPixel.Notify.WhatsApp.Vonage.csproj" />
+  </ItemGroup>
+
+  <!-- ─── Phase 12B — Azure Communication Services + Mattermost + RocketChat ───────────────────────── -->
+  <ItemGroup Label="Phase 12B">
+    <ProjectReference Include="..\..\src\RecurPixel.Notify.Email.AzureCommEmail\RecurPixel.Notify.Email.AzureCommEmail.csproj" />
+    <ProjectReference Include="..\..\src\RecurPixel.Notify.Sms.AzureCommSms\RecurPixel.Notify.Sms.AzureCommSms.csproj" />
+    <ProjectReference Include="..\..\src\RecurPixel.Notify.Mattermost\RecurPixel.Notify.Mattermost.csproj" />
+    <ProjectReference Include="..\..\src\RecurPixel.Notify.RocketChat\RecurPixel.Notify.RocketChat.csproj" />
+  </ItemGroup>
+  <!-- ─── Embed the integration config file ───────────────────────── -->
+  <ItemGroup>
+    <None Update="appsettings.integration.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
+</Project>

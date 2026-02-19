@@ -1,0 +1,148 @@
+{
+  "_readme": "Fill in the credentials for providers you want to test. Leave any field blank to skip that adapter automatically. NEVER commit this file — it is git-ignored.",
+
+  "Integration": {
+    "ToEmail":       "",
+    "ToPhone":       "",
+    "ToDeviceToken": "",
+    "ToWhatsApp":    "",
+    "ToSlack":       "",
+    "ToTelegram":    ""
+  },
+
+  "Notify": {
+    "Email": {
+      "SendGrid": {
+        "ApiKey":    "",
+        "FromEmail": "",
+        "FromName":  ""
+      },
+      "Smtp": {
+        "Host":      "",
+        "Port":      587,
+        "Username":  "",
+        "Password":  "",
+        "UseSsl":    true,
+        "FromEmail": "",
+        "FromName":  ""
+      },
+      "Mailgun": {
+        "ApiKey":    "",
+        "Domain":    "",
+        "FromEmail": "",
+        "FromName":  ""
+      },
+      "Resend": {
+        "ApiKey":    "",
+        "FromEmail": "",
+        "FromName":  ""
+      },
+      "Postmark": {
+        "ApiKey":    "",
+        "FromEmail": "",
+        "FromName":  ""
+      },
+      "AwsSes": {
+        "AccessKey": "",
+        "SecretKey": "",
+        "Region":    "",
+        "FromEmail": "",
+        "FromName":  ""
+      }
+    },
+
+    "Sms": {
+      "Twilio": {
+        "AccountSid": "",
+        "AuthToken":  "",
+        "FromNumber": ""
+      },
+      "Vonage": {
+        "ApiKey":     "",
+        "ApiSecret":  "",
+        "FromNumber": ""
+      },
+      "Plivo": {
+        "AuthId":     "",
+        "AuthToken":  "",
+        "FromNumber": ""
+      },
+      "Sinch": {
+        "ApiToken":      "",
+        "ServicePlanId": "",
+        "FromNumber":    ""
+      },
+      "MessageBird": {
+        "AccessKey":  "",
+        "FromNumber": ""
+      },
+      "AwsSns": {
+        "AccessKey": "",
+        "SecretKey": "",
+        "Region":    "",
+        "SmsType":   "Transactional"
+      }
+    },
+
+    "Push": {
+      "Fcm": {
+        "ProjectId":          "",
+        "ServiceAccountJson": ""
+      },
+      "Apns": {
+        "KeyId":      "",
+        "TeamId":     "",
+        "BundleId":   "",
+        "PrivateKey": ""
+      },
+      "OneSignal": {
+        "AppId":      "",
+        "RestApiKey": ""
+      },
+      "Expo": {
+        "AccessToken": ""
+      }
+    },
+
+    "WhatsApp": {
+      "Twilio": {
+        "AccountSid": "",
+        "AuthToken":  "",
+        "FromNumber": ""
+      },
+      "MetaCloud": {
+        "PhoneNumberId": "",
+        "AccessToken":   ""
+      },
+      "Vonage": {
+        "ApiKey":     "",
+        "ApiSecret":  "",
+        "FromNumber": ""
+      }
+    },
+
+    "Slack": {
+      "WebhookUrl": ""
+    },
+    "Discord": {
+      "WebhookUrl": ""
+    },
+    "Teams": {
+      "WebhookUrl": ""
+    },
+    "Telegram": {
+      "BotToken": "",
+      "ChatId":   ""
+    },
+    "Facebook": {
+      "PageAccessToken": ""
+    },
+    "Line": {
+      "ChannelAccessToken": ""
+    },
+    "Viber": {
+      "BotAuthToken": "",
+      "SenderName":   ""
+    }
+  }
+}

@@ -19,7 +19,7 @@ public static class ServiceCollectionExtensions
     /// <param name="services">The service collection to register into.</param>
     /// <param name="options">The Telegram options resolved from <see cref="NotifyOptions"/>.</param>
     /// <returns>The same <see cref="IServiceCollection"/> for chaining.</returns>
-    internal static IServiceCollection AddTelegramChannel(
+    public static IServiceCollection AddTelegramChannel(
         this IServiceCollection services,
         TelegramOptions options)
     {

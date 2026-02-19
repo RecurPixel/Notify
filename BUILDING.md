@@ -287,6 +287,7 @@ Teams: post to WebhookUrl. Adaptive Card or simple text body.
 - ✅ `SmsOptions` updated: `AzureCommSms` added
 - ✅ `WhatsAppOptions.Vonage` retyped to `VonageWhatsAppOptions`
 - ✅ `dotnet test` — all green
+  
 ## Phase 13 — SDK Meta-Package + NuGet Publish 🔲
 
 - 🔲 Create `src/RecurPixel.Notify.Sdk` meta-package project
@@ -303,32 +304,32 @@ Teams: post to WebhookUrl. Adaptive Card or simple text body.
 
 > When building adapters — check here first before deciding whether to override SendBulkAsync.
 
-| Channel  | Provider  | Override SendBulkAsync? | Limit                      |
-| -------- | --------- | ----------------------- | -------------------------- |
-| Email    | SendGrid  | ✅ Yes                   | 1000/call                  |
-| Email    | AwsSes    | ✅ Yes                   | batch API                  |
-| Email    | Postmark  | ✅ Yes                   | batch endpoint             |
-| Email    | Mailgun   | ✅ Yes                   | recipient variables        |
-| Email    | Resend    | ❌ No                    | no batch API               |
-| Email    | SMTP      | ❌ No                    | single send protocol       |
-| SMS      | Twilio    | ❌ No                    | no batch API               |
-| SMS      | Vonage    | ✅ Yes                   | bulk SMS API               |
-| SMS      | AwsSns    | ✅ Yes                   | topic publish              |
-| SMS      | Sinch     | ✅ Yes                   | batch SMS API              |
-| Push     | FCM       | ✅ Yes                   | 500 tokens/call            |
-| Push     | APNs      | ❌ No                    | one per call               |
-| Push     | OneSignal | ✅ Yes                   | bulk notifications API     |
-| Push     | Expo      | ✅ Yes                   | push tickets batch         |
-| WhatsApp | Any       | ❌ No                    | Meta policy restricts bulk |
-| Slack    | —         | ❌ No                    | one per webhook            |
-| Discord  | —         | ❌ No                    | one per webhook            |
-| Teams    | —         | ❌ No                    | one per webhook            |
-| Telegram | —         | ❌ No                    | no bulk DM                 |
+| Channel    | Provider       | Override SendBulkAsync? | Limit                      |
+| ---------- | -------------- | ----------------------- | -------------------------- |
+| Email      | SendGrid       | ✅ Yes                   | 1000/call                  |
+| Email      | AwsSes         | ✅ Yes                   | batch API                  |
+| Email      | Postmark       | ✅ Yes                   | batch endpoint             |
+| Email      | Mailgun        | ✅ Yes                   | recipient variables        |
+| Email      | Resend         | ❌ No                    | no batch API               |
+| Email      | SMTP           | ❌ No                    | single send protocol       |
+| SMS        | Twilio         | ❌ No                    | no batch API               |
+| SMS        | Vonage         | ✅ Yes                   | bulk SMS API               |
+| SMS        | AwsSns         | ✅ Yes                   | topic publish              |
+| SMS        | Sinch          | ✅ Yes                   | batch SMS API              |
+| Push       | FCM            | ✅ Yes                   | 500 tokens/call            |
+| Push       | APNs           | ❌ No                    | one per call               |
+| Push       | OneSignal      | ✅ Yes                   | bulk notifications API     |
+| Push       | Expo           | ✅ Yes                   | push tickets batch         |
+| WhatsApp   | Any            | ❌ No                    | Meta policy restricts bulk |
+| Slack      | —              | ❌ No                    | one per webhook            |
+| Discord    | —              | ❌ No                    | one per webhook            |
+| Teams      | —              | ❌ No                    | one per webhook            |
+| Telegram   | —              | ❌ No                    | no bulk DM                 |
 | Facebook   | —              | ❌ No                    | per-user Messenger API     |
-| Email    | AzureCommEmail | ❌ No                    | no batch API — base loop   |
-| SMS      | AzureCommSms   | ✅ Yes                   | batch API, 100/call        |
-| Mattermost | —            | ❌ No                    | one per webhook            |
-| RocketChat | —            | ❌ No                    | one per webhook            |
+| Email      | AzureCommEmail | ❌ No                    | no batch API — base loop   |
+| SMS        | AzureCommSms   | ✅ Yes                   | batch API, 100/call        |
+| Mattermost | —              | ❌ No                    | one per webhook            |
+| RocketChat | —              | ❌ No                    | one per webhook            |
 
 ---
 

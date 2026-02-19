@@ -75,6 +75,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RecurPixel.Notify.Mattermos
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RecurPixel.Notify.RocketChat", "src\RecurPixel.Notify.RocketChat\RecurPixel.Notify.RocketChat.csproj", "{CEC70B25-DF75-45EE-92EC-7E20ECA2E8F6}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RecurPixel.Notify.IntegrationTests", "tests\RecurPixel.Notify.IntegrationTests\RecurPixel.Notify.IntegrationTests.csproj", "{CBEEA7AA-DE71-4773-8A55-F3483184E647}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -493,6 +495,18 @@ Global
 		{CEC70B25-DF75-45EE-92EC-7E20ECA2E8F6}.Release|x64.Build.0 = Release|Any CPU
 		{CEC70B25-DF75-45EE-92EC-7E20ECA2E8F6}.Release|x86.ActiveCfg = Release|Any CPU
 		{CEC70B25-DF75-45EE-92EC-7E20ECA2E8F6}.Release|x86.Build.0 = Release|Any CPU
+		{CBEEA7AA-DE71-4773-8A55-F3483184E647}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CBEEA7AA-DE71-4773-8A55-F3483184E647}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CBEEA7AA-DE71-4773-8A55-F3483184E647}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{CBEEA7AA-DE71-4773-8A55-F3483184E647}.Debug|x64.Build.0 = Debug|Any CPU
+		{CBEEA7AA-DE71-4773-8A55-F3483184E647}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{CBEEA7AA-DE71-4773-8A55-F3483184E647}.Debug|x86.Build.0 = Debug|Any CPU
+		{CBEEA7AA-DE71-4773-8A55-F3483184E647}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CBEEA7AA-DE71-4773-8A55-F3483184E647}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CBEEA7AA-DE71-4773-8A55-F3483184E647}.Release|x64.ActiveCfg = Release|Any CPU
+		{CBEEA7AA-DE71-4773-8A55-F3483184E647}.Release|x64.Build.0 = Release|Any CPU
+		{CBEEA7AA-DE71-4773-8A55-F3483184E647}.Release|x86.ActiveCfg = Release|Any CPU
+		{CBEEA7AA-DE71-4773-8A55-F3483184E647}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -532,5 +546,6 @@ Global
 		{53E0206C-2C02-4782-B4FD-770D1C507447} = {827E0CD3-B72D-47B6-A68D-7590B98EB39B}
 		{2317CA65-B593-4F73-9C7C-C2D56B647F23} = {827E0CD3-B72D-47B6-A68D-7590B98EB39B}
 		{CEC70B25-DF75-45EE-92EC-7E20ECA2E8F6} = {827E0CD3-B72D-47B6-A68D-7590B98EB39B}
+		{CBEEA7AA-DE71-4773-8A55-F3483184E647} = {0AB3BF05-4346-4AA6-1389-037BE0695223}
 	EndGlobalSection
 EndGlobal

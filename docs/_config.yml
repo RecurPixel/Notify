@@ -1,0 +1,25 @@
+title: RecurPixel.Notify
+description: A modular, DI-native NuGet notification library for ASP.NET Core.
+baseurl: /RecurPixel.Notify
+url: ""
+
+remote_theme: just-the-docs/just-the-docs
+
+color_scheme: dark
+
+search_enabled: true
+search.button: true
+
+heading_anchors: true
+
+nav_sort: order
+
+aux_links:
+  GitHub: https://github.com/nicholasgreatmanufactory/RecurPixel.Notify
+aux_links_new_tab: true
+
+footer_content: "MIT License &mdash; RecurPixel.Notify"
+
+exclude:
+  - Gemfile
+  - Gemfile.lock

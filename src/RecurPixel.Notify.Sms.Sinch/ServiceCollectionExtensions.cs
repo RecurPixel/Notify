@@ -18,7 +18,7 @@ public static class ServiceCollectionExtensions
     /// <param name="services">The service collection to register into.</param>
     /// <param name="options">The Sinch options resolved from <see cref="NotifyOptions"/>.</param>
     /// <returns>The same <see cref="IServiceCollection"/> for chaining.</returns>
-    internal static IServiceCollection AddSinchChannel(
+    public static IServiceCollection AddSinchChannel(
         this IServiceCollection services,
         SinchOptions options)
     {

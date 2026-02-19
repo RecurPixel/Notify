@@ -13,7 +13,7 @@ public static class ServiceCollectionExtensions
     /// Registers the Twilio SMS channel adapter keyed as "sms:twilio".
     /// Called internally by AddRecurPixelNotify() — do not call directly.
     /// </summary>
-    internal static IServiceCollection AddTwilioSmsChannel(
+    public static IServiceCollection AddTwilioSmsChannel(
         this IServiceCollection services,
         TwilioOptions options)
     {

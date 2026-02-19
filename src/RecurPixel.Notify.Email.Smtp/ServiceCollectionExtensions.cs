@@ -14,7 +14,7 @@ public static class ServiceCollectionExtensions
     /// Registers the SMTP email channel adapter keyed as "email:smtp".
     /// Called internally by AddRecurPixelNotify() — do not call directly.
     /// </summary>
-    internal static IServiceCollection AddSmtpChannel(
+    public static IServiceCollection AddSmtpChannel(
         this IServiceCollection services,
         SmtpOptions options)
     {

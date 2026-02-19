@@ -17,7 +17,7 @@ public static class ServiceCollectionExtensions
     /// <param name="services">The service collection to register into.</param>
     /// <param name="options">The Mattermost options resolved from <see cref="NotifyOptions"/>.</param>
     /// <returns>The same <see cref="IServiceCollection"/> for chaining.</returns>
-    internal static IServiceCollection AddMattermostChannel(
+    public static IServiceCollection AddMattermostChannel(
         this IServiceCollection services,
         MattermostOptions options)
     {

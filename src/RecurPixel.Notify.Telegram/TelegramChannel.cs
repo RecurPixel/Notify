@@ -60,7 +60,7 @@ public sealed class TelegramChannel : NotificationChannelBase
                 Text = string.IsNullOrWhiteSpace(payload.Subject)
                                 ? payload.Body
                                 : $"{payload.Subject}\n\n{payload.Body}",
-                ParseMode = _options.ParseMode
+                ParseMode = string.IsNullOrWhiteSpace(_options.ParseMode) ? null : _options.ParseMode
             };
 
             var response = await _http.PostAsJsonAsync(url, body, ct);
@@ -134,6 +134,7 @@ internal sealed class TelegramSendMessageRequest
 
     /// <summary>Optional: "HTML" or "MarkdownV2". Null = plain text.</summary>
     [JsonPropertyName("parse_mode")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public string? ParseMode { get; set; }
 }
 
