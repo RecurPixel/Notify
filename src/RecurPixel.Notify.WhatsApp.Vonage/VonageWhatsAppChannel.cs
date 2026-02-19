@@ -1,19 +1,12 @@
-using System;
-using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using System.Threading;
-using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using RecurPixel.Notify.Core.Channels;
 using RecurPixel.Notify.Core.Models;
-using RecurPixel.Notify.Core.Options;
-using RecurPixel.Notify.Core.Options.Providers;
-using RecurPixel.Notify.Core.Options.Providers;
 
 namespace RecurPixel.Notify.WhatsApp.Vonage;
 

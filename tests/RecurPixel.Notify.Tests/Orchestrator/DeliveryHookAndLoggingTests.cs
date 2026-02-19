@@ -349,8 +349,8 @@ public class DeliveryHookAndLoggingTests
         });
 
         // Recipient must appear in at least one log entry for traceability
-        Assert.True(logger.Entries.Any(e =>
-            e.Message.Contains("recipient@example.com", StringComparison.OrdinalIgnoreCase)));
+        var logContent = string.Join(" ", logger.Entries.Select(e => e.Message));
+        Assert.Contains("recipient@example.com", logContent, StringComparison.OrdinalIgnoreCase);
     }
 
     [Fact]

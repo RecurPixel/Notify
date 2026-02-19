@@ -1,0 +1,69 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFrameworks>net8.0;net10.0</TargetFrameworks>
+    <Description>Full SDK meta-package for RecurPixel.Notify. Includes Core, Orchestrator, and all available notification adapters across Email, SMS, Push, WhatsApp, Chat, and Social channels. BETA: API is stable but pre-release.</Description>
+  </PropertyGroup>
+
+  <!-- Core and Orchestrator -->
+  <ItemGroup>
+    <ProjectReference Include="..\RecurPixel.Notify.Core\RecurPixel.Notify.Core.csproj" />
+    <ProjectReference Include="..\RecurPixel.Notify.Orchestrator\RecurPixel.Notify.Orchestrator.csproj" />
+  </ItemGroup>
+
+  <!-- Email adapters -->
+  <ItemGroup>
+    <ProjectReference Include="..\RecurPixel.Notify.Email.SendGrid\RecurPixel.Notify.Email.SendGrid.csproj" />
+    <ProjectReference Include="..\RecurPixel.Notify.Email.Smtp\RecurPixel.Notify.Email.Smtp.csproj" />
+    <ProjectReference Include="..\RecurPixel.Notify.Email.Mailgun\RecurPixel.Notify.Email.Mailgun.csproj" />
+    <ProjectReference Include="..\RecurPixel.Notify.Email.Postmark\RecurPixel.Notify.Email.Postmark.csproj" />
+    <ProjectReference Include="..\RecurPixel.Notify.Email.Resend\RecurPixel.Notify.Email.Resend.csproj" />
+    <ProjectReference Include="..\RecurPixel.Notify.Email.AwsSes\RecurPixel.Notify.Email.AwsSes.csproj" />
+    <ProjectReference Include="..\RecurPixel.Notify.Email.AzureCommEmail\RecurPixel.Notify.Email.AzureCommEmail.csproj" />
+  </ItemGroup>
+
+  <!-- SMS adapters -->
+  <ItemGroup>
+    <ProjectReference Include="..\RecurPixel.Notify.Sms.Twilio\RecurPixel.Notify.Sms.Twilio.csproj" />
+    <ProjectReference Include="..\RecurPixel.Notify.Sms.MessageBird\RecurPixel.Notify.Sms.MessageBird.csproj" />
+    <ProjectReference Include="..\RecurPixel.Notify.Sms.Plivo\RecurPixel.Notify.Sms.Plivo.csproj" />
+    <ProjectReference Include="..\RecurPixel.Notify.Sms.Sinch\RecurPixel.Notify.Sms.Sinch.csproj" />
+    <ProjectReference Include="..\RecurPixel.Notify.Sms.Vonage\RecurPixel.Notify.Sms.Vonage.csproj" />
+    <ProjectReference Include="..\RecurPixel.Notify.Sms.AwsSns\RecurPixel.Notify.Sms.AwsSns.csproj" />
+    <ProjectReference Include="..\RecurPixel.Notify.Sms.AzureCommSms\RecurPixel.Notify.Sms.AzureCommSms.csproj" />
+  </ItemGroup>
+
+  <!-- Push adapters -->
+  <ItemGroup>
+    <ProjectReference Include="..\RecurPixel.Notify.Push.Fcm\RecurPixel.Notify.Push.Fcm.csproj" />
+    <ProjectReference Include="..\RecurPixel.Notify.Push.Apns\RecurPixel.Notify.Push.Apns.csproj" />
+    <ProjectReference Include="..\RecurPixel.Notify.Push.Expo\RecurPixel.Notify.Push.Expo.csproj" />
+    <ProjectReference Include="..\RecurPixel.Notify.Push.OneSignal\RecurPixel.Notify.Push.OneSignal.csproj" />
+  </ItemGroup>
+
+  <!-- WhatsApp adapters -->
+  <ItemGroup>
+    <ProjectReference Include="..\RecurPixel.Notify.WhatsApp.Twilio\RecurPixel.Notify.WhatsApp.Twilio.csproj" />
+    <ProjectReference Include="..\RecurPixel.Notify.WhatsApp.MetaCloud\RecurPixel.Notify.WhatsApp.MetaCloud.csproj" />
+    <ProjectReference Include="..\RecurPixel.Notify.WhatsApp.Vonage\RecurPixel.Notify.WhatsApp.Vonage.csproj" />
+  </ItemGroup>
+
+  <!-- Chat and Social adapters -->
+  <ItemGroup>
+    <ProjectReference Include="..\RecurPixel.Notify.Slack\RecurPixel.Notify.Slack.csproj" />
+    <ProjectReference Include="..\RecurPixel.Notify.Discord\RecurPixel.Notify.Discord.csproj" />
+    <ProjectReference Include="..\RecurPixel.Notify.Teams\RecurPixel.Notify.Teams.csproj" />
+    <ProjectReference Include="..\RecurPixel.Notify.Telegram\RecurPixel.Notify.Telegram.csproj" />
+    <ProjectReference Include="..\RecurPixel.Notify.Facebook\RecurPixel.Notify.Facebook.csproj" />
+    <ProjectReference Include="..\RecurPixel.Notify.Line\RecurPixel.Notify.Line.csproj" />
+    <ProjectReference Include="..\RecurPixel.Notify.Viber\RecurPixel.Notify.Viber.csproj" />
+    <ProjectReference Include="..\RecurPixel.Notify.Mattermost\RecurPixel.Notify.Mattermost.csproj" />
+    <ProjectReference Include="..\RecurPixel.Notify.RocketChat\RecurPixel.Notify.RocketChat.csproj" />
+  </ItemGroup>
+
+  <!-- Other adapters -->
+  <ItemGroup>
+    <ProjectReference Include="..\RecurPixel.Notify.InApp\RecurPixel.Notify.InApp.csproj" />
+  </ItemGroup>
+
+</Project>

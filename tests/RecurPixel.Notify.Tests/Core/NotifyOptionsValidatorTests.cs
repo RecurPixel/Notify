@@ -12,7 +12,7 @@ public class NotifyOptionsValidatorTests
     {
         var options = new NotifyOptions
         {
-            Email = new EmailOptions { Provider = null }
+            Email = new EmailOptions { Provider = null! }
         };
 
         var ex = Assert.Throws<InvalidOperationException>(() =>
@@ -29,7 +29,7 @@ public class NotifyOptionsValidatorTests
             Email = new EmailOptions
             {
                 Provider = "sendgrid",
-                SendGrid = new SendGridOptions { ApiKey = null }
+                SendGrid = new SendGridOptions { ApiKey = null! }
             }
         };
 
@@ -47,7 +47,7 @@ public class NotifyOptionsValidatorTests
             Email = new EmailOptions
             {
                 Provider = "smtp",
-                Smtp = new SmtpOptions { Host = null }
+                Smtp = new SmtpOptions { Host = null! }
             }
         };
 
@@ -97,7 +97,7 @@ public class NotifyOptionsValidatorTests
     {
         var options = new NotifyOptions
         {
-            Sms = new SmsOptions { Provider = null }
+            Sms = new SmsOptions { Provider = null! }
         };
 
         var ex = Assert.Throws<InvalidOperationException>(() =>
@@ -114,7 +114,7 @@ public class NotifyOptionsValidatorTests
             Sms = new SmsOptions
             {
                 Provider = "twilio",
-                Twilio = new TwilioOptions { AccountSid = null, AuthToken = "x", FromNumber = "+1" }
+                Twilio = new TwilioOptions { AccountSid = null!, AuthToken = "x", FromNumber = "+1" }
             }
         };
 

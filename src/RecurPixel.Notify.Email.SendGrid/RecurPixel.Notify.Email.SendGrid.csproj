@@ -1,5 +1,9 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
+  <PropertyGroup>
+    <Description>SendGrid email adapter for RecurPixel.Notify. Supports single and bulk send with native multicast functionality, template variables, and transactional email.</Description>
+  </PropertyGroup>
+
   <ItemGroup>
     <ProjectReference Include="..\RecurPixel.Notify.Core\RecurPixel.Notify.Core.csproj" />
   </ItemGroup>
@@ -9,11 +13,5 @@
     <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="10.0.3" />
     <PackageReference Include="Microsoft.Extensions.Options" Version="10.0.3" />
   </ItemGroup>
-
-  <PropertyGroup>
-    <TargetFramework>net10.0</TargetFramework>
-    <ImplicitUsings>enable</ImplicitUsings>
-    <Nullable>enable</Nullable>
-  </PropertyGroup>
 
 </Project>

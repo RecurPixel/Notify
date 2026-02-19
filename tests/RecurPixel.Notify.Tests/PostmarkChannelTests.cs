@@ -223,7 +223,7 @@ public sealed class PostmarkChannelTests
         var batchResponse = new[]
         {
             new { MessageID = "msg-1", ErrorCode = 0,   Message = "OK" },
-            new { MessageID = (string?)null, ErrorCode = 406, Message = "Invalid address" }
+            new { MessageID = (string?)null!, ErrorCode = 406, Message = "Invalid address" }
         };
 
         var payloads = new[]

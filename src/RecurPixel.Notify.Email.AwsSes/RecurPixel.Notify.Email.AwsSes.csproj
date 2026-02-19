@@ -1,16 +1,14 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net10.0</TargetFramework>
-    <ImplicitUsings>enable</ImplicitUsings>
-    <Nullable>enable</Nullable>
+    <Description>AWS SES email notification provider for RecurPixel.Notify.</Description>
   </PropertyGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\RecurPixel.Notify.Core\RecurPixel.Notify.Core.csproj" />
   </ItemGroup>
 
-    <ItemGroup>
+  <ItemGroup>
     <PackageReference Include="AWSSDK.SimpleEmailV2" Version="4.0.11.5" />
     <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="10.0.3" />
     <PackageReference Include="Microsoft.Extensions.Options" Version="10.0.3" />
