@@ -31,7 +31,7 @@ aux_links:
   "GitHub Repository":
     - "https://github.com/RecurPixel/Notify"
   "NuGet Package":
-    - "https://www.nuget.org/packages/RecurPixel.Notify"
+    - "https://www.nuget.org/profiles/RecurPixel"
 
 # Makes Aux links open in a new tab
 aux_links_new_tab: true
