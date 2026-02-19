@@ -29,45 +29,45 @@ dotnet add package RecurPixel.Notify.Email.SendGrid
 dotnet add package RecurPixel.Notify.Sms.Twilio
 ```
 
-→ [Getting Started](docs/getting-started.md) · [Quick Start](docs/quick-start.md) · [Usage Tiers](docs/usage-tiers.md) · [Adapter Reference](docs/adapters.md)
+→ [Getting Started](https://recurpixel.github.io/Notify/getting-started) · [Quick Start](https://recurpixel.github.io/Notify/quick-start) · [Usage Tiers](https://recurpixel.github.io/Notify/usage-tiers) · [Adapter Reference](https://recurpixel.github.io/Notify/adapters)
 
 ---
 
 ## Adapter Status
 
-| Package              | Provider                          | Channel   | Unit Tested | Integration Tested | Community Approved |
-| -------------------- | --------------------------------- | --------- | ----------- | ------------------ | ------------------ |
-| `Email.SendGrid`     | Twilio SendGrid                   | Email     | ✅           | ✅                  | 🔲                  |
-| `Email.Smtp`         | Any SMTP server                   | Email     | ✅           | ✅                  | 🔲                  |
-| `Email.Mailgun`      | Mailgun                           | Email     | ✅           | 🔲                  | 🔲                  |
-| `Email.Resend`       | Resend                            | Email     | ✅           | 🔲                  | 🔲                  |
-| `Email.Postmark`     | Postmark                          | Email     | ✅           | 🔲                  | 🔲                  |
-| `Email.AwsSes`       | AWS SES                           | Email     | ✅           | 🔲                  | 🔲                  |
-| `Email.AzureCommEmail` | Azure Communication Services    | Email     | ✅           | 🔲                  | 🔲                  |
-| `Sms.Twilio`         | Twilio                            | SMS       | ✅           | ✅                  | 🔲                  |
-| `Sms.Vonage`         | Vonage (Nexmo)                    | SMS       | ✅           | 🔲                  | 🔲                  |
-| `Sms.Plivo`          | Plivo                             | SMS       | ✅           | 🔲                  | 🔲                  |
-| `Sms.Sinch`          | Sinch                             | SMS       | ✅           | 🔲                  | 🔲                  |
-| `Sms.MessageBird`    | MessageBird                       | SMS       | ✅           | 🔲                  | 🔲                  |
-| `Sms.AwsSns`         | AWS SNS                           | SMS       | ✅           | 🔲                  | 🔲                  |
-| `Sms.AzureCommSms`   | Azure Communication Services      | SMS       | ✅           | 🔲                  | 🔲                  |
-| `Push.Fcm`           | Firebase Cloud Messaging          | Push      | ✅           | 🔲                  | 🔲                  |
-| `Push.Apns`          | Apple Push Notification Service   | Push      | ✅           | 🔲                  | 🔲                  |
-| `Push.OneSignal`     | OneSignal                         | Push      | ✅           | 🔲                  | 🔲                  |
-| `Push.Expo`          | Expo Push                         | Push      | ✅           | 🔲                  | 🔲                  |
-| `WhatsApp.Twilio`    | Twilio WhatsApp                   | WhatsApp  | ✅           | ✅                  | 🔲                  |
-| `WhatsApp.MetaCloud` | Meta Cloud API                    | WhatsApp  | ✅           | 🔲                  | 🔲                  |
-| `WhatsApp.Vonage`    | Vonage WhatsApp                   | WhatsApp  | ✅           | 🔲                  | 🔲                  |
-| `Slack`              | Slack Webhooks / Bot API          | Team Chat | ✅           | ✅                  | 🔲                  |
-| `Discord`            | Discord Webhooks                  | Team Chat | ✅           | ✅                  | 🔲                  |
-| `Teams`              | Microsoft Teams Webhooks          | Team Chat | ✅           | 🔲                  | 🔲                  |
-| `Mattermost`         | Mattermost Webhooks               | Team Chat | ✅           | 🔲                  | 🔲                  |
-| `RocketChat`         | Rocket.Chat Webhooks              | Team Chat | ✅           | 🔲                  | 🔲                  |
-| `Facebook`           | Meta Messenger API                | Social    | ✅           | 🔲                  | 🔲                  |
-| `Telegram`           | Telegram Bot API                  | Social    | ✅           | ✅                  | 🔲                  |
-| `Line`               | LINE Messaging API                | Social    | ✅           | 🔲                  | 🔲                  |
-| `Viber`              | Viber Business Messages           | Social    | ✅           | 🔲                  | 🔲                  |
-| `InApp`              | Hook-based (user-defined storage) | In-App    | ✅           | ✅                  | 🔲                  |
+| Package                | Provider                          | Channel   | Unit Tested | Integration Tested | Community Approved |
+| ---------------------- | --------------------------------- | --------- | ----------- | ------------------ | ------------------ |
+| `Email.SendGrid`       | Twilio SendGrid                   | Email     | ✅           | ✅                  | 🔲                  |
+| `Email.Smtp`           | Any SMTP server                   | Email     | ✅           | ✅                  | 🔲                  |
+| `Email.Mailgun`        | Mailgun                           | Email     | ✅           | 🔲                  | 🔲                  |
+| `Email.Resend`         | Resend                            | Email     | ✅           | 🔲                  | 🔲                  |
+| `Email.Postmark`       | Postmark                          | Email     | ✅           | 🔲                  | 🔲                  |
+| `Email.AwsSes`         | AWS SES                           | Email     | ✅           | 🔲                  | 🔲                  |
+| `Email.AzureCommEmail` | Azure Communication Services      | Email     | ✅           | 🔲                  | 🔲                  |
+| `Sms.Twilio`           | Twilio                            | SMS       | ✅           | ✅                  | 🔲                  |
+| `Sms.Vonage`           | Vonage (Nexmo)                    | SMS       | ✅           | 🔲                  | 🔲                  |
+| `Sms.Plivo`            | Plivo                             | SMS       | ✅           | 🔲                  | 🔲                  |
+| `Sms.Sinch`            | Sinch                             | SMS       | ✅           | 🔲                  | 🔲                  |
+| `Sms.MessageBird`      | MessageBird                       | SMS       | ✅           | 🔲                  | 🔲                  |
+| `Sms.AwsSns`           | AWS SNS                           | SMS       | ✅           | 🔲                  | 🔲                  |
+| `Sms.AzureCommSms`     | Azure Communication Services      | SMS       | ✅           | 🔲                  | 🔲                  |
+| `Push.Fcm`             | Firebase Cloud Messaging          | Push      | ✅           | 🔲                  | 🔲                  |
+| `Push.Apns`            | Apple Push Notification Service   | Push      | ✅           | 🔲                  | 🔲                  |
+| `Push.OneSignal`       | OneSignal                         | Push      | ✅           | 🔲                  | 🔲                  |
+| `Push.Expo`            | Expo Push                         | Push      | ✅           | 🔲                  | 🔲                  |
+| `WhatsApp.Twilio`      | Twilio WhatsApp                   | WhatsApp  | ✅           | ✅                  | 🔲                  |
+| `WhatsApp.MetaCloud`   | Meta Cloud API                    | WhatsApp  | ✅           | 🔲                  | 🔲                  |
+| `WhatsApp.Vonage`      | Vonage WhatsApp                   | WhatsApp  | ✅           | 🔲                  | 🔲                  |
+| `Slack`                | Slack Webhooks / Bot API          | Team Chat | ✅           | ✅                  | 🔲                  |
+| `Discord`              | Discord Webhooks                  | Team Chat | ✅           | ✅                  | 🔲                  |
+| `Teams`                | Microsoft Teams Webhooks          | Team Chat | ✅           | 🔲                  | 🔲                  |
+| `Mattermost`           | Mattermost Webhooks               | Team Chat | ✅           | 🔲                  | 🔲                  |
+| `RocketChat`           | Rocket.Chat Webhooks              | Team Chat | ✅           | 🔲                  | 🔲                  |
+| `Facebook`             | Meta Messenger API                | Social    | ✅           | 🔲                  | 🔲                  |
+| `Telegram`             | Telegram Bot API                  | Social    | ✅           | ✅                  | 🔲                  |
+| `Line`                 | LINE Messaging API                | Social    | ✅           | 🔲                  | 🔲                  |
+| `Viber`                | Viber Business Messages           | Social    | ✅           | 🔲                  | 🔲                  |
+| `InApp`                | Hook-based (user-defined storage) | In-App    | ✅           | ✅                  | 🔲                  |
 
 **Legend:** ✅ Complete · 🔲 Not yet · ⚠️ Partial
 
