@@ -5,17 +5,18 @@ url: ""
 
 remote_theme: just-the-docs/just-the-docs
 
+plugins:
+  - jekyll-remote-theme
+
 color_scheme: dark
 
 search_enabled: true
-search.button: true
 
 heading_anchors: true
 
-nav_sort: order
-
 aux_links:
-  GitHub: https://github.com/nicholasgreatmanufactory/RecurPixel.Notify
+  "GitHub":
+    - "https://github.com/nicholasgreatmanufactory/RecurPixel.Notify"
 aux_links_new_tab: true
 
 footer_content: "MIT License &mdash; RecurPixel.Notify"
