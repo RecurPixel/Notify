@@ -9,9 +9,6 @@ description: A modular, DI-native NuGet notification library for ASP.NET Core.
 baseurl: "/RecurPixel.Notify"
 url: "https://recurpixel.github.io"
 
-# Logo and favicon
-logo: "/assets/images/logo.png"
-
 # Color scheme
 color_scheme: light
 
@@ -48,11 +45,11 @@ last_edit_time_format: "%b %e %Y at %I:%M %p"
 
 # GitHub metadata
 gh_edit_link: true
-gh_edit_link_text: "Edit this page on GitHub"
-gh_edit_repository: "https://github.com/RecurPixel/Notify"
+gh_edit_repo: "RecurPixel/RecurPixel.Notify"
 gh_edit_branch: "main"
-gh_edit_source: docs
 gh_edit_view_mode: "tree"
+gh_edit_link_text: "Edit this page on GitHub"
+gh_edit_source: docs
 
 # Markdown
 markdown: kramdown
