@@ -3,10 +3,7 @@ description: A modular, DI-native NuGet notification library for ASP.NET Core.
 baseurl: /RecurPixel.Notify
 url: ""
 
-remote_theme: just-the-docs/just-the-docs
-
-plugins:
-  - jekyll-remote-theme
+theme: just-the-docs
 
 color_scheme: dark
 
