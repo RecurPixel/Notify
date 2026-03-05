@@ -4,30 +4,49 @@ All notable changes to RecurPixel.Notify will be documented here.
 
 ---
 
-## [0.1.0-beta.2] — Upcoming
+## [0.2.0-beta.1] — March 2026
 
-### Bug Fixes
-- [ ] **Simple channel registration key mismatch** — InApp, Slack, Discord, Teams, Telegram, Facebook, Line, Viber all register as `"channelname:channelname"` but the dispatcher resolves them as bare `"channelname"`, causing `InvalidOperationException` on every send
-- [ ] **`IOptions<NotifyOptions>` not registered** — `AddRecurPixelNotify` calls `services.AddSingleton(options)` directly; `ChannelDispatcher` injects `IOptions<NotifyOptions>` and receives an empty default, causing null provider resolution
-- [ ] **Misleading XML doc on `AddSmtpChannel`** — doc claims the method is called internally by `AddRecurPixelNotify()`; it is not
+### New Packages
+- `RecurPixel.Notify` — merged meta-package replacing the separate Core + Orchestrator install
+- `RecurPixel.Notify.Email.AzureCommEmail`
+- `RecurPixel.Notify.Sms.AzureCommSms`
+- `RecurPixel.Notify.Mattermost`
+- `RecurPixel.Notify.RocketChat`
 
 ### Breaking Changes
-- [ ] **`TriggerAsync` return type** — currently returns a single aggregated `NotifyResult`; will return a proper `TriggerResult` with `IReadOnlyList<NotifyResult> ChannelResults` for per-channel inspection
-- [ ] **Package naming restructure** — `RecurPixel.Notify` (bare name) will become the base package (Core + Orchestrator); `RecurPixel.Notify.Sdk` remains as the all-adapters meta-package
+- **`TriggerAsync` return type** — now returns `TriggerResult` with `IReadOnlyList<NotifyResult> ChannelResults`, `AllSucceeded`, `AnySucceeded`, and `Failures` for per-channel inspection
+- **`BulkTriggerAsync` return type** — now returns `BulkTriggerResult` with one `TriggerResult` per input context
+- **`TriggerResult` / `BulkTriggerResult` moved to Core** — namespace is now `RecurPixel.Notify.Core.Models`
+- **Package restructure** — `RecurPixel.Notify` is now the primary install (Core + Orchestrator). Users of beta.1 should remove `RecurPixel.Notify.Core` and `RecurPixel.Notify.Orchestrator` and add `RecurPixel.Notify`
+- **Core setup method renamed** — `AddRecurPixelNotify` in Core renamed to `AddNotifyOptions` to avoid confusion with the Orchestrator overload
+- **`InAppOptions.OnDeliver` renamed to `UseHandler`** — aligns with the handler-as-implementation pattern
+- **Dead properties removed** — `NotifyOptions.OnDelivery` and `NotifyOptions.InApp` removed; use `OrchestratorOptions.OnDelivery` and `AddInAppChannel` respectively
+
+### Bug Fixes
+- **Simple channel registration key mismatch** — all simple channels (InApp, Slack, Discord, Teams, Telegram, Facebook, Line, Viber, Mattermost, RocketChat) now register and resolve as `"channel:default"`
+- **`IOptions<NotifyOptions>` not registered** — both raw `NotifyOptions` POCO and `IOptions<NotifyOptions>` are now registered; `ChannelDispatcher` receives the correct options
+- **Adapter credentials not reaching DI** — `ConfigureAllKnownOptions` now maps every provider's credentials from the `NotifyOptions` POCO into `IOptions<TAdapterOptions>` at startup; adapters constructed by DI receive real credentials instead of empty defaults
+- **Telegram `ChatId` fallback** — `TelegramChannel` now falls back to `TelegramOptions.ChatId` when `payload.To` is empty, with a clear error if neither is set
+- **Misleading XML doc on `AddSmtpChannel`** — corrected; the method is not called internally by `AddRecurPixelNotify`
 
 ### DX Improvements
-- [ ] **Single setup call** — add `AddRecurPixelNotify(options, orchestratorConfigure)` overload to eliminate the two-call requirement
-- [ ] **Silent no-send on channel name mismatch** — `UseChannels("email:smtp")` currently produces `Success = true` with nothing dispatched; will log a warning and surface a clear error
-- [ ] **`OnDelivery` composable registrations** — calling `OnDelivery` twice silently drops the first handler; will support multiple registrations
-- [ ] **`InApp.Handler` reference fragility** — handler wiring breaks if options are rebound after DI registration; will register handler as a separate keyed singleton
-- [ ] **Simple channel registration keys** — the `"channel:provider"` key pattern only applies to multi-provider channels; simple channels use bare `"channelname"` keys; registration corrected and documented
+- **Single setup call** — `AddRecurPixelNotify(Action<NotifyOptions>, Action<OrchestratorOptions>)` combines options binding, adapter auto-registration, and orchestrator setup in one call
+- **Auto-registration via assembly scanning** — install a provider package and configure its credentials; no `Add{X}Channel()` call required. `[ChannelAdapter]` attribute drives discovery at startup
+- **Config-filtered registration** — only adapters with credentials present in `NotifyOptions` are registered; unconfigured providers have zero DI footprint
+- **Startup validation** — `ValidateActiveProviders` throws `InvalidOperationException` at startup when `Provider` is set but credentials are missing — never silently at send time
+- **`OnDelivery` composable** — multiple `OnDelivery` / `OnDelivery<TService>` registrations are additive; all handlers fire in registration order
+- **`OnDelivery<TService>` scoped resolution** — creates a fresh DI scope per call; `DbContext` and other scoped services are safe to use directly without `IServiceScopeFactory`
+- **`AddInAppChannel` + `UseHandler<TService>`** — InApp delivery wired via a typed scoped handler; `OnDelivery` remains a separate audit hook
+- **Silent no-send warning** — `NotifyService` logs a warning when a channel is in the event definition but has no payload in `NotifyContext.Channels`
+- **Improved `ResolveAdapter` error** — multi-cause diagnostic message when a channel adapter key is not found in DI
+- **`INotifyService` channel properties** — added `Line`, `Viber`, `Mattermost`, `RocketChat` direct channel properties
+- **All adapter extensions use `TryAddKeyedSingleton`** — idempotent; explicit `Add{X}Channel()` calls and auto-registration no longer conflict
 
 ### Documentation
-- [ ] **Scoped services inside hooks** — document the `IServiceScopeFactory` pattern for accessing `DbContext` and other scoped services inside `OnDelivery` and `InApp.Handler`
-- [ ] **`UseChannels()` accepts channel names, not provider names** — document with correct vs incorrect examples
-- [ ] **`DefineEvent` required before `TriggerAsync`** — document requirement and add recommended `static class NotifyEvents` constants pattern
-- [ ] **"Simple channel" vs "multi-provider channel"** — `GetChannelConfig` only handles email, sms, push, whatsapp; simple channels have no provider/fallback routing; document this distinction
-- [ ] **Core + Orchestrator dependency** — document that `RecurPixel.Notify.Core` alone has no callable send API and that Orchestrator is required for `INotifyService`
+- **All docs updated** — `getting-started.md`, `usage-tiers.md`, `quick-start.md`, `features.md` rewritten to reflect current API
+- **New `examples.md`** — Tier 1 (single-channel OTP), Tier 2 (e-commerce), Tier 3 (full SDK), and a production-ready pattern with InApp + OnDelivery + event definitions
+- **Scoped services pattern documented** — `OnDelivery<TService>` and `UseHandler<TService>` DI scope behaviour explained
+- **`UseChannels` key names documented** — logical channel names only (`"email"`, `"sms"`), not provider names
 
 ---
 

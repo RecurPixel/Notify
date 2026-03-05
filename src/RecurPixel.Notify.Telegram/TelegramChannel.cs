@@ -1,15 +1,10 @@
-using System;
-using System.Net.Http;
 using System.Net.Http.Json;
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using System.Threading;
-using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using RecurPixel.Notify.Core.Channels;
 using RecurPixel.Notify.Core.Models;
-using RecurPixel.Notify.Core.Options;
 using RecurPixel.Notify.Core.Options.Providers;
 
 namespace RecurPixel.Notify.Telegram;
@@ -22,7 +17,7 @@ namespace RecurPixel.Notify.Telegram;
 public sealed class TelegramChannel : NotificationChannelBase
 {
     private readonly TelegramOptions _options;
-    private readonly HttpClient _http;
+    private readonly IHttpClientFactory _httpClientFactory;
     private readonly ILogger<TelegramChannel> _logger;
 
     /// <inheritdoc />
@@ -33,11 +28,11 @@ public sealed class TelegramChannel : NotificationChannelBase
     /// </summary>
     public TelegramChannel(
         IOptions<TelegramOptions> options,
-        HttpClient http,
+        IHttpClientFactory httpClientFactory,
         ILogger<TelegramChannel> logger)
     {
         _options = options.Value;
-        _http = http;
+        _httpClientFactory = httpClientFactory;
         _logger = logger;
     }
 
@@ -52,7 +47,10 @@ public sealed class TelegramChannel : NotificationChannelBase
 
         try
         {
-            var chatId = payload.To;
+            var chatId = !string.IsNullOrEmpty(payload.To) ? payload.To : _options.ChatId;
+            if (string.IsNullOrEmpty(chatId))
+                return Fail(payload, "No ChatId provided. Set payload.To or configure a default ChatId in TelegramOptions.");
+
             var url = $"https://api.telegram.org/bot{_options.BotToken}/sendMessage";
 
             var body = new TelegramSendMessageRequest
@@ -64,7 +62,8 @@ public sealed class TelegramChannel : NotificationChannelBase
                 ParseMode = string.IsNullOrWhiteSpace(_options.ParseMode) ? null : _options.ParseMode
             };
 
-            var response = await _http.PostAsJsonAsync(url, body, ct);
+            var http = _httpClientFactory.CreateClient();
+            var response = await http.PostAsJsonAsync(url, body, ct);
             var raw = await response.Content.ReadAsStringAsync(ct);
 
             if (!response.IsSuccessStatusCode)

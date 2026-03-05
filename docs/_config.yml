@@ -106,6 +106,7 @@ include:
 
 # Plugins
 plugins:
+  - jekyll-remote-theme
   - jekyll-github-metadata
   - jekyll-seo-tag
   - jekyll-relative-links

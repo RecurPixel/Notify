@@ -1,7 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
 using System.Reflection;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
@@ -9,6 +5,7 @@ using Microsoft.Extensions.Options;
 using RecurPixel.Notify.Core.Channels;
 using RecurPixel.Notify.Core.Extensions;
 using RecurPixel.Notify.Core.Options;
+using RecurPixel.Notify.Core.Options.Providers;
 using RecurPixel.Notify.Orchestrator.Dispatch;
 using RecurPixel.Notify.Orchestrator.Options;
 using RecurPixel.Notify.Orchestrator.Services;
@@ -39,6 +36,10 @@ public static class ServiceCollectionExtensions
 
         // Register the raw POCO (also registers IOptions<NotifyOptions> inside orchestrator below)
         services.AddNotifyOptions(notifyOptions);
+
+        // Ensure IHttpClientFactory is available — required by any HTTP-based channel adapter.
+        // Idempotent: safe to call multiple times.
+        services.AddHttpClient();
 
         // Auto-discover and register adapters filtered by configuration
         var registeredKeys = RegisterAdapters(services, notifyOptions);
@@ -124,52 +125,52 @@ public static class ServiceCollectionExtensions
         {
             "email" => provider switch
             {
-                "sendgrid"       => !string.IsNullOrEmpty(options.Email?.SendGrid?.ApiKey),
-                "smtp"           => !string.IsNullOrEmpty(options.Email?.Smtp?.Host),
-                "mailgun"        => !string.IsNullOrEmpty(options.Email?.Mailgun?.ApiKey),
-                "resend"         => !string.IsNullOrEmpty(options.Email?.Resend?.ApiKey),
-                "postmark"       => !string.IsNullOrEmpty(options.Email?.Postmark?.ApiKey),
-                "awsses"         => !string.IsNullOrEmpty(options.Email?.AwsSes?.AccessKey),
+                "sendgrid" => !string.IsNullOrEmpty(options.Email?.SendGrid?.ApiKey),
+                "smtp" => !string.IsNullOrEmpty(options.Email?.Smtp?.Host),
+                "mailgun" => !string.IsNullOrEmpty(options.Email?.Mailgun?.ApiKey),
+                "resend" => !string.IsNullOrEmpty(options.Email?.Resend?.ApiKey),
+                "postmark" => !string.IsNullOrEmpty(options.Email?.Postmark?.ApiKey),
+                "awsses" => !string.IsNullOrEmpty(options.Email?.AwsSes?.AccessKey),
                 "azurecommemail" => !string.IsNullOrEmpty(options.Email?.AzureCommEmail?.ConnectionString),
-                _                => false
+                _ => false
             },
             "sms" => provider switch
             {
-                "twilio"       => !string.IsNullOrEmpty(options.Sms?.Twilio?.AccountSid),
-                "vonage"       => !string.IsNullOrEmpty(options.Sms?.Vonage?.ApiKey),
-                "plivo"        => !string.IsNullOrEmpty(options.Sms?.Plivo?.AuthId),
-                "sinch"        => !string.IsNullOrEmpty(options.Sms?.Sinch?.ServicePlanId),
-                "messagebird"  => !string.IsNullOrEmpty(options.Sms?.MessageBird?.ApiKey),
-                "awssns"       => !string.IsNullOrEmpty(options.Sms?.AwsSns?.AccessKey),
+                "twilio" => !string.IsNullOrEmpty(options.Sms?.Twilio?.AccountSid),
+                "vonage" => !string.IsNullOrEmpty(options.Sms?.Vonage?.ApiKey),
+                "plivo" => !string.IsNullOrEmpty(options.Sms?.Plivo?.AuthId),
+                "sinch" => !string.IsNullOrEmpty(options.Sms?.Sinch?.ServicePlanId),
+                "messagebird" => !string.IsNullOrEmpty(options.Sms?.MessageBird?.ApiKey),
+                "awssns" => !string.IsNullOrEmpty(options.Sms?.AwsSns?.AccessKey),
                 "azurecommsms" => !string.IsNullOrEmpty(options.Sms?.AzureCommSms?.ConnectionString),
-                _              => false
+                _ => false
             },
             "push" => provider switch
             {
-                "fcm"       => !string.IsNullOrEmpty(options.Push?.Fcm?.ProjectId),
-                "apns"      => !string.IsNullOrEmpty(options.Push?.Apns?.KeyId),
+                "fcm" => !string.IsNullOrEmpty(options.Push?.Fcm?.ProjectId),
+                "apns" => !string.IsNullOrEmpty(options.Push?.Apns?.KeyId),
                 "onesignal" => !string.IsNullOrEmpty(options.Push?.OneSignal?.AppId),
-                "expo"      => options.Push?.Expo is not null,
-                _           => false
+                "expo" => options.Push?.Expo is not null,
+                _ => false
             },
             "whatsapp" => provider switch
             {
-                "twilio"    => !string.IsNullOrEmpty(options.WhatsApp?.Twilio?.AccountSid),
+                "twilio" => !string.IsNullOrEmpty(options.WhatsApp?.Twilio?.AccountSid),
                 "metacloud" => !string.IsNullOrEmpty(options.WhatsApp?.MetaCloud?.AccessToken),
-                "vonage"    => !string.IsNullOrEmpty(options.WhatsApp?.Vonage?.ApiKey),
-                _           => false
+                "vonage" => !string.IsNullOrEmpty(options.WhatsApp?.Vonage?.ApiKey),
+                _ => false
             },
-            "slack"       => !string.IsNullOrEmpty(options.Slack?.WebhookUrl) || !string.IsNullOrEmpty(options.Slack?.BotToken),
-            "discord"     => !string.IsNullOrEmpty(options.Discord?.WebhookUrl),
-            "teams"       => !string.IsNullOrEmpty(options.Teams?.WebhookUrl),
-            "telegram"    => !string.IsNullOrEmpty(options.Telegram?.BotToken),
-            "facebook"    => !string.IsNullOrEmpty(options.Facebook?.PageAccessToken),
-            "line"        => !string.IsNullOrEmpty(options.Line?.ChannelAccessToken),
-            "viber"       => !string.IsNullOrEmpty(options.Viber?.BotAuthToken),
-            "mattermost"  => !string.IsNullOrEmpty(options.Mattermost?.WebhookUrl),
-            "rocketchat"  => !string.IsNullOrEmpty(options.RocketChat?.WebhookUrl),
-            "inapp"       => true,  // Always registered; handler wired by AddInAppChannel / OnDeliver
-            _             => false
+            "slack" => !string.IsNullOrEmpty(options.Slack?.WebhookUrl) || !string.IsNullOrEmpty(options.Slack?.BotToken),
+            "discord" => !string.IsNullOrEmpty(options.Discord?.WebhookUrl),
+            "teams" => !string.IsNullOrEmpty(options.Teams?.WebhookUrl),
+            "telegram" => !string.IsNullOrEmpty(options.Telegram?.BotToken),
+            "facebook" => !string.IsNullOrEmpty(options.Facebook?.PageAccessToken),
+            "line" => !string.IsNullOrEmpty(options.Line?.ChannelAccessToken),
+            "viber" => !string.IsNullOrEmpty(options.Viber?.BotAuthToken),
+            "mattermost" => !string.IsNullOrEmpty(options.Mattermost?.WebhookUrl),
+            "rocketchat" => !string.IsNullOrEmpty(options.RocketChat?.WebhookUrl),
+            "inapp" => true,  // Always registered; handler wired by AddInAppChannel / OnDeliver
+            _ => false
         };
 
     /// <summary>
@@ -186,7 +187,7 @@ public static class ServiceCollectionExtensions
     private static void EnsureAdapterAssembliesLoaded()
     {
         var baseDir = AppDomain.CurrentDomain.BaseDirectory;
-        var loaded  = AppDomain.CurrentDomain.GetAssemblies()
+        var loaded = AppDomain.CurrentDomain.GetAssemblies()
             .Select(a => a.GetName().Name)
             .ToHashSet(StringComparer.OrdinalIgnoreCase);
 
@@ -202,12 +203,17 @@ public static class ServiceCollectionExtensions
     private static List<string> RegisterAdapters(IServiceCollection services, NotifyOptions options)
     {
         EnsureAdapterAssembliesLoaded();
+
+        // Configure IOptions<T> for every known adapter options type so that adapters
+        // constructed by DI receive the real credentials, not empty defaults.
+        ConfigureAllKnownOptions(services, options);
+
         var registered = new List<string>();
 
         foreach (var type in DiscoverAdapters())
         {
             var attr = type.GetCustomAttribute<ChannelAdapterAttribute>()!;
-            var key  = $"{attr.Channel}:{attr.Provider}";
+            var key = $"{attr.Channel}:{attr.Provider}";
 
             if (!IsAdapterConfigured(options, attr.Channel, attr.Provider))
                 continue;
@@ -217,6 +223,243 @@ public static class ServiceCollectionExtensions
         }
 
         return registered;
+    }
+
+    /// <summary>
+    /// Configures <see cref="IOptions{T}"/> for every known adapter options type from the
+    /// <paramref name="notifyOptions"/> POCO. Called once during auto-registration so that
+    /// adapters constructed by DI receive real credentials rather than empty defaults.
+    /// Configuring options for adapters whose packages are not installed is harmless.
+    /// </summary>
+    private static void ConfigureAllKnownOptions(IServiceCollection services, NotifyOptions notifyOptions)
+    {
+        // ── Email ─────────────────────────────────────────────────────────────
+        if (notifyOptions.Email?.SendGrid is { } sg)
+            services.Configure<SendGridOptions>(o =>
+            {
+                o.ApiKey = sg.ApiKey;
+                o.FromEmail = sg.FromEmail;
+                o.FromName = sg.FromName;
+            });
+
+        if (notifyOptions.Email?.Smtp is { } smtp)
+            services.Configure<SmtpOptions>(o =>
+            {
+                o.Host = smtp.Host;
+                o.Port = smtp.Port;
+                o.Username = smtp.Username;
+                o.Password = smtp.Password;
+                o.UseSsl = smtp.UseSsl;
+                o.FromEmail = smtp.FromEmail;
+                o.FromName = smtp.FromName;
+            });
+
+        if (notifyOptions.Email?.Mailgun is { } mg)
+            services.Configure<MailgunOptions>(o =>
+            {
+                o.ApiKey = mg.ApiKey;
+                o.Domain = mg.Domain;
+                o.FromEmail = mg.FromEmail;
+                o.FromName = mg.FromName;
+            });
+
+        if (notifyOptions.Email?.Resend is { } rs)
+            services.Configure<ResendOptions>(o =>
+            {
+                o.ApiKey = rs.ApiKey;
+                o.FromEmail = rs.FromEmail;
+                o.FromName = rs.FromName;
+            });
+
+        if (notifyOptions.Email?.Postmark is { } pm)
+            services.Configure<PostmarkOptions>(o =>
+            {
+                o.ApiKey = pm.ApiKey;
+                o.FromEmail = pm.FromEmail;
+                o.FromName = pm.FromName;
+            });
+
+        if (notifyOptions.Email?.AwsSes is { } ses)
+            services.Configure<AwsSesOptions>(o =>
+            {
+                o.AccessKey = ses.AccessKey;
+                o.SecretKey = ses.SecretKey;
+                o.Region = ses.Region;
+                o.FromEmail = ses.FromEmail;
+                o.FromName = ses.FromName;
+            });
+
+        if (notifyOptions.Email?.AzureCommEmail is { } ace)
+            services.Configure<AzureCommEmailOptions>(o =>
+            {
+                o.ConnectionString = ace.ConnectionString;
+                o.FromEmail = ace.FromEmail;
+                o.FromName = ace.FromName;
+            });
+
+        // ── SMS ───────────────────────────────────────────────────────────────
+        if (notifyOptions.Sms?.Twilio is { } st)
+            services.Configure<TwilioOptions>(o =>
+            {
+                o.AccountSid = st.AccountSid;
+                o.AuthToken = st.AuthToken;
+                o.FromNumber = st.FromNumber;
+            });
+
+        if (notifyOptions.Sms?.Vonage is { } sv)
+            services.Configure<VonageOptions>(o =>
+            {
+                o.ApiKey = sv.ApiKey;
+                o.ApiSecret = sv.ApiSecret;
+                o.FromNumber = sv.FromNumber;
+            });
+
+        if (notifyOptions.Sms?.Plivo is { } pl)
+            services.Configure<PlivoOptions>(o =>
+            {
+                o.AuthId = pl.AuthId;
+                o.AuthToken = pl.AuthToken;
+                o.FromNumber = pl.FromNumber;
+            });
+
+        if (notifyOptions.Sms?.Sinch is { } si)
+            services.Configure<SinchOptions>(o =>
+            {
+                o.ServicePlanId = si.ServicePlanId;
+                o.ApiToken = si.ApiToken;
+                o.FromNumber = si.FromNumber;
+            });
+
+        if (notifyOptions.Sms?.MessageBird is { } mb)
+            services.Configure<MessageBirdOptions>(o =>
+            {
+                o.ApiKey = mb.ApiKey;
+                o.Originator = mb.Originator;
+            });
+
+        if (notifyOptions.Sms?.AwsSns is { } sns)
+            services.Configure<AwsSnsOptions>(o =>
+            {
+                o.AccessKey = sns.AccessKey;
+                o.SecretKey = sns.SecretKey;
+                o.Region = sns.Region;
+                o.SmsType = sns.SmsType;
+                o.SenderId = sns.SenderId;
+            });
+
+        if (notifyOptions.Sms?.AzureCommSms is { } acs)
+            services.Configure<AzureCommSmsOptions>(o =>
+            {
+                o.ConnectionString = acs.ConnectionString;
+                o.FromNumber = acs.FromNumber;
+            });
+
+        // ── Push ──────────────────────────────────────────────────────────────
+        if (notifyOptions.Push?.Fcm is { } fcm)
+            services.Configure<FcmOptions>(o =>
+            {
+                o.ProjectId = fcm.ProjectId;
+                o.ServiceAccountJson = fcm.ServiceAccountJson;
+            });
+
+        if (notifyOptions.Push?.Apns is { } apns)
+            services.Configure<ApnsOptions>(o =>
+            {
+                o.KeyId = apns.KeyId;
+                o.TeamId = apns.TeamId;
+                o.BundleId = apns.BundleId;
+                o.PrivateKey = apns.PrivateKey;
+            });
+
+        if (notifyOptions.Push?.OneSignal is { } os)
+            services.Configure<OneSignalOptions>(o =>
+            {
+                o.AppId = os.AppId;
+                o.ApiKey = os.ApiKey;
+            });
+
+        if (notifyOptions.Push?.Expo is { } expo)
+            services.Configure<ExpoOptions>(o => { o.AccessToken = expo.AccessToken; });
+
+        // ── WhatsApp ──────────────────────────────────────────────────────────
+        // Note: WhatsApp-Twilio uses the same TwilioOptions class as SMS-Twilio.
+        // If both channels are configured with Twilio, WhatsApp credentials win
+        // for IOptions<TwilioOptions>. Adapters that need channel-specific
+        // discrimination should use named options in a future release.
+        if (notifyOptions.WhatsApp?.Twilio is { } wt)
+            services.Configure<TwilioOptions>(o =>
+            {
+                o.AccountSid = wt.AccountSid;
+                o.AuthToken = wt.AuthToken;
+                o.FromNumber = wt.FromNumber;
+            });
+
+        if (notifyOptions.WhatsApp?.MetaCloud is { } mc)
+            services.Configure<MetaCloudOptions>(o =>
+            {
+                o.AccessToken = mc.AccessToken;
+                o.PhoneNumberId = mc.PhoneNumberId;
+            });
+
+        if (notifyOptions.WhatsApp?.Vonage is { } wv)
+            services.Configure<VonageWhatsAppOptions>(o =>
+            {
+                o.ApiKey = wv.ApiKey;
+                o.ApiSecret = wv.ApiSecret;
+                o.FromNumber = wv.FromNumber;
+            });
+
+        // ── Messaging channels ────────────────────────────────────────────────
+        if (notifyOptions.Slack is { } slack)
+            services.Configure<SlackOptions>(o =>
+            {
+                o.WebhookUrl = slack.WebhookUrl;
+                o.BotToken = slack.BotToken;
+            });
+
+        if (notifyOptions.Discord is { } discord)
+            services.Configure<DiscordOptions>(o => { o.WebhookUrl = discord.WebhookUrl; });
+
+        if (notifyOptions.Teams is { } teams)
+            services.Configure<TeamsOptions>(o => { o.WebhookUrl = teams.WebhookUrl; });
+
+        if (notifyOptions.Telegram is { } tg)
+            services.Configure<TelegramOptions>(o =>
+            {
+                o.BotToken = tg.BotToken;
+                o.ChatId = tg.ChatId;
+                o.ParseMode = tg.ParseMode;
+            });
+
+        if (notifyOptions.Facebook is { } fb)
+            services.Configure<FacebookOptions>(o => { o.PageAccessToken = fb.PageAccessToken; });
+
+        if (notifyOptions.Line is { } line)
+            services.Configure<LineOptions>(o => { o.ChannelAccessToken = line.ChannelAccessToken; });
+
+        if (notifyOptions.Viber is { } viber)
+            services.Configure<ViberOptions>(o =>
+            {
+                o.BotAuthToken = viber.BotAuthToken;
+                o.SenderName = viber.SenderName;
+                o.SenderAvatarUrl = viber.SenderAvatarUrl;
+            });
+
+        if (notifyOptions.Mattermost is { } mm)
+            services.Configure<MattermostOptions>(o =>
+            {
+                o.WebhookUrl = mm.WebhookUrl;
+                o.Username = mm.Username;
+                o.Channel = mm.Channel;
+            });
+
+        if (notifyOptions.RocketChat is { } rc)
+            services.Configure<RocketChatOptions>(o =>
+            {
+                o.WebhookUrl = rc.WebhookUrl;
+                o.Username = rc.Username;
+                o.Channel = rc.Channel;
+            });
     }
 
     /// <summary>
@@ -239,9 +482,9 @@ public static class ServiceCollectionExtensions
                     $"Add the required configuration under Notify:{sectionLabel}:{char.ToUpperInvariant(provider[0]) + provider[1..]}.");
         }
 
-        Check(options.Email?.Provider,    "email",    "Email",    registeredKeys);
-        Check(options.Sms?.Provider,      "sms",      "Sms",      registeredKeys);
-        Check(options.Push?.Provider,     "push",     "Push",     registeredKeys);
+        Check(options.Email?.Provider, "email", "Email", registeredKeys);
+        Check(options.Sms?.Provider, "sms", "Sms", registeredKeys);
+        Check(options.Push?.Provider, "push", "Push", registeredKeys);
         Check(options.WhatsApp?.Provider, "whatsapp", "WhatsApp", registeredKeys);
 
         // Validate named provider routing tables
@@ -265,9 +508,9 @@ public static class ServiceCollectionExtensions
             }
         }
 
-        CheckProviders(options.Email?.Providers,    "email",    registeredKeys);
-        CheckProviders(options.Sms?.Providers,      "sms",      registeredKeys);
-        CheckProviders(options.Push?.Providers,     "push",     registeredKeys);
+        CheckProviders(options.Email?.Providers, "email", registeredKeys);
+        CheckProviders(options.Sms?.Providers, "sms", registeredKeys);
+        CheckProviders(options.Push?.Providers, "push", registeredKeys);
         CheckProviders(options.WhatsApp?.Providers, "whatsapp", registeredKeys);
     }
 }
