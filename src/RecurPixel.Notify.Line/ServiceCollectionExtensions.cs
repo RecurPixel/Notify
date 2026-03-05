@@ -1,5 +1,6 @@
-using System;
+﻿using System;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Options;
 using RecurPixel.Notify.Core.Channels;
 using RecurPixel.Notify.Core.Options;
@@ -26,7 +27,7 @@ public static class ServiceCollectionExtensions
 
         services.AddHttpClient<LineChannel>();
 
-        services.AddKeyedSingleton<INotificationChannel, LineChannel>("line:line");
+        services.TryAddKeyedSingleton<INotificationChannel, LineChannel>("line:default");
 
         return services;
     }

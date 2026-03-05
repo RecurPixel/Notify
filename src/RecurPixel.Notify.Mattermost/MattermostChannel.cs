@@ -18,6 +18,7 @@ namespace RecurPixel.Notify.Mattermost;
 /// Sends messages via POST to the configured Mattermost webhook URL.
 /// Bulk is handled by the base class loop — Mattermost webhooks are per-message.
 /// </summary>
+[ChannelAdapter("mattermost", "default")]
 public sealed class MattermostChannel : NotificationChannelBase
 {
     private readonly MattermostOptions _options;

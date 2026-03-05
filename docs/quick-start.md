@@ -106,7 +106,7 @@ await notify.WhatsApp.SendAsync(new NotificationPayload
 ```csharp
 await notify.Slack.SendAsync(new NotificationPayload
 {
-    Subject = "🚨 Alert",
+    Subject = "Alert",
     Body    = "Payment gateway error rate exceeded 5% in the last 10 minutes."
 });
 ```
@@ -207,7 +207,7 @@ await notify.Line.SendAsync(new NotificationPayload
 
 ```json
 "Viber": {
-  "AuthToken": "xxxxxxxxxx",
+  "BotAuthToken": "xxxxxxxxxx",
   "SenderName": "Your App"
 }
 ```
@@ -260,32 +260,47 @@ await notify.RocketChat.SendAsync(new NotificationPayload
 
 ## In-App
 
-```json
-"InApp": { "Enabled": true }
-```
+InApp has no config section — it is wired entirely in code. Register the handler before `AddRecurPixelNotify`:
 
 ```csharp
-// Register your delivery hook at startup
-options.InApp.OnDeliver(async payload =>
-{
-    await db.InAppNotifications.AddAsync(new InAppNotification
+// Program.cs — register your storage handler
+builder.Services.AddInAppChannel(opts =>
+    opts.UseHandler<IApplicationDbContext>(async (notification, db) =>
     {
-        UserId = payload.Metadata.GetValueOrDefault("user_id")?.ToString(),
-        Title  = payload.Subject,
-        Body   = payload.Body,
-        IsRead = false
-    });
-    await db.SaveChangesAsync();
-});
+        await db.InAppNotifications.AddAsync(new InAppNotification
+        {
+            UserId = notification.UserId,
+            Title  = notification.Subject,
+            Body   = notification.Body,
+            IsRead = false
+        });
+        await db.SaveChangesAsync();
+        return new NotifyResult { Success = true };
+    }));
+```
 
-// Send — triggers your hook
-await notify.InApp.SendAsync(new NotificationPayload
+Send via orchestrator:
+
+```csharp
+await notify.TriggerAsync("any.event", new NotifyContext
 {
-    Subject  = "New comment on your post",
-    Body     = "Alex replied to your thread.",
-    Metadata = new() { ["user_id"] = "usr_123" }
+    User     = new NotifyUser { UserId = user.Id.ToString() },
+    Channels = new() { ["inapp"] = new() { Subject = "New comment", Body = "Alex replied to your post." } }
 });
 ```
+
+Or direct:
+
+```csharp
+await notify.InApp.SendAsync(new NotificationPayload
+{
+    To      = user.Id.ToString(),
+    Subject = "New comment on your post",
+    Body    = "Alex replied to your thread."
+});
+```
+
+> `UseHandler` IS the delivery — your code saves or pushes the notification. It is not the same as `OnDelivery`, which is a post-send audit callback.
 
 ---
 
@@ -315,11 +330,11 @@ if (!result.AllSucceeded)
 
 ## Multi-channel event trigger
 
-Fire email + SMS + push in parallel, with conditions and fallback:
+Fire email + SMS + push in parallel, with conditions and fallback. `orchestratorOptions` is the second parameter of `AddRecurPixelNotify`:
 
 ```csharp
 // Define once at startup
-options.Orchestrator.DefineEvent("order.placed", e => e
+orchestratorOptions.DefineEvent("order.placed", e => e
     .UseChannels("email", "sms", "push")
     .WithCondition("sms",  ctx => ctx.User.PhoneVerified)
     .WithCondition("push", ctx => ctx.User.PushEnabled)
@@ -327,8 +342,8 @@ options.Orchestrator.DefineEvent("order.placed", e => e
     .WithRetry(maxAttempts: 3, delayMs: 500)
 );
 
-// Trigger from your service — all channels fire in parallel
-await notify.TriggerAsync("order.placed", new NotifyContext
+// Trigger from your service — all active channels fire in parallel
+var result = await notify.TriggerAsync("order.placed", new NotifyContext
 {
     User = new NotifyUser
     {

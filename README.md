@@ -23,8 +23,7 @@ RecurPixel.Notify is a pure .NET library — not a platform, not SaaS, no extern
 dotnet add package RecurPixel.Notify.Sdk
 
 # Or install only what you need
-dotnet add package RecurPixel.Notify.Core
-dotnet add package RecurPixel.Notify.Orchestrator
+dotnet add package RecurPixel.Notify
 dotnet add package RecurPixel.Notify.Email.SendGrid
 dotnet add package RecurPixel.Notify.Sms.Twilio
 ```

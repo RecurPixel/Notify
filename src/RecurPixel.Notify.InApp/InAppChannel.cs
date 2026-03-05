@@ -11,12 +11,14 @@ namespace RecurPixel.Notify.InApp;
 
 /// <summary>
 /// Notification channel adapter for in-app / inbox delivery.
-/// Invokes a user-provided delegate on every send — storage, SignalR,
-/// queuing, and persistence are entirely user-owned.
+/// Invokes the handler registered via <c>OnDeliver</c> on every send.
+/// Storage, SignalR, queuing, and persistence are entirely user-owned.
 /// </summary>
+[ChannelAdapter("inapp", "default")]
 public sealed class InAppChannel : NotificationChannelBase
 {
     private readonly InAppOptions _options;
+    private readonly IServiceProvider _serviceProvider;
     private readonly ILogger<InAppChannel> _logger;
 
     /// <inheritdoc />
@@ -27,10 +29,12 @@ public sealed class InAppChannel : NotificationChannelBase
     /// </summary>
     public InAppChannel(
         IOptions<InAppOptions> options,
+        IServiceProvider serviceProvider,
         ILogger<InAppChannel> logger)
     {
-        _options = options.Value;
-        _logger  = logger;
+        _options         = options.Value;
+        _serviceProvider = serviceProvider;
+        _logger          = logger;
     }
 
     /// <inheritdoc />
@@ -42,10 +46,11 @@ public sealed class InAppChannel : NotificationChannelBase
             "InApp: delivering notification to recipient {Recipient}",
             payload.To);
 
-        if (_options.Handler is null)
+        if (_options.DeliverHandler is null)
         {
-            const string error = "InApp channel is not configured. " +
-                                 "Set InAppOptions.Handler via AddRecurPixelNotify().";
+            const string error =
+                "InApp delivery handler not configured. " +
+                "Call AddInAppChannel(inApp => inApp.OnDeliver(...)) to register a handler.";
 
             _logger.LogDebug(
                 "InApp: no handler configured for recipient {Recipient}",
@@ -54,12 +59,19 @@ public sealed class InAppChannel : NotificationChannelBase
             return Fail(payload, error);
         }
 
+        var notification = new InAppNotification
+        {
+            UserId   = payload.To,
+            Subject  = payload.Subject,
+            Body     = payload.Body,
+            Metadata = payload.Metadata
+        };
+
         try
         {
-            var result = await _options.Handler(payload, ct);
+            var result = await _options.DeliverHandler(notification, _serviceProvider);
 
             // Ensure the result always carries channel identity and recipient
-            // regardless of what the user delegate returned.
             result.Channel   = ChannelName;
             result.Provider  = "inapp";
             result.Recipient = payload.To;
@@ -73,7 +85,7 @@ public sealed class InAppChannel : NotificationChannelBase
                     payload.To);
             else
                 _logger.LogDebug(
-                    "InApp: handler returned failure for recipient {Recipient}. Error {Error}",
+                    "InApp: handler returned failure for recipient {Recipient}. Error={Error}",
                     payload.To, result.Error);
 
             return result;
@@ -87,8 +99,6 @@ public sealed class InAppChannel : NotificationChannelBase
             return Fail(payload, ex.Message);
         }
     }
-
-    // ── helpers ─────────────────────────────────────────────────────────────
 
     private NotifyResult Fail(NotificationPayload payload, string error) => new()
     {

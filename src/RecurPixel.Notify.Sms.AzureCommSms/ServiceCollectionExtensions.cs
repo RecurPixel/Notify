@@ -1,5 +1,6 @@
-using Azure.Communication.Sms;
+﻿using Azure.Communication.Sms;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Options;
 using RecurPixel.Notify.Core.Channels;
 using RecurPixel.Notify.Core.Options;
@@ -27,7 +28,7 @@ public static class ServiceCollectionExtensions
 
         services.AddSingleton<AzureCommSmsChannel>();
 
-        services.AddKeyedSingleton<INotificationChannel, AzureCommSmsChannel>(
+        services.TryAddKeyedSingleton<INotificationChannel, AzureCommSmsChannel>(
             "sms:azurecommsms");
 
         return services;

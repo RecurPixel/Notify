@@ -19,6 +19,7 @@ namespace RecurPixel.Notify.Sms.MessageBird;
 /// Notification channel adapter for MessageBird SMS delivery.
 /// MessageBird has no native bulk API — bulk is handled by the base class loop.
 /// </summary>
+[ChannelAdapter("sms", "messagebird")]
 public sealed class MessageBirdChannel : NotificationChannelBase
 {
     private readonly MessageBirdOptions _options;

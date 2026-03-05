@@ -1,4 +1,5 @@
-using Microsoft.Extensions.DependencyInjection;
+﻿using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Options;
 using RecurPixel.Notify.Core.Channels;
 using RecurPixel.Notify.Core.Options;
@@ -25,8 +26,8 @@ public static class ServiceCollectionExtensions
 
         services.AddHttpClient<RocketChatChannel>();
 
-        services.AddKeyedSingleton<INotificationChannel, RocketChatChannel>(
-            "rocketchat:rocketchat");
+        services.TryAddKeyedSingleton<INotificationChannel, RocketChatChannel>(
+            "rocketchat:default");
 
         return services;
     }

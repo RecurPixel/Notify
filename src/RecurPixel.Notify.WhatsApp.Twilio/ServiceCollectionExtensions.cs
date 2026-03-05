@@ -1,5 +1,6 @@
-using System;
+﻿using System;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using RecurPixel.Notify.Core.Channels;
 using RecurPixel.Notify.Core.Options.Providers;
 
@@ -41,7 +42,7 @@ public static class ServiceCollectionExtensions
             o.FromNumber = options.FromNumber;
         });
 
-        services.AddKeyedSingleton<INotificationChannel, TwilioWhatsAppChannel>("whatsapp:twilio");
+        services.TryAddKeyedSingleton<INotificationChannel, TwilioWhatsAppChannel>("whatsapp:twilio");
 
         return services;
     }

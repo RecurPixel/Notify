@@ -1,6 +1,7 @@
-using Amazon.Runtime;
+﻿using Amazon.Runtime;
 using Amazon.SimpleNotificationService;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Options;
 using RecurPixel.Notify.Core.Channels;
 using RecurPixel.Notify.Core.Options;
@@ -39,7 +40,7 @@ public static class ServiceCollectionExtensions
 
         services.AddSingleton<AwsSnsChannel>();
 
-        services.AddKeyedSingleton<INotificationChannel, AwsSnsChannel>("sms:awssns");
+        services.TryAddKeyedSingleton<INotificationChannel, AwsSnsChannel>("sms:awssns");
 
         return services;
     }

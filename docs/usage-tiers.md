@@ -25,7 +25,7 @@ Register it explicitly in DI:
 ```csharp
 builder.Services.AddSendGridChannel(options =>
 {
-    options.ApiKey    = builder.Configuration["SendGrid:ApiKey"];
+    options.ApiKey    = builder.Configuration["Notify:Email:SendGrid:ApiKey"];
     options.FromEmail = "no-reply@yourapp.com";
     options.FromName  = "Your App";
 });
@@ -67,39 +67,49 @@ public class AuthService(
 Install Core, Orchestrator, and the provider packages you need:
 
 ```bash
-dotnet add package RecurPixel.Notify.Core
-dotnet add package RecurPixel.Notify.Orchestrator
+dotnet add package RecurPixel.Notify
 dotnet add package RecurPixel.Notify.Email.SendGrid
 dotnet add package RecurPixel.Notify.Sms.Twilio
 dotnet add package RecurPixel.Notify.Push.Fcm
+dotnet add package RecurPixel.Notify.InApp
 ```
 
-Register everything through the Orchestrator's single entry point:
+Register through the single entry point with two lambdas — the first binds configuration, the second defines events and hooks:
 
 ```csharp
+// InApp needs a separate call because its handler is code, not JSON config
+builder.Services.AddInAppChannel(opts =>
+    opts.UseHandler<IApplicationDbContext>(async (notification, db) =>
+    {
+        await db.Notifications.AddAsync(new Notification
+        {
+            UserId  = notification.UserId,
+            Title   = notification.Subject ?? string.Empty,
+            Message = notification.Body,
+            IsRead  = false
+        });
+        await db.SaveChangesAsync();
+        return new NotifyResult { Success = true };
+    }));
+
 builder.Services.AddRecurPixelNotify(
-    builder.Configuration.GetSection("Notify")
-);
+    notifyOptions =>
+    {
+        builder.Configuration.GetSection("Notify").Bind(notifyOptions);
+    },
+    orchestratorOptions =>
+    {
+        orchestratorOptions.DefineEvent("order.placed", e => e
+            .UseChannels("email", "sms", "push")
+            .WithCondition("sms",  ctx => ctx.User.PhoneVerified)
+            .WithCondition("push", ctx => ctx.User.PushEnabled)
+            .WithFallback("whatsapp", "sms", "email")
+            .WithRetry(maxAttempts: 3, delayMs: 500)
+        );
+    });
 ```
 
-The Orchestrator reads your `NotifyOptions`, sees which providers are configured, and calls each adapter's registration internally. You do not call `AddSendGridChannel()` yourself in Tier 2.
-
-Optionally define events at startup:
-
-```csharp
-builder.Services.AddRecurPixelNotify(options =>
-{
-    options.Configure(builder.Configuration.GetSection("Notify"));
-
-    options.Orchestrator.DefineEvent("order.placed", e => e
-        .UseChannels("email", "sms", "push")
-        .WithCondition("sms",  ctx => ctx.User.PhoneVerified)
-        .WithCondition("push", ctx => ctx.User.PushEnabled)
-        .WithFallback("whatsapp", "sms", "email")
-        .WithRetry(maxAttempts: 3, delayMs: 500)
-    );
-});
-```
+The Orchestrator reads your `NotifyOptions`, sees which providers are configured, and registers only those adapters. You do not call `AddSendGridChannel()` yourself in Tier 2 — the Orchestrator handles that.
 
 Inject `INotifyService` and trigger events or send directly:
 
@@ -109,7 +119,7 @@ public class OrderService(INotifyService notify)
     public async Task PlaceOrderAsync(Order order)
     {
         // Orchestrated — event config drives which channels fire
-        await notify.TriggerAsync("order.placed", context);
+        var result = await notify.TriggerAsync("order.placed", context);
 
         // Direct — bypass orchestration for time-critical sends
         await notify.Email.SendAsync(otpPayload);
@@ -128,17 +138,29 @@ public class OrderService(INotifyService notify)
 
 ```bash
 dotnet add package RecurPixel.Notify.Sdk
+dotnet add package RecurPixel.Notify.InApp
 ```
 
 The SDK meta-package pulls Core + Orchestrator + all provider adapters. Registration is identical to Tier 2:
 
 ```csharp
+builder.Services.AddInAppChannel(opts => opts.UseHandler<IApplicationDbContext>(...));
+
 builder.Services.AddRecurPixelNotify(
-    builder.Configuration.GetSection("Notify")
-);
+    notifyOptions =>
+    {
+        builder.Configuration.GetSection("Notify").Bind(notifyOptions);
+    },
+    orchestratorOptions =>
+    {
+        orchestratorOptions.DefineEvent("order.placed", e => e
+            .UseChannels("email", "sms", "push", "inapp")
+            .WithCondition("sms",  ctx => ctx.User.PhoneVerified)
+            .WithCondition("push", ctx => ctx.User.PushEnabled));
+    });
 ```
 
-Only providers you configure in `appsettings.json` are active. Unconfigured providers are registered but dormant — they add no runtime overhead.
+Only providers you configure in `appsettings.json` are registered. Unconfigured providers are not registered at all — zero DI entries, zero runtime overhead.
 
 ---
 

@@ -1,4 +1,5 @@
-using Microsoft.Extensions.DependencyInjection;
+﻿using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Options;
 using RecurPixel.Notify.Core.Channels;
 using RecurPixel.Notify.Core.Options;
@@ -12,8 +13,9 @@ namespace RecurPixel.Notify.Slack;
 public static class ServiceCollectionExtensions
 {
     /// <summary>
-    /// Registers <see cref="SlackChannel"/> in the DI container keyed as <c>slack:slack</c>.
-    /// Called automatically by <c>AddRecurPixelNotify()</c> when Slack options are present.
+    /// Registers <see cref="SlackChannel"/> in the DI container keyed as <c>slack:default</c>.
+    /// For direct-injection usage without <c>AddRecurPixelNotify()</c>.
+    /// When using <c>AddRecurPixelNotify()</c>, this channel is registered automatically via assembly scanning.
     /// </summary>
     /// <param name="services">The service collection.</param>
     /// <param name="options">The resolved Slack options.</param>
@@ -30,7 +32,7 @@ public static class ServiceCollectionExtensions
 
         services.AddHttpClient();
 
-        services.AddKeyedSingleton<INotificationChannel, SlackChannel>("slack:slack");
+        services.TryAddKeyedSingleton<INotificationChannel, SlackChannel>("slack:default");
 
         return services;
     }

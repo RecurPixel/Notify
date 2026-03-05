@@ -12,6 +12,7 @@ namespace RecurPixel.Notify.Viber;
 /// Notification channel adapter for the Viber Business Messages API.
 /// Sends messages via POST https://chatapi.viber.com/pa/send_message.
 /// </summary>
+[ChannelAdapter("viber", "default")]
 public sealed class ViberChannel : NotificationChannelBase
 {
     private readonly ViberOptions _options;

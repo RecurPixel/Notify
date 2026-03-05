@@ -18,6 +18,7 @@ namespace RecurPixel.Notify.Sms.AwsSns;
 /// Notification channel adapter for AWS Simple Notification Service SMS delivery.
 /// Supports parallel bulk sending with a concurrency cap.
 /// </summary>
+[ChannelAdapter("sms", "awssns")]
 public sealed class AwsSnsChannel : NotificationChannelBase
 {
     private readonly AwsSnsOptions _options;

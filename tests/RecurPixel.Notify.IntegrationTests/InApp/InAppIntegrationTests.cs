@@ -14,28 +14,24 @@ namespace RecurPixel.Notify.IntegrationTests.InApp;
 /// </summary>
 public sealed class InAppIntegrationTests : ChannelIntegrationTest
 {
-    protected override string ServiceKey => "inapp:inapp";
+    protected override string ServiceKey => "inapp:default";
 
     // InApp is fully in-process — no credentials needed, always run
     protected override bool IsConfigured() => true;
 
     protected override void RegisterServices(IServiceCollection services, IConfiguration config)
     {
-        var opts = new InAppOptions
+        services.AddInAppChannel(opts => opts.UseHandler(_ => Task.FromResult(new NotifyResult
         {
-            Handler = (payload, ct) => Task.FromResult(new NotifyResult
-            {
-                Success = true,
-                ProviderId = Guid.NewGuid().ToString()
-            })
-        };
-        services.AddInAppChannel(opts);
+            Success    = true,
+            ProviderId = Guid.NewGuid().ToString()
+        })));
     }
 
     protected override NotificationPayload BuildPayload(IConfiguration config) => new()
     {
-        To = "test-user-id-001",
+        To      = "test-user-id-001",
         Subject = "RecurPixel.Notify Integration Test",
-        Body = $"InApp notification — {DateTime.UtcNow:HH:mm:ss} UTC"
+        Body    = $"InApp notification — {DateTime.UtcNow:HH:mm:ss} UTC"
     };
 }

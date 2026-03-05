@@ -1,7 +1,7 @@
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Options;
 using RecurPixel.Notify.Core.Channels;
-using RecurPixel.Notify.Core.Options;
 
 namespace RecurPixel.Notify.InApp;
 
@@ -11,18 +11,23 @@ namespace RecurPixel.Notify.InApp;
 public static class ServiceCollectionExtensions
 {
     /// <summary>
-    /// Registers <see cref="InAppChannel"/> into the service collection.
+    /// Registers <see cref="InAppChannel"/> and wires the delivery handler.
     /// </summary>
     /// <param name="services">The service collection to register into.</param>
-    /// <param name="options">The InApp options resolved from <see cref="NotifyOptions"/>.</param>
+    /// <param name="configure">
+    /// Action to configure <see cref="InAppOptions"/>.
+    /// Call <c>OnDeliver</c> inside this action to register the delivery handler.
+    /// </param>
     /// <returns>The same <see cref="IServiceCollection"/> for chaining.</returns>
     public static IServiceCollection AddInAppChannel(
         this IServiceCollection services,
-        InAppOptions options)
+        Action<InAppOptions> configure)
     {
-        services.AddSingleton(Options.Create(options));
+        var options = new InAppOptions();
+        configure(options);
 
-        services.AddKeyedSingleton<INotificationChannel, InAppChannel>("inapp:inapp");
+        services.AddSingleton(Options.Create(options));
+        services.TryAddKeyedSingleton<INotificationChannel, InAppChannel>("inapp:default");
 
         return services;
     }

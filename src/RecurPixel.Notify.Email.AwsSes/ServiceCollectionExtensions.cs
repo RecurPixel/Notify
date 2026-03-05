@@ -1,6 +1,7 @@
-using Amazon.Runtime;
+﻿using Amazon.Runtime;
 using Amazon.SimpleEmailV2;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Options;
 using RecurPixel.Notify.Core.Channels;
 using RecurPixel.Notify.Core.Options;
@@ -39,7 +40,7 @@ public static class ServiceCollectionExtensions
 
         services.AddSingleton<AwsSesChannel>();
 
-        services.AddKeyedSingleton<INotificationChannel, AwsSesChannel>("email:awsses");
+        services.TryAddKeyedSingleton<INotificationChannel, AwsSesChannel>("email:awsses");
 
         return services;
     }

@@ -18,6 +18,7 @@ namespace RecurPixel.Notify.Telegram;
 /// Notification channel adapter for Telegram Bot API.
 /// Sends messages via POST https://api.telegram.org/bot{token}/sendMessage.
 /// </summary>
+[ChannelAdapter("telegram", "default")]
 public sealed class TelegramChannel : NotificationChannelBase
 {
     private readonly TelegramOptions _options;

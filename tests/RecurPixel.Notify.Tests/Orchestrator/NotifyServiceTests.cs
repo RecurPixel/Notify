@@ -85,7 +85,7 @@ public class NotifyServiceTests
 
         var result = await svc.TriggerAsync("order.placed", MakeContext());
 
-        Assert.True(result.Success);
+        Assert.True(result.AllSucceeded);
         emailMock.Verify(m => m.SendAsync(It.IsAny<NotificationPayload>(), It.IsAny<CancellationToken>()), Times.Once);
     }
 
@@ -101,7 +101,7 @@ public class NotifyServiceTests
 
         var result = await svc.TriggerAsync("order.placed", MakeContext());
 
-        Assert.True(result.Success);
+        Assert.True(result.AllSucceeded);
         emailMock.Verify(m => m.SendAsync(It.IsAny<NotificationPayload>(), It.IsAny<CancellationToken>()), Times.Once);
         smsMock.Verify(m => m.SendAsync(It.IsAny<NotificationPayload>(), It.IsAny<CancellationToken>()), Times.Once);
     }
@@ -199,7 +199,7 @@ public class NotifyServiceTests
 
         var result = await svc.TriggerAsync("test.event", ctx);
 
-        Assert.True(result.Success);
+        Assert.True(result.AllSucceeded);
     }
 
     // ── TriggerAsync — no payload for active channel ──────────────────────────
@@ -221,7 +221,7 @@ public class NotifyServiceTests
 
         var result = await svc.TriggerAsync("order.placed", ctx);
 
-        Assert.True(result.Success);
+        Assert.True(result.AnySucceeded);
         emailMock.Verify(m => m.SendAsync(It.IsAny<NotificationPayload>(), It.IsAny<CancellationToken>()), Times.Once);
         Assert.Single(hook);
     }
@@ -239,8 +239,8 @@ public class NotifyServiceTests
 
         var result = await svc.TriggerAsync("order.placed", MakeContext());
 
-        Assert.False(result.Success);
-        Assert.Contains("SMTP timeout", result.Error);
+        Assert.False(result.AllSucceeded);
+        Assert.Contains("SMTP timeout", result.Failures[0].Error);
     }
 
     // ── Named provider routing ─────────────────────────────────────────────────
@@ -355,6 +355,91 @@ public class NotifyServiceTests
         var options = new OrchestratorOptions();
         Assert.Throws<ArgumentException>(
             () => options.DefineEvent("", e => e.UseChannels("email")));
+    }
+
+    // ── TriggerAsync — auto-populate To from NotifyUser ──────────────────────
+
+    [Fact]
+    public async Task TriggerAsync_EmailTo_AutoPopulatedFromUserEmail_WhenNotSet()
+    {
+        NotificationPayload? captured = null;
+        var emailMock = new Mock<INotificationChannel>();
+        emailMock.Setup(m => m.ChannelName).Returns("email");
+        emailMock.Setup(m => m.SendAsync(It.IsAny<NotificationPayload>(), It.IsAny<CancellationToken>()))
+            .Callback<NotificationPayload, CancellationToken>((p, _) => captured = p)
+            .ReturnsAsync(new NotifyResult { Success = true, Channel = "email", SentAt = DateTime.UtcNow });
+
+        var (svc, _) = BuildService(
+            o => o.DefineEvent("auth.verify-email", e => e.UseChannels("email")),
+            n => { },
+            emailMock: emailMock);
+
+        var ctx = new NotifyContext
+        {
+            User     = new NotifyUser { UserId = "25", Email = "user@example.com" },
+            Channels = new() { ["email"] = new() { Subject = "Verify", Body = "Click here" } }
+            // To intentionally not set — should be filled from User.Email
+        };
+
+        var result = await svc.TriggerAsync("auth.verify-email", ctx);
+
+        Assert.True(result.AllSucceeded);
+        Assert.NotNull(captured);
+        Assert.Equal("user@example.com", captured.To);
+    }
+
+    [Fact]
+    public async Task TriggerAsync_SmsTo_AutoPopulatedFromUserPhone_WhenNotSet()
+    {
+        NotificationPayload? captured = null;
+        var smsMock = new Mock<INotificationChannel>();
+        smsMock.Setup(m => m.ChannelName).Returns("sms");
+        smsMock.Setup(m => m.SendAsync(It.IsAny<NotificationPayload>(), It.IsAny<CancellationToken>()))
+            .Callback<NotificationPayload, CancellationToken>((p, _) => captured = p)
+            .ReturnsAsync(new NotifyResult { Success = true, Channel = "sms", SentAt = DateTime.UtcNow });
+
+        var (svc, _) = BuildService(
+            o => o.DefineEvent("auth.otp", e => e.UseChannels("sms")),
+            n => { },
+            smsMock: smsMock);
+
+        var ctx = new NotifyContext
+        {
+            User     = new NotifyUser { UserId = "25", Phone = "+19876543210" },
+            Channels = new() { ["sms"] = new() { Body = "Your OTP is 123456" } }
+        };
+
+        await svc.TriggerAsync("auth.otp", ctx);
+
+        Assert.NotNull(captured);
+        Assert.Equal("+19876543210", captured.To);
+    }
+
+    [Fact]
+    public async Task TriggerAsync_ExplicitTo_NotOverwrittenByUserEmail()
+    {
+        NotificationPayload? captured = null;
+        var emailMock = new Mock<INotificationChannel>();
+        emailMock.Setup(m => m.ChannelName).Returns("email");
+        emailMock.Setup(m => m.SendAsync(It.IsAny<NotificationPayload>(), It.IsAny<CancellationToken>()))
+            .Callback<NotificationPayload, CancellationToken>((p, _) => captured = p)
+            .ReturnsAsync(new NotifyResult { Success = true, Channel = "email", SentAt = DateTime.UtcNow });
+
+        var (svc, _) = BuildService(
+            o => o.DefineEvent("order.placed", e => e.UseChannels("email")),
+            n => { },
+            emailMock: emailMock);
+
+        var ctx = new NotifyContext
+        {
+            User     = new NotifyUser { UserId = "25", Email = "user@example.com" },
+            Channels = new() { ["email"] = new() { To = "override@example.com", Subject = "s", Body = "b" } }
+        };
+
+        await svc.TriggerAsync("order.placed", ctx);
+
+        Assert.NotNull(captured);
+        Assert.Equal("override@example.com", captured.To); // explicit To is preserved
     }
 
     // ── Direct channel access ──────────────────────────────────────────────────

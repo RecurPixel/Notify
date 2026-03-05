@@ -104,6 +104,7 @@ internal sealed class MetaCloudHttpClient : IMetaCloudClient
 /// WhatsApp channel adapter using the Meta WhatsApp Cloud API.
 /// No native bulk API — bulk is handled automatically by the base class loop.
 /// </summary>
+[ChannelAdapter("whatsapp", "metacloud")]
 public sealed class MetaCloudWhatsAppChannel : NotificationChannelBase
 {
     private readonly MetaCloudOptions _options;

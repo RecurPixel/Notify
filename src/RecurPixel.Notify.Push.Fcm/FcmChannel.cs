@@ -11,6 +11,7 @@ namespace RecurPixel.Notify.Push.Fcm;
 /// Single send uses the FCM messages API.
 /// Bulk send uses FCM multicast — up to 500 tokens per call.
 /// </summary>
+[ChannelAdapter("push", "fcm")]
 public sealed class FcmChannel : NotificationChannelBase
 {
     private readonly FcmOptions _options;

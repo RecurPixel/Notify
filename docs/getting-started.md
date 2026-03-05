@@ -26,9 +26,8 @@ Choose the packages you need. You do not need to install everything.
 # Option A: Full SDK — pulls all channels and providers
 dotnet add package RecurPixel.Notify.Sdk
 
-# Option B: Core + Orchestrator + only the providers you use
-dotnet add package RecurPixel.Notify.Core
-dotnet add package RecurPixel.Notify.Orchestrator
+# Option B: RecurPixel.Notify + only the providers you use
+dotnet add package RecurPixel.Notify
 dotnet add package RecurPixel.Notify.Email.SendGrid
 dotnet add package RecurPixel.Notify.Sms.Twilio
 
@@ -78,15 +77,21 @@ You only need to configure channels you actually use. Unconfigured channels are 
 
 ## Step 3 — Register in DI
 
-In `Program.cs`:
+In `Program.cs`, call `AddRecurPixelNotify` with two lambdas: the first binds your configuration, the second defines events and hooks.
 
 ```csharp
 builder.Services.AddRecurPixelNotify(
-    builder.Configuration.GetSection("Notify")
-);
+    notifyOptions =>
+    {
+        builder.Configuration.GetSection("Notify").Bind(notifyOptions);
+    },
+    orchestratorOptions =>
+    {
+        // Define events and delivery hooks here — see Steps 5 and 6
+    });
 ```
 
-That's it. The library reads your configuration, validates it at startup, and registers everything in DI. If your config is missing a required field (like `ApiKey`), it throws at startup — never silently at send time.
+The library reads your configuration, validates it at startup, and registers only the providers whose credentials are present. If a required credential is missing, startup throws — never silently at send time.
 
 ---
 
@@ -97,11 +102,11 @@ public class OrderService(INotifyService notify)
 {
     public async Task ConfirmOrderAsync(Order order)
     {
-        await notify.TriggerAsync("order.confirmed", new NotifyContext
+        var result = await notify.TriggerAsync("order.confirmed", new NotifyContext
         {
             User = new NotifyUser
             {
-                UserId        = order.UserId,
+                UserId        = order.UserId.ToString(),
                 Email         = order.CustomerEmail,
                 Phone         = order.CustomerPhone,
                 PhoneVerified = order.Customer.PhoneVerified,
@@ -112,6 +117,10 @@ public class OrderService(INotifyService notify)
                 ["sms"]   = new() { Body = $"Your order #{order.Id} is confirmed." }
             }
         });
+
+        if (!result.AllSucceeded)
+            foreach (var f in result.Failures)
+                logger.LogWarning("Channel {Ch} failed: {Err}", f.Channel, f.Error);
     }
 }
 ```
@@ -120,24 +129,27 @@ public class OrderService(INotifyService notify)
 
 ## Step 5 — (Optional) Define events at startup
 
-Events let you configure which channels fire, conditions, retry, and fallback chains — all in one place. Define them in `Program.cs` before building the app:
+Events let you configure which channels fire, conditions, retry, and fallback chains — all in one place. Add them inside the second lambda in `Program.cs`:
 
 ```csharp
-builder.Services.AddRecurPixelNotify(options =>
-{
-    options.Configure(builder.Configuration.GetSection("Notify"));
+builder.Services.AddRecurPixelNotify(
+    notifyOptions =>
+    {
+        builder.Configuration.GetSection("Notify").Bind(notifyOptions);
+    },
+    orchestratorOptions =>
+    {
+        orchestratorOptions.DefineEvent("order.confirmed", e => e
+            .UseChannels("email", "sms")
+            .WithCondition("sms", ctx => ctx.User.PhoneVerified)
+            .WithRetry(maxAttempts: 3, delayMs: 500)
+        );
 
-    options.Orchestrator.DefineEvent("order.confirmed", e => e
-        .UseChannels("email", "sms")
-        .WithCondition("sms", ctx => ctx.User.PhoneVerified)
-        .WithRetry(maxAttempts: 3, delayMs: 500)
-    );
-
-    options.Orchestrator.DefineEvent("auth.otp", e => e
-        .UseChannels("sms")
-        .WithRetry(maxAttempts: 3, delayMs: 300)
-    );
-});
+        orchestratorOptions.DefineEvent("auth.otp", e => e
+            .UseChannels("sms")
+            .WithRetry(maxAttempts: 3, delayMs: 300)
+        );
+    });
 ```
 
 If you call `TriggerAsync` with an event name that has no definition, all channels in `NotifyContext.Channels` are sent with global retry/fallback settings applied.
@@ -146,10 +158,10 @@ If you call `TriggerAsync` with an event name that has no definition, all channe
 
 ## Step 6 — (Optional) Hook into delivery results
 
-Plug in your own delivery log writer:
+Plug in your own delivery log writer inside the same second lambda:
 
 ```csharp
-options.OnDelivery(async result =>
+orchestratorOptions.OnDelivery<IApplicationDbContext>(async (result, db) =>
 {
     await db.NotificationLogs.AddAsync(new NotificationLog
     {
@@ -165,7 +177,41 @@ options.OnDelivery(async result =>
 });
 ```
 
-`OnDelivery` is called for every individual send result — including each result within a bulk operation. You own the log table. We just call the hook.
+`OnDelivery` is called for every individual send result — including each result within a bulk operation. The typed overload `OnDelivery<TService>` resolves `TService` from a fresh DI scope per call, so scoped services like `DbContext` are safe to use directly. You own the log table. We just call the hook.
+
+---
+
+## Step 7 — (Optional) In-App channel
+
+The InApp channel works differently from provider-backed channels: it has no config section and requires you to wire a handler that IS the delivery (e.g. writing to your database or pushing via SignalR). Register it as a separate call **before** `AddRecurPixelNotify`:
+
+```csharp
+builder.Services.AddInAppChannel(opts =>
+    opts.UseHandler<IApplicationDbContext>(async (notification, db) =>
+    {
+        await db.Notifications.AddAsync(new Notification
+        {
+            UserId  = notification.UserId,
+            Title   = notification.Subject ?? string.Empty,
+            Message = notification.Body,
+            IsRead  = false
+        });
+        await db.SaveChangesAsync();
+        return new NotifyResult { Success = true };
+    }));
+
+builder.Services.AddRecurPixelNotify(
+    notifyOptions => builder.Configuration.GetSection("Notify").Bind(notifyOptions),
+    orchestratorOptions =>
+    {
+        orchestratorOptions.DefineEvent("order.confirmed", e => e
+            .UseChannels("email", "sms", "inapp")
+            .WithCondition("sms", ctx => ctx.User.PhoneVerified));
+    });
+```
+
+> `UseHandler` provides the delivery *implementation* — it IS the send operation.
+> `OnDelivery` is an audit *callback* called after every channel send. They are distinct.
 
 ---
 
@@ -173,5 +219,6 @@ options.OnDelivery(async result =>
 
 - [Quick Start](quick-start) — minimal code examples for each channel
 - [Usage Tiers](usage-tiers) — understand the three ways to use the library
+- [Examples](examples) — complete Tier 1, 2, and 3 setups with real code
 - [Adapter Reference](adapters) — all providers, their config fields, and native bulk support
 - [Features](features) — retry, fallback chains, conditions, bulk send, delivery hooks

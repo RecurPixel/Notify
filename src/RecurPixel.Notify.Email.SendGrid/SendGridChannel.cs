@@ -18,6 +18,7 @@ namespace RecurPixel.Notify.Email.SendGrid;
 /// Email channel adapter for Twilio SendGrid.
 /// Supports both single send and native batch send (up to 1000 recipients per call).
 /// </summary>
+[ChannelAdapter("email", "sendgrid")]
 public sealed class SendGridChannel : NotificationChannelBase
 {
     private readonly SendGridOptions _options;

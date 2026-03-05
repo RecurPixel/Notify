@@ -1,5 +1,6 @@
-using System;
+﻿using System;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Options;
 using RecurPixel.Notify.Core.Channels;
 using RecurPixel.Notify.Core.Options;
@@ -27,7 +28,7 @@ public static class ServiceCollectionExtensions
 
         services.AddHttpClient<TelegramChannel>();
 
-        services.AddKeyedSingleton<INotificationChannel, TelegramChannel>("telegram:telegram");
+        services.TryAddKeyedSingleton<INotificationChannel, TelegramChannel>("telegram:default");
 
         return services;
     }

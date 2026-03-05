@@ -24,6 +24,7 @@ internal sealed class NotifyService : INotifyService
     private readonly ChannelDispatcher _dispatcher;
     private readonly OrchestratorOptions _orchOptions;
     private readonly NotifyOptions _notifyOptions;
+    private readonly IServiceProvider _serviceProvider;
     private readonly ILogger<NotifyService> _logger;
 
     public NotifyService(
@@ -31,13 +32,15 @@ internal sealed class NotifyService : INotifyService
         ChannelDispatcher dispatcher,
         OrchestratorOptions orchOptions,
         IOptions<NotifyOptions> notifyOptions,
+        IServiceProvider serviceProvider,
         ILogger<NotifyService> logger)
     {
-        _registry      = registry;
-        _dispatcher    = dispatcher;
-        _orchOptions   = orchOptions;
-        _notifyOptions = notifyOptions.Value;
-        _logger        = logger;
+        _registry        = registry;
+        _dispatcher      = dispatcher;
+        _orchOptions     = orchOptions;
+        _notifyOptions   = notifyOptions.Value;
+        _serviceProvider = serviceProvider;
+        _logger          = logger;
     }
 
     // ── Direct channel properties ─────────────────────────────────────────────
@@ -61,12 +64,20 @@ internal sealed class NotifyService : INotifyService
     /// <inheritdoc/>
     public INotificationChannel Facebook => new RoutingChannel("facebook", _dispatcher);
     /// <inheritdoc/>
-    public INotificationChannel InApp    => new RoutingChannel("inapp",    _dispatcher);
+    public INotificationChannel InApp       => new RoutingChannel("inapp",       _dispatcher);
+    /// <inheritdoc/>
+    public INotificationChannel Line        => new RoutingChannel("line",        _dispatcher);
+    /// <inheritdoc/>
+    public INotificationChannel Viber       => new RoutingChannel("viber",       _dispatcher);
+    /// <inheritdoc/>
+    public INotificationChannel Mattermost  => new RoutingChannel("mattermost",  _dispatcher);
+    /// <inheritdoc/>
+    public INotificationChannel RocketChat  => new RoutingChannel("rocketchat",  _dispatcher);
 
     // ── Orchestrated single send ──────────────────────────────────────────────
 
     /// <inheritdoc/>
-    public async Task<NotifyResult> TriggerAsync(
+    public async Task<TriggerResult> TriggerAsync(
         string eventName,
         NotifyContext context,
         CancellationToken ct = default)
@@ -79,7 +90,6 @@ internal sealed class NotifyService : INotifyService
             eventName, string.Join(",", eventDef.Channels));
 
         // Per-event retry takes precedence over global retry.
-        // If neither is set, ChannelDispatcher defaults to a single attempt.
         var retryOptions = eventDef.Retry ?? _notifyOptions.Retry;
 
         // Evaluate conditions — skip channels where condition returns false
@@ -91,32 +101,54 @@ internal sealed class NotifyService : INotifyService
         _logger.LogDebug("Event={Event} active channels after conditions: {Active}",
             eventName, string.Join(",", activeChannels));
 
-        // Only dispatch channels that have a payload defined in context
-        var channelsToDispatch = activeChannels
-            .Where(ch => context.Channels is not null && context.Channels.ContainsKey(ch))
-            .ToList();
+        var channelResults = new List<NotifyResult>();
+        var dispatchedResults = new List<NotifyResult>(); // only actual dispatch attempts — drives the hook
 
-        if (channelsToDispatch.Count == 0)
+        // Dispatch each active channel, logging a warning when no payload is provided
+        foreach (var channelName in activeChannels)
         {
-            return new NotifyResult
+            if (context.Channels is null || !context.Channels.ContainsKey(channelName))
             {
-                Success = true,
-                Channel = eventName,
-                SentAt  = DateTime.UtcNow
+                _logger.LogWarning(
+                    "Event '{EventName}' targets channel '{Channel}' but no payload was provided " +
+                    "in NotifyContext.Channels. No notification sent. " +
+                    "Ensure UseChannels() uses logical names (e.g. \"email\", not \"email:sendgrid\").",
+                    eventName, channelName);
+
+                channelResults.Add(new NotifyResult
+                {
+                    Success = false,
+                    Channel = channelName,
+                    Error   = $"No payload for channel '{channelName}' in NotifyContext.Channels.",
+                    SentAt  = DateTime.UtcNow
+                });
+                continue;
+            }
+
+            var dispatchResult = await _dispatcher.DispatchAsync(channelName, ResolvePayload(context.Channels[channelName], channelName, context.User), retryOptions, ct);
+            channelResults.Add(dispatchResult);
+            dispatchedResults.Add(dispatchResult);
+        }
+
+        if (channelResults.Count == 0)
+        {
+            return new TriggerResult
+            {
+                EventName      = eventName,
+                UserId         = context.User.UserId,
+                ChannelResults = []
             };
         }
 
-        var dispatchTasks = channelsToDispatch
-            .Select(ch => _dispatcher.DispatchAsync(ch, context.Channels![ch], retryOptions, ct))
-            .ToList();
+        // Fire delivery hook only for actual dispatch attempts (not missing-payload skips)
+        await InvokeDeliveryHookAsync(dispatchedResults);
 
-        var results = await Task.WhenAll(dispatchTasks);
+        // Cross-channel fallback: only when ALL primary dispatches failed and a chain is defined
+        var dispatched = activeChannels
+            .Where(ch => context.Channels?.ContainsKey(ch) == true)
+            .ToHashSet(StringComparer.OrdinalIgnoreCase);
 
-        // Fire delivery hook for each primary channel result
-        await InvokeDeliveryHookAsync(results);
-
-        // Cross-channel fallback: only when ALL primary channels failed and a chain is defined
-        if (eventDef.FallbackChain is { Count: > 0 } && results.All(r => !r.Success))
+        if (eventDef.FallbackChain is { Count: > 0 } && channelResults.All(r => !r.Success))
         {
             _logger.LogDebug(
                 "All primary channels failed for event={Event}. Attempting cross-channel fallback chain.",
@@ -124,22 +156,27 @@ internal sealed class NotifyService : INotifyService
 
             var fallbackResult = await TryFallbackChainAsync(
                 eventDef.FallbackChain,
-                new HashSet<string>(channelsToDispatch, StringComparer.OrdinalIgnoreCase),
+                dispatched,
                 context,
                 retryOptions,
                 ct);
 
             if (fallbackResult is not null)
-                return fallbackResult;
+                channelResults.Add(fallbackResult);
         }
 
-        return BuildAggregateResult(eventName, results);
+        return new TriggerResult
+        {
+            EventName      = eventName,
+            UserId         = context.User.UserId,
+            ChannelResults = channelResults
+        };
     }
 
     // ── Orchestrated bulk send ────────────────────────────────────────────────
 
     /// <inheritdoc/>
-    public async Task<BulkNotifyResult> BulkTriggerAsync(
+    public async Task<BulkTriggerResult> BulkTriggerAsync(
         string eventName,
         IReadOnlyList<NotifyContext> contexts,
         CancellationToken ct = default)
@@ -166,22 +203,15 @@ internal sealed class NotifyService : INotifyService
 
         var results = await Task.WhenAll(tasks);
 
-        return new BulkNotifyResult
-        {
-            Results         = results,
-            Channel         = eventName,
-            UsedNativeBatch = false
-        };
+        return new BulkTriggerResult { Results = results };
     }
 
     // ── Cross-channel fallback ────────────────────────────────────────────────
 
     /// <summary>
-    /// Tries channels in <paramref name="chain"/> in order, skipping any channel already
-    /// dispatched in the primary pass. Stops and returns the first successful result.
-    /// Sets <see cref="NotifyResult.UsedFallback"/> to <c>true</c> on the returned result.
-    /// Fires the delivery hook for every attempt (success or failure).
-    /// Returns <c>null</c> if every channel in the chain also fails or has no payload.
+    /// Tries channels in <paramref name="chain"/> in order, skipping any already dispatched.
+    /// Stops and returns the first successful result with <see cref="NotifyResult.UsedFallback"/> set.
+    /// Fires the delivery hook for every attempt. Returns <c>null</c> if all fail.
     /// </summary>
     private async Task<NotifyResult?> TryFallbackChainAsync(
         IReadOnlyList<string> chain,
@@ -192,28 +222,23 @@ internal sealed class NotifyService : INotifyService
     {
         foreach (var channel in chain)
         {
-            // Skip channels already attempted in the primary pass
             if (alreadyDispatched.Contains(channel))
             {
-                _logger.LogDebug(
-                    "Fallback chain: skipping channel={Channel} — already attempted.", channel);
+                _logger.LogDebug("Fallback chain: skipping channel={Channel} — already attempted.", channel);
                 continue;
             }
 
-            // Skip channels with no payload in context
             if (context.Channels is null || !context.Channels.TryGetValue(channel, out var payload))
             {
-                _logger.LogDebug(
-                    "Fallback chain: skipping channel={Channel} — no payload in context.", channel);
+                _logger.LogDebug("Fallback chain: skipping channel={Channel} — no payload in context.", channel);
                 continue;
             }
 
             _logger.LogDebug("Fallback chain: trying channel={Channel}.", channel);
 
-            var result = await _dispatcher.DispatchAsync(channel, payload, retryOptions, ct);
+            var result = await _dispatcher.DispatchAsync(channel, ResolvePayload(payload, channel, context.User), retryOptions, ct);
             result.UsedFallback = true;
 
-            // Fire hook for this fallback attempt regardless of outcome
             await InvokeHookSafe(result);
 
             if (result.Success)
@@ -222,8 +247,7 @@ internal sealed class NotifyService : INotifyService
                 return result;
             }
 
-            _logger.LogDebug(
-                "Fallback chain: channel={Channel} failed — trying next.", channel);
+            _logger.LogDebug("Fallback chain: channel={Channel} failed — trying next.", channel);
         }
 
         return null;
@@ -231,9 +255,45 @@ internal sealed class NotifyService : INotifyService
 
     // ── Helpers ───────────────────────────────────────────────────────────────
 
+    /// <summary>
+    /// Returns a payload with <see cref="NotificationPayload.To"/> populated from
+    /// <paramref name="user"/> when the caller left it empty.
+    /// Creates a copy — never mutates the caller's original object.
+    /// Mapping: email→User.Email, sms/whatsapp→User.Phone, push→User.DeviceToken, inapp→User.UserId.
+    /// </summary>
+    private static NotificationPayload ResolvePayload(
+        NotificationPayload payload,
+        string channel,
+        NotifyUser user)
+    {
+        if (!string.IsNullOrEmpty(payload.To))
+            return payload;
+
+        var autoTo = channel switch
+        {
+            "email"    => user.Email,
+            "sms"      => user.Phone,
+            "push"     => user.DeviceToken,
+            "whatsapp" => user.Phone,
+            "inapp"    => string.IsNullOrEmpty(user.UserId) ? null : user.UserId,
+            _          => null
+        };
+
+        if (string.IsNullOrEmpty(autoTo))
+            return payload;
+
+        return new NotificationPayload
+        {
+            To       = autoTo,
+            Subject  = payload.Subject,
+            Body     = payload.Body,
+            Metadata = payload.Metadata
+        };
+    }
+
     private async Task InvokeDeliveryHookAsync(IEnumerable<NotifyResult> results)
     {
-        if (_orchOptions.DeliveryHook is null) return;
+        if (!_orchOptions.HasDeliveryHandlers) return;
 
         var hookTasks = results.Select(r => InvokeHookSafe(r));
         await Task.WhenAll(hookTasks);
@@ -241,30 +301,15 @@ internal sealed class NotifyService : INotifyService
 
     private async Task InvokeHookSafe(NotifyResult result)
     {
-        if (_orchOptions.DeliveryHook is null) return;
+        if (!_orchOptions.HasDeliveryHandlers) return;
         try
         {
-            await _orchOptions.DeliveryHook(result);
+            await _orchOptions.InvokeDeliveryHandlers(result, _serviceProvider);
         }
         catch (Exception ex)
         {
             // Hook failures must never crash the dispatch path
             _logger.LogDebug(ex, "OnDelivery hook threw for channel={Channel}", result.Channel);
         }
-    }
-
-    private static NotifyResult BuildAggregateResult(string eventName, NotifyResult[] results)
-    {
-        var allSucceeded = results.All(r => r.Success);
-        var channels     = string.Join(",", results.Select(r => r.Channel));
-        var errors       = string.Join("; ", results.Where(r => !r.Success).Select(r => r.Error));
-
-        return new NotifyResult
-        {
-            Success = allSucceeded,
-            Channel = channels,
-            Error   = allSucceeded ? null : errors,
-            SentAt  = DateTime.UtcNow
-        };
     }
 }

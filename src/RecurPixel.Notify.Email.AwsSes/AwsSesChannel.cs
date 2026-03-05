@@ -12,6 +12,7 @@ namespace RecurPixel.Notify.Email.AwsSes;
 /// Notification channel adapter for AWS Simple Email Service v2.
 /// Supports native bulk sending via SES v2 bulk email API.
 /// </summary>
+[ChannelAdapter("email", "awsses")]
 public sealed class AwsSesChannel : NotificationChannelBase
 {
     private readonly AwsSesOptions _options;

@@ -1,5 +1,6 @@
-using System;
+﻿using System;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using RecurPixel.Notify.Core.Channels;
 using RecurPixel.Notify.Core.Options.Providers;
 using Microsoft.Extensions.Options;
@@ -40,7 +41,7 @@ public static class ServiceCollectionExtensions
         });
 
         services.AddSingleton<IFcmMessagingClient, FirebaseMessagingClient>();
-        services.AddKeyedSingleton<INotificationChannel, FcmChannel>("push:fcm");
+        services.TryAddKeyedSingleton<INotificationChannel, FcmChannel>("push:fcm");
 
         return services;
     }

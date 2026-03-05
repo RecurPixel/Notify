@@ -18,6 +18,7 @@ namespace RecurPixel.Notify.Facebook;
 /// Notification channel adapter for the Meta Messenger Send API.
 /// Sends messages to a recipient via their page-scoped user ID (PSID).
 /// </summary>
+[ChannelAdapter("facebook", "default")]
 public sealed class FacebookChannel : NotificationChannelBase
 {
     private readonly FacebookOptions _options;

@@ -1,5 +1,6 @@
-using System;
+﻿using System;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Options;
 using RecurPixel.Notify.Core.Channels;
 using RecurPixel.Notify.Core.Options;
@@ -27,7 +28,7 @@ public static class ServiceCollectionExtensions
 
         services.AddHttpClient<FacebookChannel>();
 
-        services.AddKeyedSingleton<INotificationChannel, FacebookChannel>("facebook:facebook");
+        services.TryAddKeyedSingleton<INotificationChannel, FacebookChannel>("facebook:default");
 
         return services;
     }

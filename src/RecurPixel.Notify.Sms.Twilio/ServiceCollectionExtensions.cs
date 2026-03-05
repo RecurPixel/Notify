@@ -1,4 +1,5 @@
-using Microsoft.Extensions.DependencyInjection;
+﻿using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using RecurPixel.Notify.Core.Channels;
 using RecurPixel.Notify.Core.Options.Providers;
 
@@ -24,7 +25,7 @@ public static class ServiceCollectionExtensions
             o.FromNumber = options.FromNumber;
         });
 
-        services.AddKeyedSingleton<INotificationChannel, TwilioSmsChannel>("sms:twilio");
+        services.TryAddKeyedSingleton<INotificationChannel, TwilioSmsChannel>("sms:twilio");
 
         return services;
     }

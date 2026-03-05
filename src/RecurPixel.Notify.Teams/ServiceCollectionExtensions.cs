@@ -1,4 +1,5 @@
-using Microsoft.Extensions.DependencyInjection;
+﻿using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using RecurPixel.Notify.Core.Channels;
 using RecurPixel.Notify.Core.Options.Providers;
 
@@ -10,8 +11,9 @@ namespace RecurPixel.Notify.Teams;
 public static class ServiceCollectionExtensions
 {
     /// <summary>
-    /// Registers <see cref="TeamsChannel"/> in the DI container keyed as <c>teams:teams</c>.
-    /// Called automatically by <c>AddRecurPixelNotify()</c> when Teams options are present.
+    /// Registers <see cref="TeamsChannel"/> in the DI container keyed as <c>teams:default</c>.
+    /// For direct-injection usage without <c>AddRecurPixelNotify()</c>.
+    /// When using <c>AddRecurPixelNotify()</c>, this channel is registered automatically via assembly scanning.
     /// </summary>
     /// <param name="services">The service collection.</param>
     /// <param name="options">The resolved Teams options.</param>
@@ -27,7 +29,7 @@ public static class ServiceCollectionExtensions
 
         services.AddHttpClient();
 
-        services.AddKeyedSingleton<INotificationChannel, TeamsChannel>("teams:teams");
+        services.TryAddKeyedSingleton<INotificationChannel, TeamsChannel>("teams:default");
 
         return services;
     }

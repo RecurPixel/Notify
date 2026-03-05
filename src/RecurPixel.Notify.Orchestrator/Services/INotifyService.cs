@@ -20,10 +20,10 @@ public interface INotifyService
     /// <param name="context">User and per-channel payload data.</param>
     /// <param name="ct">Cancellation token.</param>
     /// <returns>
-    /// Aggregate result — Success is true only if all active channels succeeded.
-    /// Use the OnDelivery hook for per-channel detail.
+    /// Per-channel breakdown — inspect <see cref="TriggerResult.ChannelResults"/> for individual
+    /// channel outcomes. <see cref="TriggerResult.AllSucceeded"/> is true only when every channel succeeded.
     /// </returns>
-    Task<NotifyResult> TriggerAsync(string eventName, NotifyContext context, CancellationToken ct = default);
+    Task<TriggerResult> TriggerAsync(string eventName, NotifyContext context, CancellationToken ct = default);
 
     // ── Orchestrated bulk send ───────────────────────────────────────────────
 
@@ -36,7 +36,10 @@ public interface INotifyService
     /// <param name="eventName">Name of the event as registered via DefineEvent.</param>
     /// <param name="contexts">One context per recipient user.</param>
     /// <param name="ct">Cancellation token.</param>
-    Task<BulkNotifyResult> BulkTriggerAsync(
+    /// <returns>
+    /// One <see cref="TriggerResult"/> per input context, in input order.
+    /// </returns>
+    Task<BulkTriggerResult> BulkTriggerAsync(
         string eventName,
         IReadOnlyList<NotifyContext> contexts,
         CancellationToken ct = default);
@@ -72,4 +75,16 @@ public interface INotifyService
 
     /// <summary>In-app inbox channel — sends directly, bypassing the event system.</summary>
     INotificationChannel InApp { get; }
+
+    /// <summary>LINE channel — sends directly, bypassing the event system.</summary>
+    INotificationChannel Line { get; }
+
+    /// <summary>Viber channel — sends directly, bypassing the event system.</summary>
+    INotificationChannel Viber { get; }
+
+    /// <summary>Mattermost channel — sends directly, bypassing the event system.</summary>
+    INotificationChannel Mattermost { get; }
+
+    /// <summary>Rocket.Chat channel — sends directly, bypassing the event system.</summary>
+    INotificationChannel RocketChat { get; }
 }

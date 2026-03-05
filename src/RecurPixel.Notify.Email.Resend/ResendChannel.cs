@@ -19,6 +19,7 @@ namespace RecurPixel.Notify.Email.Resend;
 /// Notification channel adapter for Resend email delivery.
 /// Resend has no native batch API — bulk is handled by the base class loop.
 /// </summary>
+[ChannelAdapter("email", "resend")]
 public sealed class ResendChannel : NotificationChannelBase
 {
     private readonly ResendOptions _options;

@@ -1,33 +1,40 @@
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging.Abstractions;
+using Microsoft.Extensions.Options;
+using RecurPixel.Notify.Core.Models;
 using RecurPixel.Notify.InApp;
 
 namespace RecurPixel.Notify.Tests;
 
 public sealed class InAppChannelTests
 {
+    private static readonly IServiceProvider EmptySp =
+        new ServiceCollection().BuildServiceProvider();
+
     private static NotificationPayload DefaultPayload => new()
     {
-        To = "user-id-abc123",
+        To      = "user-id-abc123",
         Subject = "You have a new message",
-        Body = "Click here to view it"
+        Body    = "Click here to view it"
     };
+
+    private static InAppChannel BuildChannel(Action<InAppOptions>? configure = null)
+    {
+        var opts = new InAppOptions();
+        configure?.Invoke(opts);
+        return new InAppChannel(Options.Create(opts), EmptySp, NullLogger<InAppChannel>.Instance);
+    }
 
     // ── success ──────────────────────────────────────────────────────────────
 
     [Fact]
     public async Task SendAsync_HandlerReturnsSuccess_PropagatesResult()
     {
-        var options = new InAppOptions
+        var channel = BuildChannel(o => o.UseHandler(_ => Task.FromResult(new NotifyResult
         {
-            Handler = (payload, _) => Task.FromResult(new NotifyResult
-            {
-                Success = true,
-                ProviderId = "db-row-id-999"
-            })
-        };
-
-        var channel = new InAppChannel(
-            Options.Create(options),
-            NullLogger<InAppChannel>.Instance);
+            Success    = true,
+            ProviderId = "db-row-id-999"
+        })));
 
         var result = await channel.SendAsync(DefaultPayload);
 
@@ -44,18 +51,11 @@ public sealed class InAppChannelTests
     {
         var sentAt = new DateTime(2026, 1, 15, 10, 0, 0, DateTimeKind.Utc);
 
-        var options = new InAppOptions
+        var channel = BuildChannel(o => o.UseHandler(_ => Task.FromResult(new NotifyResult
         {
-            Handler = (_, _) => Task.FromResult(new NotifyResult
-            {
-                Success = true,
-                SentAt = sentAt
-            })
-        };
-
-        var channel = new InAppChannel(
-            Options.Create(options),
-            NullLogger<InAppChannel>.Instance);
+            Success = true,
+            SentAt  = sentAt
+        })));
 
         var result = await channel.SendAsync(DefaultPayload);
 
@@ -67,18 +67,11 @@ public sealed class InAppChannelTests
     {
         var before = DateTime.UtcNow;
 
-        var options = new InAppOptions
+        var channel = BuildChannel(o => o.UseHandler(_ => Task.FromResult(new NotifyResult
         {
-            Handler = (_, _) => Task.FromResult(new NotifyResult
-            {
-                Success = true,
-                SentAt = default   // channel should fill this in
-            })
-        };
-
-        var channel = new InAppChannel(
-            Options.Create(options),
-            NullLogger<InAppChannel>.Instance);
+            Success = true,
+            SentAt  = default   // channel should fill this in
+        })));
 
         var result = await channel.SendAsync(DefaultPayload);
 
@@ -88,19 +81,12 @@ public sealed class InAppChannelTests
     [Fact]
     public async Task SendAsync_AlwaysOverridesChannelAndProvider()
     {
-        var options = new InAppOptions
+        var channel = BuildChannel(o => o.UseHandler(_ => Task.FromResult(new NotifyResult
         {
-            Handler = (_, _) => Task.FromResult(new NotifyResult
-            {
-                Success = true,
-                Channel = "something-else",   // should be overwritten
-                Provider = "something-else"    // should be overwritten
-            })
-        };
-
-        var channel = new InAppChannel(
-            Options.Create(options),
-            NullLogger<InAppChannel>.Instance);
+            Success  = true,
+            Channel  = "something-else",   // should be overwritten
+            Provider = "something-else"    // should be overwritten
+        })));
 
         var result = await channel.SendAsync(DefaultPayload);
 
@@ -111,18 +97,11 @@ public sealed class InAppChannelTests
     [Fact]
     public async Task SendAsync_AlwaysOverridesRecipient()
     {
-        var options = new InAppOptions
+        var channel = BuildChannel(o => o.UseHandler(_ => Task.FromResult(new NotifyResult
         {
-            Handler = (_, _) => Task.FromResult(new NotifyResult
-            {
-                Success = true,
-                Recipient = "wrong-recipient"   // should be overwritten
-            })
-        };
-
-        var channel = new InAppChannel(
-            Options.Create(options),
-            NullLogger<InAppChannel>.Instance);
+            Success   = true,
+            Recipient = "wrong-recipient"   // should be overwritten
+        })));
 
         var result = await channel.SendAsync(DefaultPayload);
 
@@ -134,18 +113,11 @@ public sealed class InAppChannelTests
     [Fact]
     public async Task SendAsync_HandlerReturnsFailure_PropagatesFailure()
     {
-        var options = new InAppOptions
+        var channel = BuildChannel(o => o.UseHandler(_ => Task.FromResult(new NotifyResult
         {
-            Handler = (_, _) => Task.FromResult(new NotifyResult
-            {
-                Success = false,
-                Error = "User inbox is full"
-            })
-        };
-
-        var channel = new InAppChannel(
-            Options.Create(options),
-            NullLogger<InAppChannel>.Instance);
+            Success = false,
+            Error   = "User inbox is full"
+        })));
 
         var result = await channel.SendAsync(DefaultPayload);
 
@@ -160,14 +132,8 @@ public sealed class InAppChannelTests
     [Fact]
     public async Task SendAsync_HandlerThrows_ReturnsFalseWithExceptionMessage()
     {
-        var options = new InAppOptions
-        {
-            Handler = (_, _) => throw new InvalidOperationException("DB connection lost")
-        };
-
-        var channel = new InAppChannel(
-            Options.Create(options),
-            NullLogger<InAppChannel>.Instance);
+        var channel = BuildChannel(o => o.UseHandler(
+            _ => throw new InvalidOperationException("DB connection lost")));
 
         var result = await channel.SendAsync(DefaultPayload);
 
@@ -179,14 +145,8 @@ public sealed class InAppChannelTests
     [Fact]
     public async Task SendAsync_HandlerThrowsTaskCanceled_ReturnsFalse()
     {
-        var options = new InAppOptions
-        {
-            Handler = (_, _) => throw new TaskCanceledException("Request was cancelled")
-        };
-
-        var channel = new InAppChannel(
-            Options.Create(options),
-            NullLogger<InAppChannel>.Instance);
+        var channel = BuildChannel(o => o.UseHandler(
+            _ => throw new TaskCanceledException("Request was cancelled")));
 
         var result = await channel.SendAsync(DefaultPayload, CancellationToken.None);
 
@@ -199,11 +159,7 @@ public sealed class InAppChannelTests
     [Fact]
     public async Task SendAsync_NoHandlerConfigured_ReturnsFalseWithClearMessage()
     {
-        var options = new InAppOptions { Handler = null };
-
-        var channel = new InAppChannel(
-            Options.Create(options),
-            NullLogger<InAppChannel>.Instance);
+        var channel = BuildChannel(); // no OnDeliver
 
         var result = await channel.SendAsync(DefaultPayload);
 
@@ -218,60 +174,25 @@ public sealed class InAppChannelTests
     [Fact]
     public void ChannelName_IsInApp()
     {
-        var channel = new InAppChannel(
-            Options.Create(new InAppOptions()),
-            NullLogger<InAppChannel>.Instance);
-
-        Assert.Equal("inapp", channel.ChannelName);
+        Assert.Equal("inapp", BuildChannel().ChannelName);
     }
 
     [Fact]
-    public async Task SendAsync_PassesPayloadToHandler()
+    public async Task SendAsync_MapsPayloadToNotification()
     {
-        NotificationPayload? captured = null;
+        InAppNotification? captured = null;
 
-        var options = new InAppOptions
+        var channel = BuildChannel(o => o.UseHandler(n =>
         {
-            Handler = (payload, _) =>
-            {
-                captured = payload;
-                return Task.FromResult(new NotifyResult { Success = true });
-            }
-        };
-
-        var channel = new InAppChannel(
-            Options.Create(options),
-            NullLogger<InAppChannel>.Instance);
+            captured = n;
+            return Task.FromResult(new NotifyResult { Success = true });
+        }));
 
         await channel.SendAsync(DefaultPayload);
 
         Assert.NotNull(captured);
-        Assert.Equal(DefaultPayload.To, captured!.To);
+        Assert.Equal(DefaultPayload.To, captured!.UserId);
         Assert.Equal(DefaultPayload.Subject, captured.Subject);
         Assert.Equal(DefaultPayload.Body, captured.Body);
-    }
-
-    [Fact]
-    public async Task SendAsync_PassesCancellationTokenToHandler()
-    {
-        using var cts = new CancellationTokenSource();
-        CancellationToken? captured = null;
-
-        var options = new InAppOptions
-        {
-            Handler = (_, ct) =>
-            {
-                captured = ct;
-                return Task.FromResult(new NotifyResult { Success = true });
-            }
-        };
-
-        var channel = new InAppChannel(
-            Options.Create(options),
-            NullLogger<InAppChannel>.Instance);
-
-        await channel.SendAsync(DefaultPayload, cts.Token);
-
-        Assert.Equal(cts.Token, captured);
     }
 }

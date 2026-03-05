@@ -20,6 +20,7 @@ namespace RecurPixel.Notify.Email.Postmark;
 /// Notification channel adapter for Postmark email delivery.
 /// Supports native batch sending via Postmark's batch messages endpoint.
 /// </summary>
+[ChannelAdapter("email", "postmark")]
 public sealed class PostmarkChannel : NotificationChannelBase
 {
     private readonly PostmarkOptions _options;

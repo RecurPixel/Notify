@@ -1,4 +1,5 @@
-using Microsoft.Extensions.DependencyInjection;
+﻿using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using RecurPixel.Notify.Core.Channels;
 using RecurPixel.Notify.Core.Options;
 using RecurPixel.Notify.Core.Options.Providers;
@@ -11,8 +12,9 @@ namespace RecurPixel.Notify.Discord;
 public static class ServiceCollectionExtensions
 {
     /// <summary>
-    /// Registers <see cref="DiscordChannel"/> in the DI container keyed as <c>discord:discord</c>.
-    /// Called automatically by <c>AddRecurPixelNotify()</c> when Discord options are present.
+    /// Registers <see cref="DiscordChannel"/> in the DI container keyed as <c>discord:default</c>.
+    /// For direct-injection usage without <c>AddRecurPixelNotify()</c>.
+    /// When using <c>AddRecurPixelNotify()</c>, this channel is registered automatically via assembly scanning.
     /// </summary>
     /// <param name="services">The service collection.</param>
     /// <param name="options">The resolved Discord options.</param>
@@ -28,7 +30,7 @@ public static class ServiceCollectionExtensions
 
         services.AddHttpClient();
 
-        services.AddKeyedSingleton<INotificationChannel, DiscordChannel>("discord:discord");
+        services.TryAddKeyedSingleton<INotificationChannel, DiscordChannel>("discord:default");
 
         return services;
     }

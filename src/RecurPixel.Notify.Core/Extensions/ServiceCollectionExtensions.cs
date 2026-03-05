@@ -9,23 +9,29 @@ namespace RecurPixel.Notify.Core.Extensions;
 public static class ServiceCollectionExtensions
 {
     /// <summary>
-    /// Registers RecurPixel.Notify with a fluent options builder.
-    /// Use this when you want to configure options programmatically or mix config sources.
+    /// Registers <see cref="NotifyOptions"/> with a fluent builder.
+    /// Use this for Tier 1 (direct adapter injection without the Orchestrator).
+    /// When using the full stack with event dispatch, call
+    /// <c>AddRecurPixelNotify(configureOptions, configureOrchestrator)</c>
+    /// from the <c>RecurPixel.Notify.Orchestrator.Extensions</c> namespace instead.
     /// </summary>
-    public static IServiceCollection AddRecurPixelNotify(
+    public static IServiceCollection AddNotifyOptions(
         this IServiceCollection services,
         Action<NotifyOptions> configure)
     {
         var options = new NotifyOptions();
         configure(options);
-        return services.AddRecurPixelNotify(options);
+        return services.AddNotifyOptions(options);
     }
 
     /// <summary>
-    /// Registers RecurPixel.Notify with a pre-built options object.
+    /// Registers a pre-built <see cref="NotifyOptions"/> object.
     /// Use this when options are loaded from a database, Vault, or any custom source.
+    /// When using the full stack with event dispatch, call
+    /// <c>AddRecurPixelNotify(configureOptions, configureOrchestrator)</c>
+    /// from the <c>RecurPixel.Notify.Orchestrator.Extensions</c> namespace instead.
     /// </summary>
-    public static IServiceCollection AddRecurPixelNotify(
+    public static IServiceCollection AddNotifyOptions(
         this IServiceCollection services,
         NotifyOptions options)
     {

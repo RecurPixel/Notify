@@ -16,6 +16,7 @@ namespace RecurPixel.Notify.Email.Smtp;
 /// Email channel adapter for SMTP.
 /// No native bulk API — bulk is handled automatically by the base class loop.
 /// </summary>
+[ChannelAdapter("email", "smtp")]
 public sealed class SmtpChannel : NotificationChannelBase
 {
     private readonly SmtpOptions _options;

@@ -13,6 +13,7 @@ namespace RecurPixel.Notify.Line;
 /// Notification channel adapter for the LINE Messaging API.
 /// Sends push messages via POST https://api.line.me/v2/bot/message/push.
 /// </summary>
+[ChannelAdapter("line", "default")]
 public sealed class LineChannel : NotificationChannelBase
 {
     private readonly LineOptions _options;

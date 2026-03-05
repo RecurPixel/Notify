@@ -26,10 +26,11 @@ Automatically retry failed sends with configurable delay and exponential backoff
 
 ### Per-event retry
 
-Per-event config overrides the global setting for that event:
+Per-event config overrides the global setting for that event. `orchestratorOptions` is the second parameter of `AddRecurPixelNotify`:
 
 ```csharp
-options.Orchestrator.DefineEvent("auth.otp", e => e
+// Inside the orchestratorOptions => { ... } lambda
+orchestratorOptions.DefineEvent("auth.otp", e => e
     .UseChannels("sms")
     .WithRetry(maxAttempts: 5, delayMs: 300)
 );
@@ -66,7 +67,7 @@ If a channel fails after exhausting retries, the next channel in the fallback ch
 ### Per-event fallback
 
 ```csharp
-options.Orchestrator.DefineEvent("order.placed", e => e
+orchestratorOptions.DefineEvent("order.placed", e => e
     .UseChannels("email", "sms")
     .WithFallback("whatsapp", "sms", "email")
 );
@@ -152,7 +153,7 @@ If `Metadata["provider"]` is set to a name that does not exist in the `Providers
 Per-channel send conditions evaluated at runtime against the `NotifyContext`. Prevents sending to unverified numbers, users with push disabled, or any other runtime guard.
 
 ```csharp
-options.Orchestrator.DefineEvent("order.placed", e => e
+orchestratorOptions.DefineEvent("order.placed", e => e
     .UseChannels("email", "sms", "push")
     .WithCondition("sms",  ctx => ctx.User.PhoneVerified)
     .WithCondition("push", ctx => ctx.User.PushEnabled && ctx.User.DeviceToken != null)
@@ -214,9 +215,11 @@ var contexts = customers.Select(c => new NotifyContext
 }).ToList();
 
 var result = await notify.BulkTriggerAsync("promo.blast", contexts);
+
+Console.WriteLine($"{result.SuccessCount}/{result.Total} users notified");
 ```
 
-### BulkNotifyResult
+### BulkNotifyResult (direct channel bulk)
 
 | Property | Description |
 |---|---|
@@ -226,7 +229,20 @@ var result = await notify.BulkTriggerAsync("promo.blast", contexts);
 | `SuccessCount` | Count of successful sends |
 | `FailureCount` | Count of failed sends |
 | `Total` | Total payloads submitted |
+| `Channel` | Channel name shared by all results in this batch |
 | `UsedNativeBatch` | `true` if the provider's own batch API was used |
+
+### BulkTriggerResult (orchestrated bulk)
+
+| Property | Description |
+|---|---|
+| `AllSucceeded` | `true` if every user's every channel succeeded |
+| `AnySucceeded` | `true` if at least one user/channel succeeded |
+| `Failures` | List of `TriggerResult` where at least one channel failed |
+| `SuccessCount` | Users where all channels succeeded |
+| `FailureCount` | Users where at least one channel failed |
+| `Total` | Total users processed |
+| `Results` | All `TriggerResult` entries in input order |
 
 ### Bulk configuration
 
@@ -246,10 +262,24 @@ var result = await notify.BulkTriggerAsync("promo.blast", contexts);
 
 ## Delivery Hook
 
-Called after every individual send attempt — including each result within a bulk operation.
+Called after every individual send attempt — including each result within a bulk operation. `orchestratorOptions` is the second parameter of `AddRecurPixelNotify`.
+
+### Simple hook (no DI dependencies)
 
 ```csharp
-options.OnDelivery(async result =>
+orchestratorOptions.OnDelivery(async result =>
+{
+    Console.WriteLine($"[{result.Channel}] {(result.Success ? "OK" : "FAIL")} → {result.Recipient}");
+    await Task.CompletedTask;
+});
+```
+
+### Typed hook with scoped service
+
+The typed overload resolves `TService` in a fresh DI scope per call — safe for `DbContext` and other scoped services:
+
+```csharp
+orchestratorOptions.OnDelivery<IApplicationDbContext>(async (result, db) =>
 {
     await db.NotificationLogs.AddAsync(new NotificationLog
     {
@@ -266,6 +296,8 @@ options.OnDelivery(async result =>
     await db.SaveChangesAsync();
 });
 ```
+
+Multiple `OnDelivery` registrations are composable — all fire in registration order.
 
 ### NotifyResult fields
 

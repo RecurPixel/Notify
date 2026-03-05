@@ -21,6 +21,7 @@ namespace RecurPixel.Notify.Sms.Sinch;
 /// Notification channel adapter for Sinch SMS delivery.
 /// Supports native batch sending via the Sinch Batch SMS API.
 /// </summary>
+[ChannelAdapter("sms", "sinch")]
 public sealed class SinchChannel : NotificationChannelBase
 {
     private readonly SinchOptions _options;

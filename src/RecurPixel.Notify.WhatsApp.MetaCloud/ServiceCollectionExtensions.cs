@@ -1,5 +1,6 @@
-using System;
+﻿using System;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using RecurPixel.Notify.Core.Channels;
 using RecurPixel.Notify.Core.Options.Providers;
 
@@ -36,7 +37,7 @@ public static class ServiceCollectionExtensions
         });
 
         services.AddHttpClient(nameof(MetaCloudWhatsAppChannel));
-        services.AddKeyedSingleton<INotificationChannel, MetaCloudWhatsAppChannel>("whatsapp:metacloud");
+        services.TryAddKeyedSingleton<INotificationChannel, MetaCloudWhatsAppChannel>("whatsapp:metacloud");
 
         return services;
     }

@@ -33,8 +33,8 @@ internal sealed class ChannelDispatcher
         ILogger<ChannelDispatcher> logger)
     {
         _serviceProvider = serviceProvider;
-        _notifyOptions   = notifyOptions.Value;
-        _logger          = logger;
+        _notifyOptions = notifyOptions.Value;
+        _logger = logger;
     }
 
     /// <summary>
@@ -58,9 +58,9 @@ internal sealed class ChannelDispatcher
                 channelName, primaryKey, namedProviderName ?? "(default)");
 
             var adapter = ResolveAdapter(primaryKey, channelName);
-            var result  = await SendWithRetryAsync(adapter, payload, retryOptions, ct);
+            var result = await SendWithRetryAsync(adapter, payload, retryOptions, ct);
 
-            result.Channel       = channelName;
+            result.Channel = channelName;
             result.NamedProvider = namedProviderName;
 
             if (result.Success)
@@ -74,11 +74,11 @@ internal sealed class ChannelDispatcher
                     channelName, fallbackKey);
 
                 var fallbackAdapter = ResolveAdapter(fallbackKey, channelName);
-                var fallbackResult  = await SendAsync(fallbackAdapter, payload, ct);
+                var fallbackResult = await SendAsync(fallbackAdapter, payload, ct);
 
-                fallbackResult.Channel       = channelName;
+                fallbackResult.Channel = channelName;
                 fallbackResult.NamedProvider = namedProviderName;
-                fallbackResult.UsedFallback  = true;
+                fallbackResult.UsedFallback = true;
 
                 return fallbackResult;
             }
@@ -97,8 +97,8 @@ internal sealed class ChannelDispatcher
             {
                 Success = false,
                 Channel = channelName,
-                Error   = ex.Message,
-                SentAt  = DateTime.UtcNow
+                Error = ex.Message,
+                SentAt = DateTime.UtcNow
             };
         }
     }
@@ -119,7 +119,7 @@ internal sealed class ChannelDispatcher
         CancellationToken ct)
     {
         var maxAttempts = retryOptions?.MaxAttempts ?? 1;
-        var delayMs     = retryOptions?.DelayMs ?? 500;
+        var delayMs = retryOptions?.DelayMs ?? 500;
         var exponential = retryOptions?.ExponentialBackoff ?? true;
 
         NotifyResult lastResult = null!;
@@ -155,7 +155,7 @@ internal sealed class ChannelDispatcher
     private (string primaryKey, string? fallbackKey, string? namedProviderName)
         ResolveKeys(string channelName, NotificationPayload payload)
     {
-        var (defaultProvider, channelFallback, namedProviders) = GetChannelConfig(channelName);
+        var (defaultProvider, channelFallback, namedProviders, isMultiProviderChannel) = GetChannelConfig(channelName);
 
         // Check for named routing via Metadata["provider"]
         string? namedProviderName = null;
@@ -178,34 +178,52 @@ internal sealed class ChannelDispatcher
             return ($"{channelName}:{namedDef.Type}", namedFallbackKey, namedProviderName);
         }
 
-        // No named routing — use default provider
+        // No named routing — use default provider or :default
         if (string.IsNullOrWhiteSpace(defaultProvider))
         {
-            // Simple channel with no provider selection (Slack, Discord, Teams, etc.)
-            return (channelName, null, null);
+            // Multi-provider channels (email, sms, push, whatsapp) require an explicit Provider configured
+            if (isMultiProviderChannel)
+                throw new InvalidOperationException(
+                    $"No provider configured for channel '{channelName}'. " +
+                    $"Set Notify:{Capitalize(channelName)}:Provider in your configuration or use Metadata[\"provider\"].");
+
+            // Single-implementation channels (Slack, Discord, Telegram, etc.)
+            // Always resolves to "{channel}:default"
+            return ($"{channelName}:default", null, null);
         }
 
         var fallbackKey = channelFallback is not null ? $"{channelName}:{channelFallback}" : null;
         return ($"{channelName}:{defaultProvider}", fallbackKey, null);
     }
 
-    private (string? defaultProvider, string? fallback, Dictionary<string, NamedProviderDefinition>? namedProviders)
+    private (string? defaultProvider, string? fallback, Dictionary<string, NamedProviderDefinition>? namedProviders, bool isMultiProviderChannel)
         GetChannelConfig(string channelName) => channelName switch
-    {
-        "email"    => (_notifyOptions.Email?.Provider,    _notifyOptions.Email?.Fallback,    _notifyOptions.Email?.Providers),
-        "sms"      => (_notifyOptions.Sms?.Provider,      _notifyOptions.Sms?.Fallback,      _notifyOptions.Sms?.Providers),
-        "push"     => (_notifyOptions.Push?.Provider,     _notifyOptions.Push?.Fallback,     _notifyOptions.Push?.Providers),
-        "whatsapp" => (_notifyOptions.WhatsApp?.Provider, _notifyOptions.WhatsApp?.Fallback, _notifyOptions.WhatsApp?.Providers),
-        _          => (null, null, null)   // simple channels — registered by channel name only
-    };
+        {
+            "email" => (_notifyOptions.Email?.Provider, _notifyOptions.Email?.Fallback, _notifyOptions.Email?.Providers, true),
+            "sms" => (_notifyOptions.Sms?.Provider, _notifyOptions.Sms?.Fallback, _notifyOptions.Sms?.Providers, true),
+            "push" => (_notifyOptions.Push?.Provider, _notifyOptions.Push?.Fallback, _notifyOptions.Push?.Providers, true),
+            "whatsapp" => (_notifyOptions.WhatsApp?.Provider, _notifyOptions.WhatsApp?.Fallback, _notifyOptions.WhatsApp?.Providers, true),
+
+            // Single-implementation channels — no provider selection, no fallback, no named routing.
+            // ResolveKeys falls through to "{channel}:default" key.
+            "slack" or "discord" or "teams" or "telegram" or "facebook" or
+            "line" or "viber" or "mattermost" or "rocketchat" or "inapp"
+                => (null, null, null, false),
+
+            _ => throw new InvalidOperationException(
+                $"Unknown channel '{channelName}'. " +
+                $"Ensure UseChannels() uses logical channel names (e.g. \"email\", \"sms\", \"slack\").")
+        };
 
     private INotificationChannel ResolveAdapter(string key, string channelName)
     {
         var adapter = _serviceProvider.GetKeyedService<INotificationChannel>(key);
         if (adapter is null)
             throw new InvalidOperationException(
-                $"No adapter registered for key '{key}'. " +
-                $"Ensure the provider package for channel '{channelName}' is installed and registered.");
+                $"No adapter registered for key '{key}'. Possible causes:\n" +
+                $"  1. The NuGet package for this provider is not installed.\n" +
+                $"  2. Called AddNotifyOptions() alone — use AddRecurPixelNotify(options, orchestrator) instead.\n" +
+                $"  3. Register explicitly: services.Add{Capitalize(channelName)}Channel(...) before AddRecurPixelNotifyOrchestrator().");
         return adapter;
     }
 
@@ -222,11 +240,11 @@ internal sealed class ChannelDispatcher
         {
             return new NotifyResult
             {
-                Success  = false,
-                Channel  = adapter.ChannelName,
+                Success = false,
+                Channel = adapter.ChannelName,
                 Provider = adapter.ChannelName,
-                Error    = ex.Message,
-                SentAt   = DateTime.UtcNow
+                Error = ex.Message,
+                SentAt = DateTime.UtcNow
             };
         }
     }

@@ -21,6 +21,7 @@ namespace RecurPixel.Notify.Email.Mailgun;
 /// Notification channel adapter for Mailgun email delivery.
 /// Supports native batch sending via Mailgun's recipient variables API.
 /// </summary>
+[ChannelAdapter("email", "mailgun")]
 public sealed class MailgunChannel : NotificationChannelBase
 {
     private readonly MailgunOptions _options;

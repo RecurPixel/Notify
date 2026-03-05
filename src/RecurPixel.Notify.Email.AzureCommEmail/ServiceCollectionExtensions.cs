@@ -1,5 +1,6 @@
-using Azure.Communication.Email;
+﻿using Azure.Communication.Email;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Options;
 using RecurPixel.Notify.Core.Channels;
 using RecurPixel.Notify.Core.Options;
@@ -27,7 +28,7 @@ public static class ServiceCollectionExtensions
 
         services.AddSingleton<AzureCommEmailChannel>();
 
-        services.AddKeyedSingleton<INotificationChannel, AzureCommEmailChannel>(
+        services.TryAddKeyedSingleton<INotificationChannel, AzureCommEmailChannel>(
             "email:azurecommemail");
 
         return services;

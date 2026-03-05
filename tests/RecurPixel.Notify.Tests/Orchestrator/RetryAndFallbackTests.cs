@@ -43,10 +43,10 @@ public class RetryAndFallbackTests
             services.AddKeyedSingleton<INotificationChannel>(
                 "sms:twilio", (_, _) => smsMock.Object);
 
-        // Slack has no provider selection — keyed by channel name alone
+        // Slack has no provider selection — keyed as "slack:default" (Phase 1a)
         if (slackMock is not null)
             services.AddKeyedSingleton<INotificationChannel>(
-                "slack", (_, _) => slackMock.Object);
+                "slack:default", (_, _) => slackMock.Object);
 
         services.AddRecurPixelNotifyOrchestrator(o =>
         {
@@ -140,7 +140,7 @@ public class RetryAndFallbackTests
 
         var result = await svc.TriggerAsync("order.placed", MakeContext());
 
-        Assert.False(result.Success);
+        Assert.False(result.AllSucceeded);
         emailMock.Verify(
             m => m.SendAsync(It.IsAny<NotificationPayload>(), It.IsAny<CancellationToken>()),
             Times.Exactly(3));
@@ -160,7 +160,7 @@ public class RetryAndFallbackTests
 
         var result = await svc.TriggerAsync("order.placed", MakeContext());
 
-        Assert.True(result.Success);
+        Assert.True(result.AllSucceeded);
         // Adapter called twice: fail, then succeed
         emailMock.Verify(
             m => m.SendAsync(It.IsAny<NotificationPayload>(), It.IsAny<CancellationToken>()),
@@ -263,8 +263,8 @@ public class RetryAndFallbackTests
 
         var result = await svc.TriggerAsync("alert", MakeContext(includeSlack: true));
 
-        Assert.True(result.Success);
-        Assert.True(result.UsedFallback);
+        Assert.True(result.AnySucceeded);
+        Assert.Contains(result.ChannelResults, r => r.UsedFallback);
 
         // Primary email attempted once
         emailMock.Verify(
@@ -298,7 +298,7 @@ public class RetryAndFallbackTests
 
         var result = await svc.TriggerAsync("alert", MakeContext(includeSlack: true));
 
-        Assert.True(result.Success);
+        Assert.True(result.AllSucceeded);
         slackMock.Verify(
             m => m.SendAsync(It.IsAny<NotificationPayload>(), It.IsAny<CancellationToken>()),
             Times.Never);
@@ -324,8 +324,8 @@ public class RetryAndFallbackTests
 
         var result = await svc.TriggerAsync("alert", MakeContext(includeSlack: true));
 
-        Assert.True(result.Success);
-        Assert.True(result.UsedFallback);
+        Assert.True(result.AnySucceeded);
+        Assert.Contains(result.ChannelResults, r => r.UsedFallback);
 
         // sms was primary — called once there, must NOT be called again in fallback
         smsMock.Verify(
@@ -365,7 +365,7 @@ public class RetryAndFallbackTests
 
         var result = await svc.TriggerAsync("alert", ctx);
 
-        Assert.True(result.Success);
+        Assert.True(result.AnySucceeded);
         // slack picked up after sms skipped for missing payload
         slackMock.Verify(
             m => m.SendAsync(It.IsAny<NotificationPayload>(), It.IsAny<CancellationToken>()),
@@ -388,7 +388,7 @@ public class RetryAndFallbackTests
 
         var result = await svc.TriggerAsync("alert", MakeContext(includeSlack: true));
 
-        Assert.False(result.Success);
+        Assert.False(result.AllSucceeded);
         // Hook called for primary failure and fallback failure
         Assert.Equal(2, hook.Count);
         Assert.All(hook, r => Assert.False(r.Success));
@@ -424,7 +424,7 @@ public class RetryAndFallbackTests
 
         var result = await svc.TriggerAsync("alert", ctx);
 
-        Assert.True(result.Success);
+        Assert.True(result.AnySucceeded);
         // Hook: email (fail) + sms fallback (fail) + slack fallback (success) = 3 calls
         Assert.Equal(3, hook.Count);
         Assert.False(hook[0].Success);  // primary email
@@ -450,7 +450,7 @@ public class RetryAndFallbackTests
 
         var result = await svc.TriggerAsync("alert", MakeContext(includeSlack: true));
 
-        Assert.True(result.UsedFallback);
+        Assert.Contains(result.ChannelResults, r => r.UsedFallback);
 
         // Primary email result: UsedFallback = false
         var emailHookResult = hook.First(r => r.Channel == "email");

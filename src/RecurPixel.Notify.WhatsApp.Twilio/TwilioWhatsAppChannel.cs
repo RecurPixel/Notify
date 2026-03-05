@@ -16,6 +16,7 @@ namespace RecurPixel.Notify.WhatsApp.Twilio;
 /// WhatsApp channel adapter using the Twilio WhatsApp API.
 /// No native bulk API — bulk is handled automatically by the base class loop.
 /// </summary>
+[ChannelAdapter("whatsapp", "twilio")]
 public sealed class TwilioWhatsAppChannel : NotificationChannelBase
 {
     private readonly TwilioOptions _options;

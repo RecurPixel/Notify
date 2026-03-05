@@ -1,4 +1,5 @@
-using Microsoft.Extensions.DependencyInjection;
+﻿using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using RecurPixel.Notify.Core.Channels;
 using RecurPixel.Notify.Core.Options;
 using RecurPixel.Notify.Core.Options.Providers;
@@ -25,7 +26,7 @@ public static class ServiceCollectionExtensions
             o.FromName = options.FromName;
         });
 
-        services.AddKeyedSingleton<INotificationChannel, SendGridChannel>("email:sendgrid");
+        services.TryAddKeyedSingleton<INotificationChannel, SendGridChannel>("email:sendgrid");
 
         return services;
     }

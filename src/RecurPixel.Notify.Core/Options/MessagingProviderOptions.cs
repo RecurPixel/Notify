@@ -1,3 +1,7 @@
+using System;
+using System.Threading.Tasks;
+using Microsoft.Extensions.DependencyInjection;
+using RecurPixel.Notify.Core.Models;
 
 /// <summary>LINE Messaging API credentials.</summary>
 public class LineOptions
@@ -20,17 +24,53 @@ public class ViberOptions
 }
 
 /// <summary>
-/// In-app notification options. The user provides a delegate that is called
-/// on every send. Storage, SignalR, queuing — all user-owned.
+/// In-app notification options.
+/// Call <see cref="UseHandler(Func{InAppNotification, Task{NotifyResult}})"/> to wire the
+/// delivery implementation. Storage, SignalR, queuing — all user-owned.
 /// </summary>
 public class InAppOptions
 {
     /// <summary>
-    /// Delegate invoked on every in-app send attempt.
-    /// Receives the <see cref="RecurPixel.Notify.Core.Models.NotificationPayload"/> and
-    /// must return a <see cref="RecurPixel.Notify.Core.Models.NotifyResult"/>.
+    /// Internal handler invoked on every in-app send attempt.
+    /// Receives the <see cref="InAppNotification"/> and the root <see cref="IServiceProvider"/>
+    /// (use it to create a scope for scoped services).
     /// </summary>
-    public Func<RecurPixel.Notify.Core.Models.NotificationPayload, System.Threading.CancellationToken, System.Threading.Tasks.Task<RecurPixel.Notify.Core.Models.NotifyResult>>? Handler { get; set; }
+    internal Func<InAppNotification, IServiceProvider, Task<NotifyResult>>? DeliverHandler { get; private set; }
+
+    /// <summary>
+    /// Provides the delivery implementation for in-app notifications.
+    /// The handler receives a strongly-typed <see cref="InAppNotification"/> and must
+    /// return a <see cref="NotifyResult"/> indicating success or failure.
+    /// <para>
+    /// This IS the send operation (write to your database, push via SignalR, etc.).
+    /// It is distinct from <c>OrchestratorOptions.OnDelivery</c>, which is an audit
+    /// callback called after every channel send attempt.
+    /// </para>
+    /// </summary>
+    public InAppOptions UseHandler(Func<InAppNotification, Task<NotifyResult>> handler)
+    {
+        if (handler is null) throw new ArgumentNullException(nameof(handler));
+        DeliverHandler = (notification, _) => handler(notification);
+        return this;
+    }
+
+    /// <summary>
+    /// Provides the delivery implementation with a scoped <typeparamref name="TService"/>
+    /// resolved from a new DI scope for each invocation.
+    /// Use this to inject a scoped <c>DbContext</c> or other scoped service.
+    /// </summary>
+    public InAppOptions UseHandler<TService>(Func<InAppNotification, TService, Task<NotifyResult>> handler)
+        where TService : class
+    {
+        if (handler is null) throw new ArgumentNullException(nameof(handler));
+        DeliverHandler = async (notification, sp) =>
+        {
+            using var scope = sp.CreateScope();
+            var service = scope.ServiceProvider.GetRequiredService<TService>();
+            return await handler(notification, service);
+        };
+        return this;
+    }
 }
 
 /// <summary>Vonage WhatsApp Business messaging credentials.</summary>

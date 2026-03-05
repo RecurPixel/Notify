@@ -1,4 +1,5 @@
-using Microsoft.Extensions.DependencyInjection;
+﻿using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Options;
 using RecurPixel.Notify.Core.Channels;
 using RecurPixel.Notify.Core.Options;
@@ -26,7 +27,7 @@ public static class ServiceCollectionExtensions
 
         services.AddHttpClient<VonageSmsChannel>();
 
-        services.AddKeyedSingleton<INotificationChannel, VonageSmsChannel>("sms:vonage");
+        services.TryAddKeyedSingleton<INotificationChannel, VonageSmsChannel>("sms:vonage");
 
         return services;
     }

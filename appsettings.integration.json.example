@@ -7,7 +7,11 @@
     "ToDeviceToken": "",
     "ToWhatsApp":    "",
     "ToSlack":       "",
-    "ToTelegram":    ""
+    "ToDiscord":     "",
+    "ToTelegram":    "",
+    "ToFacebook":    "",
+    "ToLine":        "",
+    "ToViber":       ""
   },
 
   "Notify": {
@@ -48,6 +52,11 @@
         "Region":    "",
         "FromEmail": "",
         "FromName":  ""
+      },
+      "AzureCommEmail": {
+        "ConnectionString": "",
+        "FromEmail":        "",
+        "FromName":         ""
       }
     },
 
@@ -81,6 +90,10 @@
         "SecretKey": "",
         "Region":    "",
         "SmsType":   "Transactional"
+      },
+      "AzureCommSms": {
+        "ConnectionString": "",
+        "FromNumber":       ""
       }
     },
 
@@ -143,6 +156,16 @@
     "Viber": {
       "BotAuthToken": "",
       "SenderName":   ""
+    },
+    "Mattermost": {
+      "WebhookUrl": "",
+      "Username":   "",
+      "Channel":    ""
+    },
+    "RocketChat": {
+      "WebhookUrl": "",
+      "Username":   "",
+      "Channel":    ""
     }
   }
 }

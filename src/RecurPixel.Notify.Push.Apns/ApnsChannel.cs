@@ -16,6 +16,7 @@ namespace RecurPixel.Notify.Push.Apns;
 /// Push notification channel adapter for Apple Push Notification service (APNs).
 /// No native bulk API — bulk is handled automatically by the base class loop.
 /// </summary>
+[ChannelAdapter("push", "apns")]
 public sealed class ApnsChannel : NotificationChannelBase
 {
     private readonly ApnsOptions _options;

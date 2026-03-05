@@ -1,5 +1,6 @@
-using System;
+﻿using System;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using RecurPixel.Notify.Core.Channels;
 using RecurPixel.Notify.Core.Options.Providers;
 
@@ -47,7 +48,7 @@ public static class ServiceCollectionExtensions
             o.PrivateKey = options.PrivateKey;
         });
 
-        services.AddKeyedSingleton<INotificationChannel, ApnsChannel>("push:apns");
+        services.TryAddKeyedSingleton<INotificationChannel, ApnsChannel>("push:apns");
 
         return services;
     }
