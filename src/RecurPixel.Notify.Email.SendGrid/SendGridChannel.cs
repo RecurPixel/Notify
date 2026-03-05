@@ -5,14 +5,12 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using RecurPixel.Notify.Core.Channels;
-using RecurPixel.Notify.Core.Models;
-using RecurPixel.Notify.Core.Options;
-using RecurPixel.Notify.Core.Options.Providers;
+using RecurPixel.Notify.Channels;
+using RecurPixel.Notify.Configuration;
 using SendGrid;
 using SendGrid.Helpers.Mail;
 
-namespace RecurPixel.Notify.Email.SendGrid;
+namespace RecurPixel.Notify.Channels;
 
 /// <summary>
 /// Email channel adapter for Twilio SendGrid.

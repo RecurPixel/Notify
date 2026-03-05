@@ -1,4 +1,4 @@
-namespace RecurPixel.Notify.Core.Models;
+namespace RecurPixel.Notify;
 
 /// <summary>
 /// The full context passed to TriggerAsync or BulkTriggerAsync.

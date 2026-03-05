@@ -7,7 +7,9 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using RecurPixel.Notify.Core.Models;
+using RecurPixel.Notify;
+using RecurPixel.Notify.Channels;
+using RecurPixel.Notify.Configuration;
 using RecurPixel.Notify.Core.Options.Channels;
 using RecurPixel.Notify.Core.Options.Providers;
 using RecurPixel.Notify.Orchestrator.Extensions;
@@ -29,9 +31,9 @@ builder.Services.AddRecurPixelNotify(
             Provider = "sendgrid",
             SendGrid = new SendGridOptions
             {
-                ApiKey    = "SG.fake-key-tier2-test",
+                ApiKey = "SG.fake-key-tier2-test",
                 FromEmail = "no-reply@example.com",
-                FromName  = "Tier 2 Test"
+                FromName = "Tier 2 Test"
             }
         };
 
@@ -41,7 +43,7 @@ builder.Services.AddRecurPixelNotify(
             Twilio = new TwilioOptions
             {
                 AccountSid = "ACfakeaccountsid123",
-                AuthToken  = "fakeauthtoken",
+                AuthToken = "fakeauthtoken",
                 FromNumber = "+15550001234"
             }
         };
@@ -71,15 +73,15 @@ var orderCtx = new NotifyContext
 {
     User = new NotifyUser
     {
-        UserId        = "user-001",
-        Email         = "customer@example.com",
-        Phone         = "+15550009999",
+        UserId = "user-001",
+        Email = "customer@example.com",
+        Phone = "+15550009999",
         PhoneVerified = true
     },
     Channels = new Dictionary<string, NotificationPayload>
     {
         ["email"] = new() { Subject = "Order Confirmed", Body = "<p>Your order is confirmed.</p>" },
-        ["sms"]   = new() { Body = "Your order is confirmed. #42" }
+        ["sms"] = new() { Body = "Your order is confirmed. #42" }
     }
 };
 var orderResult = await notify.TriggerAsync("order.confirmed", orderCtx);
@@ -94,15 +96,15 @@ var noSmsCtx = new NotifyContext
 {
     User = new NotifyUser
     {
-        UserId        = "user-002",
-        Email         = "user2@example.com",
-        Phone         = "+15550008888",
+        UserId = "user-002",
+        Email = "user2@example.com",
+        Phone = "+15550008888",
         PhoneVerified = false
     },
     Channels = new Dictionary<string, NotificationPayload>
     {
         ["email"] = new() { Subject = "Order Confirmed", Body = "<p>Your order is confirmed.</p>" },
-        ["sms"]   = new() { Body = "Your order is confirmed." }
+        ["sms"] = new() { Body = "Your order is confirmed." }
     }
 };
 var noSmsResult = await notify.TriggerAsync("order.confirmed", noSmsCtx);
@@ -116,9 +118,9 @@ Console.WriteLine();
 Console.WriteLine("Direct channel access via notify.Email (bypasses event system)...");
 var directResult = await notify.Email.SendAsync(new NotificationPayload
 {
-    To      = "direct@example.com",
+    To = "direct@example.com",
     Subject = "Direct Send",
-    Body    = "<p>Direct send bypasses orchestration.</p>"
+    Body = "<p>Direct send bypasses orchestration.</p>"
 });
 Console.WriteLine($"  [{(directResult.Success ? "PASS" : "FAIL")}] email direct / {directResult.Provider}: {directResult.Error ?? "sent"}");
 

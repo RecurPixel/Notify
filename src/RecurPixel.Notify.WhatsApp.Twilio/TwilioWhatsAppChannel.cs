@@ -3,10 +3,9 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using RecurPixel.Notify.Core.Channels;
-using RecurPixel.Notify.Core.Models;
-using RecurPixel.Notify.Core.Options;
-using RecurPixel.Notify.Core.Options.Providers;
+using RecurPixel.Notify;
+using RecurPixel.Notify.Channels;
+using RecurPixel.Notify.Configuration;
 using Twilio;
 using Twilio.Rest.Api.V2010.Account;
 
@@ -33,7 +32,7 @@ public sealed class TwilioWhatsAppChannel : NotificationChannelBase
         ILogger<TwilioWhatsAppChannel> logger)
     {
         _options = options.Value;
-        _logger  = logger;
+        _logger = logger;
     }
 
     /// <inheritdoc />
@@ -58,7 +57,7 @@ public sealed class TwilioWhatsAppChannel : NotificationChannelBase
                 : $"whatsapp:{payload.To}";
 
             var message = await MessageResource.CreateAsync(
-                to:   new global::Twilio.Types.PhoneNumber(to),
+                to: new global::Twilio.Types.PhoneNumber(to),
                 from: new global::Twilio.Types.PhoneNumber(from),
                 body: payload.Body);
 
@@ -68,12 +67,12 @@ public sealed class TwilioWhatsAppChannel : NotificationChannelBase
 
             return new NotifyResult
             {
-                Success    = true,
-                Channel    = ChannelName,
-                Provider   = "twilio",
+                Success = true,
+                Channel = ChannelName,
+                Provider = "twilio",
                 ProviderId = message.Sid,
-                Recipient  = payload.To,
-                SentAt     = DateTime.UtcNow
+                Recipient = payload.To,
+                SentAt = DateTime.UtcNow
             };
         }
         catch (Exception ex)
@@ -83,12 +82,12 @@ public sealed class TwilioWhatsAppChannel : NotificationChannelBase
 
             return new NotifyResult
             {
-                Success   = false,
-                Channel   = ChannelName,
-                Provider  = "twilio",
+                Success = false,
+                Channel = ChannelName,
+                Provider = "twilio",
                 Recipient = payload.To,
-                Error     = ex.Message,
-                SentAt    = DateTime.UtcNow
+                Error = ex.Message,
+                SentAt = DateTime.UtcNow
             };
         }
     }

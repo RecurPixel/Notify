@@ -1,4 +1,4 @@
-namespace RecurPixel.Notify.Core.Options.Providers;
+namespace RecurPixel.Notify.Configuration;
 
 /// <summary>Meta Cloud API credentials for WhatsApp.</summary>
 public class MetaCloudOptions

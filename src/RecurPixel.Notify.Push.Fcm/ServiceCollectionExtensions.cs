@@ -1,9 +1,10 @@
 ﻿using System;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
-using RecurPixel.Notify.Core.Channels;
-using RecurPixel.Notify.Core.Options.Providers;
 using Microsoft.Extensions.Options;
+using RecurPixel.Notify;
+using RecurPixel.Notify.Channels;
+using RecurPixel.Notify.Configuration;
 
 namespace RecurPixel.Notify.Push.Fcm;
 
@@ -36,7 +37,7 @@ public static class ServiceCollectionExtensions
 
         services.Configure<FcmOptions>(o =>
         {
-            o.ProjectId          = options.ProjectId;
+            o.ProjectId = options.ProjectId;
             o.ServiceAccountJson = options.ServiceAccountJson;
         });
 

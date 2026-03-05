@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
 
-namespace RecurPixel.Notify.Core.Models;
+namespace RecurPixel.Notify;
 
 /// <summary>
 /// Result of a <c>INotifyService.BulkTriggerAsync</c> call.

@@ -1,7 +1,7 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using RecurPixel.Notify.Core.Channels;
-using RecurPixel.Notify.Core.Models;
+using RecurPixel.Notify;
+using RecurPixel.Notify.Channels;
 using Xunit;
 
 namespace RecurPixel.Notify.IntegrationTests.Infrastructure;

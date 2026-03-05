@@ -2,10 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
-using RecurPixel.Notify.Core.Models;
-using RecurPixel.Notify.Orchestrator.Events;
 
-namespace RecurPixel.Notify.Orchestrator.Options;
+namespace RecurPixel.Notify;
 
 /// <summary>
 /// Configuration for the RecurPixel.Notify Orchestrator.

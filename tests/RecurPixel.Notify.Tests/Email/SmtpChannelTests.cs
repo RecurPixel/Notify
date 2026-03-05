@@ -1,4 +1,6 @@
-using RecurPixel.Notify.Email.Smtp;
+using RecurPixel.Notify;
+using RecurPixel.Notify.Channels;
+using RecurPixel.Notify.Configuration;
 
 namespace RecurPixel.Notify.Tests.Email;
 

@@ -1,7 +1,9 @@
 using System;
 using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
-using RecurPixel.Notify.Core.Models;
+using RecurPixel.Notify;
+
+namespace RecurPixel.Notify.Configuration;
 
 /// <summary>LINE Messaging API credentials.</summary>
 public class LineOptions

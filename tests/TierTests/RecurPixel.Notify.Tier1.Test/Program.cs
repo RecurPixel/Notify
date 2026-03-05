@@ -7,10 +7,9 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using RecurPixel.Notify.Core.Channels;
-using RecurPixel.Notify.Core.Models;
-using RecurPixel.Notify.Core.Options.Providers;
-using RecurPixel.Notify.Email.SendGrid;
+using RecurPixel.Notify;
+using RecurPixel.Notify.Channels;
+using RecurPixel.Notify.Configuration;
 
 Console.WriteLine("=== Tier 1: Direct Provider Usage ===");
 Console.WriteLine();
@@ -21,9 +20,9 @@ builder.Logging.SetMinimumLevel(LogLevel.Warning);
 // Tier 1 registration — explicit, no orchestrator
 builder.Services.AddSendGridChannel(new SendGridOptions
 {
-    ApiKey    = "SG.fake-key-tier1-test",
+    ApiKey = "SG.fake-key-tier1-test",
     FromEmail = "no-reply@example.com",
-    FromName  = "Tier 1 Test"
+    FromName = "Tier 1 Test"
 });
 
 var host = builder.Build();
@@ -40,9 +39,9 @@ Console.WriteLine();
 Console.WriteLine("Attempting send (fake credentials — verifying runtime path)...");
 var result = await channel.SendAsync(new NotificationPayload
 {
-    To      = "recipient@example.com",
+    To = "recipient@example.com",
     Subject = "Tier 1 Test Email",
-    Body    = "<p>Hello from Tier 1 direct send.</p>"
+    Body = "<p>Hello from Tier 1 direct send.</p>"
 });
 
 Console.WriteLine($"  Channel  : {result.Channel}");

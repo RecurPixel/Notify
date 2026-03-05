@@ -1,7 +1,6 @@
-using RecurPixel.Notify.Core.Options;
-using RecurPixel.Notify.Core.Options.Channels;
+using RecurPixel.Notify.Configuration;
 
-namespace RecurPixel.Notify.Core.Extensions;
+namespace RecurPixel.Notify;
 
 /// <summary>
 /// Validates NotifyOptions at startup.
@@ -173,7 +172,7 @@ internal static class NotifyOptionsValidator
     private static void ValidateFallbackAndProviders(
         string channel,
         string? fallback,
-        Dictionary<string, Options.NamedProviderDefinition>? providers,
+        Dictionary<string, NamedProviderDefinition>? providers,
         Func<string, bool> isConfigured)
     {
         if (!string.IsNullOrWhiteSpace(fallback) && !isConfigured(fallback))
@@ -194,7 +193,7 @@ internal static class NotifyOptionsValidator
         }
     }
 
-    private static bool IsEmailProviderConfigured(Options.Channels.EmailOptions email, string key) =>
+    private static bool IsEmailProviderConfigured(EmailOptions email, string key) =>
         key switch
         {
             "sendgrid" => email.SendGrid is not null,

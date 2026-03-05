@@ -1,4 +1,4 @@
-namespace RecurPixel.Notify.Core.Options.Providers;
+namespace RecurPixel.Notify.Configuration;
 
 /// <summary>Twilio credentials. Used for SMS and WhatsApp.</summary>
 public class TwilioOptions

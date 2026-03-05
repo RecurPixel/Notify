@@ -1,9 +1,9 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Options;
-using RecurPixel.Notify.Core.Channels;
-using RecurPixel.Notify.Core.Options;
-using RecurPixel.Notify.Core.Options.Providers;
+using RecurPixel.Notify;
+using RecurPixel.Notify.Channels;
+using RecurPixel.Notify.Configuration;
 
 namespace RecurPixel.Notify.Push.Expo;
 

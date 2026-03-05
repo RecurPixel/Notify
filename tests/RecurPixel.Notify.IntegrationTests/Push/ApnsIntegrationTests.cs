@@ -1,7 +1,8 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using RecurPixel.Notify.Core.Models;
-using RecurPixel.Notify.Core.Options.Providers;
+using RecurPixel.Notify;
+using RecurPixel.Notify.Channels;
+using RecurPixel.Notify.Configuration;
 using RecurPixel.Notify.IntegrationTests.Infrastructure;
 using RecurPixel.Notify.Push.Apns;
 

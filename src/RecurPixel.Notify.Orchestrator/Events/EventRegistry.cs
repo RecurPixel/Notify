@@ -1,4 +1,4 @@
-namespace RecurPixel.Notify.Orchestrator.Events;
+namespace RecurPixel.Notify;
 
 /// <summary>
 /// Stores and retrieves <see cref="EventDefinition"/> instances by name.

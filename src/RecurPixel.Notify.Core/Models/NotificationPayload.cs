@@ -1,4 +1,4 @@
-namespace RecurPixel.Notify.Core.Models;
+namespace RecurPixel.Notify;
 
 /// <summary>
 /// Represents the data to be delivered through a notification channel.

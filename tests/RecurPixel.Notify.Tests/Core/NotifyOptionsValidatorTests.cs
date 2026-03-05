@@ -1,5 +1,4 @@
-using RecurPixel.Notify.Core.Extensions;
-using RecurPixel.Notify.Core.Options.Channels;
+using RecurPixel.Notify;
 
 namespace RecurPixel.Notify.Tests.Core;
 

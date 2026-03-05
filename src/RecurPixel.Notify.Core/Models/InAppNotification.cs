@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 
-namespace RecurPixel.Notify.Core.Models;
+namespace RecurPixel.Notify;
 
 /// <summary>
 /// A strongly-typed in-app notification passed to the <c>OnDeliver</c> handler.

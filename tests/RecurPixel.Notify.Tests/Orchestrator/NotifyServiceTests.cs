@@ -1,9 +1,7 @@
 using Microsoft.Extensions.DependencyInjection;
-using RecurPixel.Notify.Core.Channels;
-using RecurPixel.Notify.Core.Options.Channels;
-using RecurPixel.Notify.Orchestrator.Extensions;
-using RecurPixel.Notify.Orchestrator.Options;
-using RecurPixel.Notify.Orchestrator.Services;
+using RecurPixel.Notify;
+using RecurPixel.Notify.Channels;
+using RecurPixel.Notify.Configuration;
 
 namespace RecurPixel.Notify.Tests.Orchestrator;
 
@@ -376,7 +374,7 @@ public class NotifyServiceTests
 
         var ctx = new NotifyContext
         {
-            User     = new NotifyUser { UserId = "25", Email = "user@example.com" },
+            User = new NotifyUser { UserId = "25", Email = "user@example.com" },
             Channels = new() { ["email"] = new() { Subject = "Verify", Body = "Click here" } }
             // To intentionally not set — should be filled from User.Email
         };
@@ -405,7 +403,7 @@ public class NotifyServiceTests
 
         var ctx = new NotifyContext
         {
-            User     = new NotifyUser { UserId = "25", Phone = "+19876543210" },
+            User = new NotifyUser { UserId = "25", Phone = "+19876543210" },
             Channels = new() { ["sms"] = new() { Body = "Your OTP is 123456" } }
         };
 
@@ -432,7 +430,7 @@ public class NotifyServiceTests
 
         var ctx = new NotifyContext
         {
-            User     = new NotifyUser { UserId = "25", Email = "user@example.com" },
+            User = new NotifyUser { UserId = "25", Email = "user@example.com" },
             Channels = new() { ["email"] = new() { To = "override@example.com", Subject = "s", Body = "b" } }
         };
 

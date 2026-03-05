@@ -1,10 +1,12 @@
 using FirebaseAdmin.Messaging;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using RecurPixel.Notify.Core.Models;
-using RecurPixel.Notify.Core.Options.Providers;
+using RecurPixel.Notify;
+using RecurPixel.Notify.Channels;
+using RecurPixel.Notify.Configuration;
 using RecurPixel.Notify.IntegrationTests.Infrastructure;
 using RecurPixel.Notify.Push.Fcm;
+using FcmOptions = RecurPixel.Notify.Configuration.FcmOptions;
 
 namespace RecurPixel.Notify.IntegrationTests.Push;
 
@@ -37,7 +39,7 @@ public sealed class FcmIntegrationTests : ChannelIntegrationTest
 
     protected override void RegisterServices(IServiceCollection services, IConfiguration config)
     {
-        var opts = new Core.Options.Providers.FcmOptions
+        var opts = new FcmOptions
         {
             ProjectId = config["Notify:Push:Fcm:ProjectId"]!,
             ServiceAccountJson = config["Notify:Push:Fcm:ServiceAccountJson"]!

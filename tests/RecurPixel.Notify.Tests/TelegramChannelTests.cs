@@ -17,7 +17,7 @@ public sealed class TelegramChannelTests
         Body = "World"
     };
 
-    private static HttpClient MakeClient(HttpStatusCode status, object responseBody)
+    private static IHttpClientFactory MakeFactory(HttpStatusCode status, object responseBody)
     {
         var json = JsonSerializer.Serialize(responseBody);
         var handler = new Mock<HttpMessageHandler>();
@@ -34,7 +34,10 @@ public sealed class TelegramChannelTests
                 Content = new StringContent(json)
             });
 
-        return new HttpClient(handler.Object);
+        var client = new HttpClient(handler.Object);
+        var factory = new Mock<IHttpClientFactory>();
+        factory.Setup(f => f.CreateClient(It.IsAny<string>())).Returns(client);
+        return factory.Object;
     }
 
     // ── success ──────────────────────────────────────────────────────────────
@@ -50,7 +53,7 @@ public sealed class TelegramChannelTests
 
         var channel = new TelegramChannel(
             Options.Create(DefaultOptions),
-            MakeClient(HttpStatusCode.OK, response),
+            MakeFactory(HttpStatusCode.OK, response),
             NullLogger<TelegramChannel>.Instance);
 
         var result = await channel.SendAsync(DefaultPayload);
@@ -98,9 +101,13 @@ public sealed class TelegramChannelTests
                 Content = new StringContent(JsonSerializer.Serialize(response))
             });
 
+        var client = new HttpClient(handler.Object);
+        var factory = new Mock<IHttpClientFactory>();
+        factory.Setup(f => f.CreateClient(It.IsAny<string>())).Returns(client);
+
         var channel = new TelegramChannel(
             Options.Create(DefaultOptions),
-            new HttpClient(handler.Object),
+            factory.Object,
             NullLogger<TelegramChannel>.Instance);
 
         var result = await channel.SendAsync(payload);
@@ -120,7 +127,7 @@ public sealed class TelegramChannelTests
 
         var channel = new TelegramChannel(
             Options.Create(DefaultOptions),
-            MakeClient(HttpStatusCode.BadRequest, response),
+            MakeFactory(HttpStatusCode.BadRequest, response),
             NullLogger<TelegramChannel>.Instance);
 
         var result = await channel.SendAsync(DefaultPayload);
@@ -144,9 +151,13 @@ public sealed class TelegramChannelTests
                 ItExpr.IsAny<CancellationToken>())
             .ThrowsAsync(new HttpRequestException("Network failure"));
 
+        var client = new HttpClient(handler.Object);
+        var factory = new Mock<IHttpClientFactory>();
+        factory.Setup(f => f.CreateClient(It.IsAny<string>())).Returns(client);
+
         var channel = new TelegramChannel(
             Options.Create(DefaultOptions),
-            new HttpClient(handler.Object),
+            factory.Object,
             NullLogger<TelegramChannel>.Instance);
 
         var result = await channel.SendAsync(DefaultPayload);
@@ -163,7 +174,7 @@ public sealed class TelegramChannelTests
     {
         var channel = new TelegramChannel(
             Options.Create(DefaultOptions),
-            MakeClient(HttpStatusCode.OK, new { }),
+            MakeFactory(HttpStatusCode.OK, new { }),
             NullLogger<TelegramChannel>.Instance);
 
         Assert.Equal("telegram", channel.ChannelName);
@@ -180,7 +191,7 @@ public sealed class TelegramChannelTests
 
         var channel = new TelegramChannel(
             Options.Create(DefaultOptions),
-            MakeClient(HttpStatusCode.OK, response),
+            MakeFactory(HttpStatusCode.OK, response),
             NullLogger<TelegramChannel>.Instance);
 
         var result = await channel.SendAsync(DefaultPayload);
@@ -199,7 +210,7 @@ public sealed class TelegramChannelTests
 
         var channel = new TelegramChannel(
             Options.Create(DefaultOptions),
-            MakeClient(HttpStatusCode.OK, response),
+            MakeFactory(HttpStatusCode.OK, response),
             NullLogger<TelegramChannel>.Instance);
 
         var result = await channel.SendAsync(DefaultPayload);

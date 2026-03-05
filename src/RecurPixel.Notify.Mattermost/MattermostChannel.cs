@@ -7,9 +7,9 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using RecurPixel.Notify.Core.Channels;
-using RecurPixel.Notify.Core.Models;
-using RecurPixel.Notify.Core.Options;
+using RecurPixel.Notify;
+using RecurPixel.Notify.Channels;
+using RecurPixel.Notify.Configuration;
 
 namespace RecurPixel.Notify.Mattermost;
 
@@ -37,8 +37,8 @@ public sealed class MattermostChannel : NotificationChannelBase
         ILogger<MattermostChannel> logger)
     {
         _options = options.Value;
-        _http    = http;
-        _logger  = logger;
+        _http = http;
+        _logger = logger;
     }
 
     /// <inheritdoc />
@@ -57,9 +57,9 @@ public sealed class MattermostChannel : NotificationChannelBase
 
             var body = new MattermostWebhookRequest
             {
-                Text     = text,
+                Text = text,
                 Username = _options.Username,
-                Channel  = _options.Channel
+                Channel = _options.Channel
             };
 
             var response = await _http.PostAsJsonAsync(
@@ -80,11 +80,11 @@ public sealed class MattermostChannel : NotificationChannelBase
 
             return new NotifyResult
             {
-                Success   = true,
-                Channel   = ChannelName,
-                Provider  = "mattermost",
+                Success = true,
+                Channel = ChannelName,
+                Provider = "mattermost",
                 Recipient = payload.To,
-                SentAt    = DateTime.UtcNow
+                SentAt = DateTime.UtcNow
             };
         }
         catch (Exception ex)
@@ -98,18 +98,18 @@ public sealed class MattermostChannel : NotificationChannelBase
 
     private NotifyResult Fail(string to, string error) => new()
     {
-        Success   = false,
-        Channel   = ChannelName,
-        Provider  = "mattermost",
+        Success = false,
+        Channel = ChannelName,
+        Provider = "mattermost",
         Recipient = to,
-        Error     = error,
-        SentAt    = DateTime.UtcNow
+        Error = error,
+        SentAt = DateTime.UtcNow
     };
 
     private static readonly JsonSerializerOptions JsonOptions = new()
     {
-        PropertyNamingPolicy        = JsonNamingPolicy.SnakeCaseLower,
-        DefaultIgnoreCondition      = JsonIgnoreCondition.WhenWritingNull,
+        PropertyNamingPolicy = JsonNamingPolicy.SnakeCaseLower,
+        DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
         PropertyNameCaseInsensitive = true
     };
 }

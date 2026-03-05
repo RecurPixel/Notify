@@ -2,15 +2,10 @@ using System.Reflection;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Options;
-using RecurPixel.Notify.Core.Channels;
-using RecurPixel.Notify.Core.Extensions;
-using RecurPixel.Notify.Core.Options;
-using RecurPixel.Notify.Core.Options.Providers;
-using RecurPixel.Notify.Orchestrator.Dispatch;
-using RecurPixel.Notify.Orchestrator.Options;
-using RecurPixel.Notify.Orchestrator.Services;
+using RecurPixel.Notify.Channels;
+using RecurPixel.Notify.Configuration;
 
-namespace RecurPixel.Notify.Orchestrator.Extensions;
+namespace RecurPixel.Notify;
 
 /// <summary>
 /// Extension methods for registering RecurPixel.Notify with the DI container.

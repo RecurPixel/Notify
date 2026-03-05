@@ -1,8 +1,6 @@
-using RecurPixel.Notify.Core.Channels;
-using RecurPixel.Notify.Core.Models;
-using RecurPixel.Notify.Orchestrator.Dispatch;
+using RecurPixel.Notify.Channels;
 
-namespace RecurPixel.Notify.Orchestrator.Services;
+namespace RecurPixel.Notify;
 
 /// <summary>
 /// An <see cref="INotificationChannel"/> that delegates to <see cref="ChannelDispatcher"/>.

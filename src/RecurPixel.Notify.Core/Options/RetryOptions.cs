@@ -1,4 +1,4 @@
-namespace RecurPixel.Notify.Core.Options;
+namespace RecurPixel.Notify;
 
 /// <summary>
 /// Configuration for retry behaviour on failed send attempts.

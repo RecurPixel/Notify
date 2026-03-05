@@ -1,7 +1,6 @@
-using RecurPixel.Notify.Core.Channels;
-using RecurPixel.Notify.Core.Models;
+using RecurPixel.Notify.Channels;
 
-namespace RecurPixel.Notify.Orchestrator.Services;
+namespace RecurPixel.Notify;
 
 /// <summary>
 /// Primary entry point for notification dispatch. Inject this into your application services.

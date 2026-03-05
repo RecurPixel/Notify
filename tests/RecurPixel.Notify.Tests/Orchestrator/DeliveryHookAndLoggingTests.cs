@@ -1,11 +1,8 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using RecurPixel.Notify.Core.Channels;
-using RecurPixel.Notify.Core.Options.Channels;
-using RecurPixel.Notify.Email.Smtp;
-using RecurPixel.Notify.Orchestrator.Extensions;
-using RecurPixel.Notify.Orchestrator.Options;
-using RecurPixel.Notify.Orchestrator.Services;
+using RecurPixel.Notify;
+using RecurPixel.Notify.Channels;
+using RecurPixel.Notify.Configuration;
 
 namespace RecurPixel.Notify.Tests.Orchestrator;
 

@@ -1,4 +1,4 @@
-namespace RecurPixel.Notify.Core.Options;
+namespace RecurPixel.Notify.Configuration;
 
 /// <summary>
 /// Defines a named provider routing entry within a channel's options.

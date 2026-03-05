@@ -5,8 +5,9 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Extensions.Options;
 using Moq;
-using RecurPixel.Notify.Core.Models;
-using RecurPixel.Notify.Core.Options;
+using RecurPixel.Notify;
+using RecurPixel.Notify.Channels;
+using RecurPixel.Notify.Configuration;
 using RecurPixel.Notify.Sms.AzureCommSms;
 using Xunit;
 
@@ -17,12 +18,12 @@ public sealed class AzureCommSmsChannelTests
     private static AzureCommSmsOptions DefaultOptions => new()
     {
         ConnectionString = "endpoint=https://test.communication.azure.com/;accesskey=dGVzdA==",
-        FromNumber       = "+15551234567"
+        FromNumber = "+15551234567"
     };
 
     private static NotificationPayload DefaultPayload => new()
     {
-        To   = "+447700900000",
+        To = "+447700900000",
         Body = "Hello from ACS SMS"
     };
 
@@ -31,12 +32,12 @@ public sealed class AzureCommSmsChannelTests
         bool succeeds,
         string messageId = "acs-sms-msg-abc123")
     {
-        var mock   = new Mock<IAzureCommSmsClient>();
+        var mock = new Mock<IAzureCommSmsClient>();
         var result = new AcsSmsResult(
-            To:           to,
-            MessageId:    succeeds ? messageId : null,
-            Successful:   succeeds,
-            StatusCode:   succeeds ? 202 : 400,
+            To: to,
+            MessageId: succeeds ? messageId : null,
+            Successful: succeeds,
+            StatusCode: succeeds ? 202 : 400,
             ErrorMessage: succeeds ? null : "Invalid number");
 
         mock.Setup(c => c.SendAsync(
@@ -69,7 +70,7 @@ public sealed class AzureCommSmsChannelTests
     [Fact]
     public async Task SendAsync_Success_ReturnsTrueWithMessageId()
     {
-        var mock    = MakeSingleMock(DefaultPayload.To, succeeds: true, "acs-sms-msg-abc123");
+        var mock = MakeSingleMock(DefaultPayload.To, succeeds: true, "acs-sms-msg-abc123");
         var channel = new AzureCommSmsChannel(
             Options.Create(DefaultOptions),
             mock.Object,
@@ -88,7 +89,7 @@ public sealed class AzureCommSmsChannelTests
     [Fact]
     public async Task SendAsync_AcsReturnsUnsuccessful_ReturnsFalse()
     {
-        var mock    = MakeSingleMock(DefaultPayload.To, succeeds: false);
+        var mock = MakeSingleMock(DefaultPayload.To, succeeds: false);
         var channel = new AzureCommSmsChannel(
             Options.Create(DefaultOptions),
             mock.Object,
@@ -136,7 +137,7 @@ public sealed class AzureCommSmsChannelTests
             new AcsSmsResult("+447700900002", "msg-2", true,  202, null)
         };
 
-        var mock    = MakeBulkMock(results);
+        var mock = MakeBulkMock(results);
         var payloads = new[]
         {
             new NotificationPayload { To = "+447700900001", Body = "Hi" },
@@ -165,7 +166,7 @@ public sealed class AzureCommSmsChannelTests
             new AcsSmsResult("+447700900002", null,    false, 400, "Invalid number")
         };
 
-        var mock    = MakeBulkMock(results);
+        var mock = MakeBulkMock(results);
         var payloads = new[]
         {
             new NotificationPayload { To = "+447700900001", Body = "Hi" },

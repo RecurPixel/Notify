@@ -1,6 +1,6 @@
 using System;
 
-namespace RecurPixel.Notify.Core.Channels;
+namespace RecurPixel.Notify.Channels;
 
 /// <summary>
 /// Marks a class as a notification channel adapter and declares its logical channel name and provider.

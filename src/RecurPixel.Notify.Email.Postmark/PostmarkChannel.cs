@@ -9,12 +9,10 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using RecurPixel.Notify.Core.Channels;
-using RecurPixel.Notify.Core.Models;
-using RecurPixel.Notify.Core.Options;
-using RecurPixel.Notify.Core.Options.Providers;
+using RecurPixel.Notify.Channels;
+using RecurPixel.Notify.Configuration;
 
-namespace RecurPixel.Notify.Email.Postmark;
+namespace RecurPixel.Notify.Channels;
 
 /// <summary>
 /// Notification channel adapter for Postmark email delivery.

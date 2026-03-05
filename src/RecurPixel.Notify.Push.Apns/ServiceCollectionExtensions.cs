@@ -1,8 +1,9 @@
 ﻿using System;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
-using RecurPixel.Notify.Core.Channels;
-using RecurPixel.Notify.Core.Options.Providers;
+using RecurPixel.Notify;
+using RecurPixel.Notify.Channels;
+using RecurPixel.Notify.Configuration;
 
 namespace RecurPixel.Notify.Push.Apns;
 
@@ -42,9 +43,9 @@ public static class ServiceCollectionExtensions
 
         services.Configure<ApnsOptions>(o =>
         {
-            o.KeyId      = options.KeyId;
-            o.TeamId     = options.TeamId;
-            o.BundleId   = options.BundleId;
+            o.KeyId = options.KeyId;
+            o.TeamId = options.TeamId;
+            o.BundleId = options.BundleId;
             o.PrivateKey = options.PrivateKey;
         });
 

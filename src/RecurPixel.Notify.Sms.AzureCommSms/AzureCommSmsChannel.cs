@@ -5,11 +5,12 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using RecurPixel.Notify.Core.Channels;
-using RecurPixel.Notify.Core.Models;
-using RecurPixel.Notify.Core.Options;
+using RecurPixel.Notify;
+using RecurPixel.Notify.Channels;
+using RecurPixel.Notify.Configuration;
+using RecurPixel.Notify.Sms.AzureCommSms;
 
-namespace RecurPixel.Notify.Sms.AzureCommSms;
+namespace RecurPixel.Notify.Channels;
 
 /// <summary>
 /// Notification channel adapter for Azure Communication Services SMS.
@@ -34,8 +35,8 @@ public sealed class AzureCommSmsChannel : NotificationChannelBase
         ILogger<AzureCommSmsChannel> logger)
     {
         _options = options.Value;
-        _client  = client;
-        _logger  = logger;
+        _client = client;
+        _logger = logger;
     }
 
     /// <inheritdoc />
@@ -50,10 +51,10 @@ public sealed class AzureCommSmsChannel : NotificationChannelBase
         try
         {
             var item = await _client.SendAsync(
-                from:    _options.FromNumber,
-                to:      payload.To,
+                from: _options.FromNumber,
+                to: payload.To,
                 message: payload.Body ?? string.Empty,
-                ct:      ct);
+                ct: ct);
 
             if (!item.Successful)
             {
@@ -71,12 +72,12 @@ public sealed class AzureCommSmsChannel : NotificationChannelBase
 
             return new NotifyResult
             {
-                Success    = true,
-                Channel    = ChannelName,
-                Provider   = "azurecommsms",
+                Success = true,
+                Channel = ChannelName,
+                Provider = "azurecommsms",
                 ProviderId = item.MessageId,
-                Recipient  = payload.To,
-                SentAt     = DateTime.UtcNow
+                Recipient = payload.To,
+                SentAt = DateTime.UtcNow
             };
         }
         catch (Exception ex)
@@ -99,21 +100,21 @@ public sealed class AzureCommSmsChannel : NotificationChannelBase
             payloads.Count);
 
         var allResults = new List<NotifyResult>();
-        var chunks     = payloads.Chunk(100);
+        var chunks = payloads.Chunk(100);
 
         foreach (var chunk in chunks)
         {
-            var chunkList  = chunk.ToList();
+            var chunkList = chunk.ToList();
             var recipients = chunkList.Select(p => p.To).ToList();
-            var message    = chunkList[0].Body ?? string.Empty;
+            var message = chunkList[0].Body ?? string.Empty;
 
             try
             {
                 var items = await _client.SendBulkAsync(
-                    from:    _options.FromNumber,
-                    to:      recipients,
+                    from: _options.FromNumber,
+                    to: recipients,
                     message: message,
-                    ct:      ct);
+                    ct: ct);
 
                 foreach (var item in items)
                 {
@@ -121,12 +122,12 @@ public sealed class AzureCommSmsChannel : NotificationChannelBase
                     {
                         allResults.Add(new NotifyResult
                         {
-                            Success    = true,
-                            Channel    = ChannelName,
-                            Provider   = "azurecommsms",
+                            Success = true,
+                            Channel = ChannelName,
+                            Provider = "azurecommsms",
                             ProviderId = item.MessageId,
-                            Recipient  = item.To,
-                            SentAt     = DateTime.UtcNow
+                            Recipient = item.To,
+                            SentAt = DateTime.UtcNow
                         });
                     }
                     else
@@ -145,8 +146,8 @@ public sealed class AzureCommSmsChannel : NotificationChannelBase
 
         return new BulkNotifyResult
         {
-            Results         = allResults,
-            Channel         = ChannelName,
+            Results = allResults,
+            Channel = ChannelName,
             UsedNativeBatch = true
         };
     }
@@ -155,11 +156,11 @@ public sealed class AzureCommSmsChannel : NotificationChannelBase
 
     private NotifyResult Fail(string to, string error) => new()
     {
-        Success   = false,
-        Channel   = ChannelName,
-        Provider  = "azurecommsms",
+        Success = false,
+        Channel = ChannelName,
+        Provider = "azurecommsms",
         Recipient = to,
-        Error     = error,
-        SentAt    = DateTime.UtcNow
+        Error = error,
+        SentAt = DateTime.UtcNow
     };
 }

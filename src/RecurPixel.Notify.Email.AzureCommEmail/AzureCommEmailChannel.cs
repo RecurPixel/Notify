@@ -3,11 +3,12 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using RecurPixel.Notify.Core.Channels;
-using RecurPixel.Notify.Core.Models;
-using RecurPixel.Notify.Core.Options;
+using RecurPixel.Notify;
+using RecurPixel.Notify.Channels;
+using RecurPixel.Notify.Configuration;
+using RecurPixel.Notify.Email.AzureCommEmail;
 
-namespace RecurPixel.Notify.Email.AzureCommEmail;
+namespace RecurPixel.Notify.Channels;
 
 /// <summary>
 /// Notification channel adapter for Azure Communication Services Email.
@@ -32,8 +33,8 @@ public sealed class AzureCommEmailChannel : NotificationChannelBase
         ILogger<AzureCommEmailChannel> logger)
     {
         _options = options.Value;
-        _client  = client;
-        _logger  = logger;
+        _client = client;
+        _logger = logger;
     }
 
     /// <inheritdoc />
@@ -54,12 +55,12 @@ public sealed class AzureCommEmailChannel : NotificationChannelBase
             var isHtml = IsHtml(payload.Body);
 
             var messageId = await _client.SendAsync(
-                senderAddress:    from,
+                senderAddress: from,
                 recipientAddress: payload.To,
-                subject:          payload.Subject ?? string.Empty,
-                html:             isHtml ? payload.Body : null,
-                plainText:        isHtml ? null : payload.Body,
-                ct:               ct);
+                subject: payload.Subject ?? string.Empty,
+                html: isHtml ? payload.Body : null,
+                plainText: isHtml ? null : payload.Body,
+                ct: ct);
 
             _logger.LogDebug(
                 "AzureCommEmail: email sent to {To}. MessageId {MessageId}",
@@ -67,12 +68,12 @@ public sealed class AzureCommEmailChannel : NotificationChannelBase
 
             return new NotifyResult
             {
-                Success    = true,
-                Channel    = ChannelName,
-                Provider   = "azurecommemail",
+                Success = true,
+                Channel = ChannelName,
+                Provider = "azurecommemail",
                 ProviderId = messageId,
-                Recipient  = payload.To,
-                SentAt     = DateTime.UtcNow
+                Recipient = payload.To,
+                SentAt = DateTime.UtcNow
             };
         }
         catch (Exception ex)
@@ -92,11 +93,11 @@ public sealed class AzureCommEmailChannel : NotificationChannelBase
 
     private NotifyResult Fail(string to, string error) => new()
     {
-        Success   = false,
-        Channel   = ChannelName,
-        Provider  = "azurecommemail",
+        Success = false,
+        Channel = ChannelName,
+        Provider = "azurecommemail",
         Recipient = to,
-        Error     = error,
-        SentAt    = DateTime.UtcNow
+        Error = error,
+        SentAt = DateTime.UtcNow
     };
 }

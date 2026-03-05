@@ -5,14 +5,9 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using RecurPixel.Notify.Core.Channels;
-using RecurPixel.Notify.Core.Models;
-using RecurPixel.Notify.Core.Options;
-using RecurPixel.Notify.Orchestrator.Dispatch;
-using RecurPixel.Notify.Orchestrator.Events;
-using RecurPixel.Notify.Orchestrator.Options;
+using RecurPixel.Notify.Channels;
 
-namespace RecurPixel.Notify.Orchestrator.Services;
+namespace RecurPixel.Notify;
 
 /// <summary>
 /// Full implementation of <see cref="INotifyService"/>.

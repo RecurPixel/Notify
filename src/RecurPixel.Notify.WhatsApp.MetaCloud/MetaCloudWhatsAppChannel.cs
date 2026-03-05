@@ -6,10 +6,9 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using RecurPixel.Notify.Core.Channels;
-using RecurPixel.Notify.Core.Models;
-using RecurPixel.Notify.Core.Options;
-using RecurPixel.Notify.Core.Options.Providers;
+using RecurPixel.Notify;
+using RecurPixel.Notify.Channels;
+using RecurPixel.Notify.Configuration;
 
 namespace RecurPixel.Notify.WhatsApp.MetaCloud;
 
@@ -18,9 +17,9 @@ namespace RecurPixel.Notify.WhatsApp.MetaCloud;
 /// <summary>Result of a Meta Cloud API send attempt.</summary>
 internal sealed class MetaCloudSendResult
 {
-    public bool   IsSuccess { get; init; }
+    public bool IsSuccess { get; init; }
     public string? MessageId { get; init; }
-    public string? Error    { get; init; }
+    public string? Error { get; init; }
 }
 
 /// <summary>
@@ -45,7 +44,7 @@ internal sealed class MetaCloudHttpClient : IMetaCloudClient
 
     public MetaCloudHttpClient(HttpClient http, MetaCloudOptions options)
     {
-        _http    = http;
+        _http = http;
         _options = options;
     }
 
@@ -71,7 +70,7 @@ internal sealed class MetaCloudHttpClient : IMetaCloudClient
 
         if (response.IsSuccessStatusCode)
         {
-            var json      = await response.Content.ReadFromJsonAsync<MetaSuccessResponse>(ct);
+            var json = await response.Content.ReadFromJsonAsync<MetaSuccessResponse>(ct);
             var messageId = json?.Messages?[0]?.Id;
             return new MetaCloudSendResult { IsSuccess = true, MessageId = messageId };
         }
@@ -80,7 +79,7 @@ internal sealed class MetaCloudHttpClient : IMetaCloudClient
         return new MetaCloudSendResult
         {
             IsSuccess = false,
-            Error     = $"Meta Cloud API returned {response.StatusCode}: {error}"
+            Error = $"Meta Cloud API returned {response.StatusCode}: {error}"
         };
     }
 
@@ -134,8 +133,8 @@ public sealed class MetaCloudWhatsAppChannel : NotificationChannelBase
         ILogger<MetaCloudWhatsAppChannel> logger)
     {
         _options = options.Value;
-        _client  = client;
-        _logger  = logger;
+        _client = client;
+        _logger = logger;
     }
 
     /// <inheritdoc />
@@ -158,12 +157,12 @@ public sealed class MetaCloudWhatsAppChannel : NotificationChannelBase
 
                 return new NotifyResult
                 {
-                    Success    = true,
-                    Channel    = ChannelName,
-                    Provider   = "metacloud",
+                    Success = true,
+                    Channel = ChannelName,
+                    Provider = "metacloud",
                     ProviderId = result.MessageId,
-                    Recipient  = payload.To,
-                    SentAt     = DateTime.UtcNow
+                    Recipient = payload.To,
+                    SentAt = DateTime.UtcNow
                 };
             }
 
@@ -173,12 +172,12 @@ public sealed class MetaCloudWhatsAppChannel : NotificationChannelBase
 
             return new NotifyResult
             {
-                Success   = false,
-                Channel   = ChannelName,
-                Provider  = "metacloud",
+                Success = false,
+                Channel = ChannelName,
+                Provider = "metacloud",
                 Recipient = payload.To,
-                Error     = result.Error,
-                SentAt    = DateTime.UtcNow
+                Error = result.Error,
+                SentAt = DateTime.UtcNow
             };
         }
         catch (Exception ex)
@@ -188,12 +187,12 @@ public sealed class MetaCloudWhatsAppChannel : NotificationChannelBase
 
             return new NotifyResult
             {
-                Success   = false,
-                Channel   = ChannelName,
-                Provider  = "metacloud",
+                Success = false,
+                Channel = ChannelName,
+                Provider = "metacloud",
                 Recipient = payload.To,
-                Error     = ex.Message,
-                SentAt    = DateTime.UtcNow
+                Error = ex.Message,
+                SentAt = DateTime.UtcNow
             };
         }
     }

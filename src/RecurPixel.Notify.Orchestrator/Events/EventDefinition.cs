@@ -1,7 +1,4 @@
-using RecurPixel.Notify.Core.Models;
-using RecurPixel.Notify.Core.Options;
-
-namespace RecurPixel.Notify.Orchestrator.Events;
+namespace RecurPixel.Notify;
 
 /// <summary>
 /// Immutable definition of a named notification event.

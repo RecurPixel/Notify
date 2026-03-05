@@ -8,7 +8,9 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using RecurPixel.Notify.Core.Models;
+using RecurPixel.Notify;
+using RecurPixel.Notify.Channels;
+using RecurPixel.Notify.Configuration;
 using RecurPixel.Notify.Core.Options.Channels;
 using RecurPixel.Notify.Core.Options.Providers;
 using RecurPixel.Notify.Orchestrator.Extensions;
@@ -30,9 +32,9 @@ builder.Services.AddRecurPixelNotify(
             Provider = "sendgrid",
             SendGrid = new SendGridOptions
             {
-                ApiKey    = "SG.fake-key-tier3-test",
+                ApiKey = "SG.fake-key-tier3-test",
                 FromEmail = "no-reply@example.com",
-                FromName  = "Tier 3 Test"
+                FromName = "Tier 3 Test"
             }
         };
 
@@ -42,7 +44,7 @@ builder.Services.AddRecurPixelNotify(
             Twilio = new TwilioOptions
             {
                 AccountSid = "ACfakeaccountsid123",
-                AuthToken  = "fakeauthtoken",
+                AuthToken = "fakeauthtoken",
                 FromNumber = "+15550001234"
             }
         };
@@ -51,7 +53,7 @@ builder.Services.AddRecurPixelNotify(
         notifyOptions.Telegram = new TelegramOptions
         {
             BotToken = "fake:bottoken999",
-            ChatId   = "123456789"
+            ChatId = "123456789"
         };
     },
     orchestratorOptions =>
@@ -85,7 +87,7 @@ var welcomeResult = await notify.TriggerAsync("welcome", new NotifyContext
     User = new NotifyUser { UserId = "user-001", Email = "user@example.com" },
     Channels = new Dictionary<string, NotificationPayload>
     {
-        ["email"]    = new() { Subject = "Welcome!", Body = "<p>Welcome to the platform.</p>" },
+        ["email"] = new() { Subject = "Welcome!", Body = "<p>Welcome to the platform.</p>" },
         ["telegram"] = new() { Body = "Welcome to the platform!" }
     }
 });
@@ -99,15 +101,15 @@ var orderResult = await notify.TriggerAsync("order.placed", new NotifyContext
 {
     User = new NotifyUser
     {
-        UserId        = "user-001",
-        Email         = "user@example.com",
-        Phone         = "+15550009999",
+        UserId = "user-001",
+        Email = "user@example.com",
+        Phone = "+15550009999",
         PhoneVerified = true
     },
     Channels = new Dictionary<string, NotificationPayload>
     {
         ["email"] = new() { Subject = "Order Placed", Body = "<p>Your order has been placed.</p>" },
-        ["sms"]   = new() { Body = "Your order has been placed." }
+        ["sms"] = new() { Body = "Your order has been placed." }
     }
 });
 foreach (var ch in orderResult.ChannelResults)
@@ -119,15 +121,15 @@ Console.WriteLine("Direct channel access (bypasses orchestration)...");
 
 var emailDirect = await notify.Email.SendAsync(new NotificationPayload
 {
-    To      = "direct@example.com",
+    To = "direct@example.com",
     Subject = "Direct Email",
-    Body    = "<p>Testing direct channel access.</p>"
+    Body = "<p>Testing direct channel access.</p>"
 });
 Console.WriteLine($"  [{(emailDirect.Success ? "PASS" : "FAIL")}] email direct / {emailDirect.Provider}: {emailDirect.Error ?? "sent"}");
 
 var smsDirect = await notify.Sms.SendAsync(new NotificationPayload
 {
-    To   = "+15550009999",
+    To = "+15550009999",
     Body = "Direct SMS test."
 });
 Console.WriteLine($"  [{(smsDirect.Success ? "PASS" : "FAIL")}] sms direct / {smsDirect.Provider}: {smsDirect.Error ?? "sent"}");

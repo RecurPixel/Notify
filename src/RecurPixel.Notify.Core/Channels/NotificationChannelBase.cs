@@ -1,6 +1,6 @@
-using RecurPixel.Notify.Core.Models;
+using RecurPixel.Notify;
 
-namespace RecurPixel.Notify.Core.Channels;
+namespace RecurPixel.Notify.Channels;
 
 /// <summary>
 /// Base class for all notification channel adapters.

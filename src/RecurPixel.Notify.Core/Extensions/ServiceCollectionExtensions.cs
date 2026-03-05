@@ -1,7 +1,6 @@
 using Microsoft.Extensions.DependencyInjection;
-using RecurPixel.Notify.Core.Options;
 
-namespace RecurPixel.Notify.Core.Extensions;
+namespace RecurPixel.Notify;
 
 /// <summary>
 /// IServiceCollection extension methods for registering RecurPixel.Notify.

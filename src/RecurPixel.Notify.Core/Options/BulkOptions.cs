@@ -1,4 +1,4 @@
-namespace RecurPixel.Notify.Core.Options;
+namespace RecurPixel.Notify;
 
 /// <summary>
 /// Configuration for bulk and batch notification sending behaviour.

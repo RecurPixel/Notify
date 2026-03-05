@@ -4,8 +4,9 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Extensions.Options;
 using Moq;
-using RecurPixel.Notify.Core.Models;
-using RecurPixel.Notify.Core.Options;
+using RecurPixel.Notify;
+using RecurPixel.Notify.Channels;
+using RecurPixel.Notify.Configuration;
 using RecurPixel.Notify.Email.AzureCommEmail;
 using Xunit;
 
@@ -16,15 +17,15 @@ public sealed class AzureCommEmailChannelTests
     private static AzureCommEmailOptions DefaultOptions => new()
     {
         ConnectionString = "endpoint=https://test.communication.azure.com/;accesskey=dGVzdA==",
-        FromEmail        = "no-reply@test.com",
-        FromName         = "Test"
+        FromEmail = "no-reply@test.com",
+        FromName = "Test"
     };
 
     private static NotificationPayload DefaultPayload => new()
     {
-        To      = "recipient@example.com",
+        To = "recipient@example.com",
         Subject = "Hello",
-        Body    = "Plain text body"
+        Body = "Plain text body"
     };
 
     private static Mock<IAzureCommEmailClient> MakeClientMock(
@@ -64,7 +65,7 @@ public sealed class AzureCommEmailChannelTests
     [Fact]
     public async Task SendAsync_Success_ReturnsTrueWithMessageId()
     {
-        var mock    = MakeClientMock(succeeds: true, "acs-email-msg-abc123");
+        var mock = MakeClientMock(succeeds: true, "acs-email-msg-abc123");
         var channel = new AzureCommEmailChannel(
             Options.Create(DefaultOptions),
             mock.Object,
@@ -83,7 +84,7 @@ public sealed class AzureCommEmailChannelTests
     [Fact]
     public async Task SendAsync_Exception_ReturnsFalse()
     {
-        var mock    = MakeClientMock(succeeds: false);
+        var mock = MakeClientMock(succeeds: false);
         var channel = new AzureCommEmailChannel(
             Options.Create(DefaultOptions),
             mock.Object,
@@ -101,7 +102,7 @@ public sealed class AzureCommEmailChannelTests
     [Fact]
     public async Task SendAsync_PlainTextBody_PassesAsPlainText()
     {
-        string? capturedHtml      = "not-set";
+        string? capturedHtml = "not-set";
         string? capturedPlainText = "not-set";
 
         var mock = new Mock<IAzureCommEmailClient>();
@@ -115,7 +116,7 @@ public sealed class AzureCommEmailChannelTests
             .Callback<string, string, string, string?, string?, CancellationToken>(
                 (_, _, _, html, plain, _) =>
                 {
-                    capturedHtml      = html;
+                    capturedHtml = html;
                     capturedPlainText = plain;
                 })
             .ReturnsAsync("msg-1");
@@ -136,12 +137,12 @@ public sealed class AzureCommEmailChannelTests
     {
         var payload = new NotificationPayload
         {
-            To      = "recipient@example.com",
+            To = "recipient@example.com",
             Subject = "Hello",
-            Body    = "<h1>Hello</h1>"
+            Body = "<h1>Hello</h1>"
         };
 
-        string? capturedHtml      = "not-set";
+        string? capturedHtml = "not-set";
         string? capturedPlainText = "not-set";
 
         var mock = new Mock<IAzureCommEmailClient>();
@@ -155,7 +156,7 @@ public sealed class AzureCommEmailChannelTests
             .Callback<string, string, string, string?, string?, CancellationToken>(
                 (_, _, _, html, plain, _) =>
                 {
-                    capturedHtml      = html;
+                    capturedHtml = html;
                     capturedPlainText = plain;
                 })
             .ReturnsAsync("msg-1");

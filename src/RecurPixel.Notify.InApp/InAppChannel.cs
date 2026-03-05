@@ -3,9 +3,9 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using RecurPixel.Notify.Core.Channels;
-using RecurPixel.Notify.Core.Models;
-using RecurPixel.Notify.Core.Options;
+using RecurPixel.Notify;
+using RecurPixel.Notify.Channels;
+using RecurPixel.Notify.Configuration;
 
 namespace RecurPixel.Notify.InApp;
 
@@ -32,9 +32,9 @@ public sealed class InAppChannel : NotificationChannelBase
         IServiceProvider serviceProvider,
         ILogger<InAppChannel> logger)
     {
-        _options         = options.Value;
+        _options = options.Value;
         _serviceProvider = serviceProvider;
-        _logger          = logger;
+        _logger = logger;
     }
 
     /// <inheritdoc />
@@ -61,9 +61,9 @@ public sealed class InAppChannel : NotificationChannelBase
 
         var notification = new InAppNotification
         {
-            UserId   = payload.To,
-            Subject  = payload.Subject,
-            Body     = payload.Body,
+            UserId = payload.To,
+            Subject = payload.Subject,
+            Body = payload.Body,
             Metadata = payload.Metadata
         };
 
@@ -72,8 +72,8 @@ public sealed class InAppChannel : NotificationChannelBase
             var result = await _options.DeliverHandler(notification, _serviceProvider);
 
             // Ensure the result always carries channel identity and recipient
-            result.Channel   = ChannelName;
-            result.Provider  = "inapp";
+            result.Channel = ChannelName;
+            result.Provider = "inapp";
             result.Recipient = payload.To;
 
             if (result.SentAt == default)
@@ -102,11 +102,11 @@ public sealed class InAppChannel : NotificationChannelBase
 
     private NotifyResult Fail(NotificationPayload payload, string error) => new()
     {
-        Success   = false,
-        Channel   = ChannelName,
-        Provider  = "inapp",
+        Success = false,
+        Channel = ChannelName,
+        Provider = "inapp",
         Recipient = payload.To,
-        Error     = error,
-        SentAt    = DateTime.UtcNow
+        Error = error,
+        SentAt = DateTime.UtcNow
     };
 }

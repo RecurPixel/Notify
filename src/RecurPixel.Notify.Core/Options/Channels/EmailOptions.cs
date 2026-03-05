@@ -1,6 +1,4 @@
-using RecurPixel.Notify.Core.Options.Providers;
-
-namespace RecurPixel.Notify.Core.Options.Channels;
+namespace RecurPixel.Notify.Configuration;
 
 /// <summary>
 /// Email channel configuration.

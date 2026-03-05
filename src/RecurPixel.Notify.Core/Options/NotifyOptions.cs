@@ -1,7 +1,6 @@
-using RecurPixel.Notify.Core.Options.Channels;
-using RecurPixel.Notify.Core.Options.Providers;
+using RecurPixel.Notify.Configuration;
 
-namespace RecurPixel.Notify.Core.Options;
+namespace RecurPixel.Notify;
 
 /// <summary>
 /// Root configuration object for RecurPixel.Notify.

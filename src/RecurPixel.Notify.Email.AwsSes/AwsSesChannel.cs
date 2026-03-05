@@ -2,11 +2,10 @@ using Amazon.SimpleEmailV2;
 using Amazon.SimpleEmailV2.Model;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using RecurPixel.Notify.Core.Channels;
-using RecurPixel.Notify.Core.Models;
-using RecurPixel.Notify.Core.Options.Providers;
+using RecurPixel.Notify.Channels;
+using RecurPixel.Notify.Configuration;
 
-namespace RecurPixel.Notify.Email.AwsSes;
+namespace RecurPixel.Notify.Channels;
 
 /// <summary>
 /// Notification channel adapter for AWS Simple Email Service v2.

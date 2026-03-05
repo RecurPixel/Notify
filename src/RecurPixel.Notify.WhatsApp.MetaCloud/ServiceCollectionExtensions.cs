@@ -1,8 +1,9 @@
 ﻿using System;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
-using RecurPixel.Notify.Core.Channels;
-using RecurPixel.Notify.Core.Options.Providers;
+using RecurPixel.Notify;
+using RecurPixel.Notify.Channels;
+using RecurPixel.Notify.Configuration;
 
 namespace RecurPixel.Notify.WhatsApp.MetaCloud;
 
@@ -32,7 +33,7 @@ public static class ServiceCollectionExtensions
 
         services.Configure<MetaCloudOptions>(o =>
         {
-            o.AccessToken   = options.AccessToken;
+            o.AccessToken = options.AccessToken;
             o.PhoneNumberId = options.PhoneNumberId;
         });
 

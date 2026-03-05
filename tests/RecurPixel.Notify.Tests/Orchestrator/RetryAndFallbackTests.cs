@@ -1,9 +1,7 @@
 using Microsoft.Extensions.DependencyInjection;
-using RecurPixel.Notify.Core.Channels;
-using RecurPixel.Notify.Core.Options.Channels;
-using RecurPixel.Notify.Orchestrator.Extensions;
-using RecurPixel.Notify.Orchestrator.Options;
-using RecurPixel.Notify.Orchestrator.Services;
+using RecurPixel.Notify;
+using RecurPixel.Notify.Channels;
+using RecurPixel.Notify.Configuration;
 
 namespace RecurPixel.Notify.Tests.Orchestrator;
 

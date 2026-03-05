@@ -1,7 +1,7 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Extensions.Options;
-using RecurPixel.Notify.Core.Models;
+using RecurPixel.Notify;
 using RecurPixel.Notify.InApp;
 
 namespace RecurPixel.Notify.Tests;
@@ -13,9 +13,9 @@ public sealed class InAppChannelTests
 
     private static NotificationPayload DefaultPayload => new()
     {
-        To      = "user-id-abc123",
+        To = "user-id-abc123",
         Subject = "You have a new message",
-        Body    = "Click here to view it"
+        Body = "Click here to view it"
     };
 
     private static InAppChannel BuildChannel(Action<InAppOptions>? configure = null)
@@ -32,7 +32,7 @@ public sealed class InAppChannelTests
     {
         var channel = BuildChannel(o => o.UseHandler(_ => Task.FromResult(new NotifyResult
         {
-            Success    = true,
+            Success = true,
             ProviderId = "db-row-id-999"
         })));
 
@@ -54,7 +54,7 @@ public sealed class InAppChannelTests
         var channel = BuildChannel(o => o.UseHandler(_ => Task.FromResult(new NotifyResult
         {
             Success = true,
-            SentAt  = sentAt
+            SentAt = sentAt
         })));
 
         var result = await channel.SendAsync(DefaultPayload);
@@ -70,7 +70,7 @@ public sealed class InAppChannelTests
         var channel = BuildChannel(o => o.UseHandler(_ => Task.FromResult(new NotifyResult
         {
             Success = true,
-            SentAt  = default   // channel should fill this in
+            SentAt = default   // channel should fill this in
         })));
 
         var result = await channel.SendAsync(DefaultPayload);
@@ -83,8 +83,8 @@ public sealed class InAppChannelTests
     {
         var channel = BuildChannel(o => o.UseHandler(_ => Task.FromResult(new NotifyResult
         {
-            Success  = true,
-            Channel  = "something-else",   // should be overwritten
+            Success = true,
+            Channel = "something-else",   // should be overwritten
             Provider = "something-else"    // should be overwritten
         })));
 
@@ -99,7 +99,7 @@ public sealed class InAppChannelTests
     {
         var channel = BuildChannel(o => o.UseHandler(_ => Task.FromResult(new NotifyResult
         {
-            Success   = true,
+            Success = true,
             Recipient = "wrong-recipient"   // should be overwritten
         })));
 
@@ -116,7 +116,7 @@ public sealed class InAppChannelTests
         var channel = BuildChannel(o => o.UseHandler(_ => Task.FromResult(new NotifyResult
         {
             Success = false,
-            Error   = "User inbox is full"
+            Error = "User inbox is full"
         })));
 
         var result = await channel.SendAsync(DefaultPayload);

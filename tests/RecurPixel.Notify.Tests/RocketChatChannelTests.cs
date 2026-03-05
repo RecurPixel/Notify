@@ -7,8 +7,9 @@ using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Extensions.Options;
 using Moq;
 using Moq.Protected;
-using RecurPixel.Notify.Core.Models;
-using RecurPixel.Notify.Core.Options;
+using RecurPixel.Notify;
+using RecurPixel.Notify.Channels;
+using RecurPixel.Notify.Configuration;
 using RecurPixel.Notify.RocketChat;
 using Xunit;
 
@@ -19,15 +20,15 @@ public sealed class RocketChatChannelTests
     private static RocketChatOptions DefaultOptions => new()
     {
         WebhookUrl = "https://rocketchat.example.com/hooks/test-hook-id",
-        Username   = "TestBot",
-        Channel    = "#general"
+        Username = "TestBot",
+        Channel = "#general"
     };
 
     private static NotificationPayload DefaultPayload => new()
     {
-        To      = "channel",
+        To = "channel",
         Subject = "Hello",
-        Body    = "World"
+        Body = "World"
     };
 
     private static HttpClient MakeClient(HttpStatusCode status, string responseBody = "ok")
@@ -43,7 +44,7 @@ public sealed class RocketChatChannelTests
             .ReturnsAsync(new HttpResponseMessage
             {
                 StatusCode = status,
-                Content    = new StringContent(responseBody)
+                Content = new StringContent(responseBody)
             });
 
         return new HttpClient(handler.Object);
@@ -87,7 +88,7 @@ public sealed class RocketChatChannelTests
             .ReturnsAsync(new HttpResponseMessage
             {
                 StatusCode = HttpStatusCode.OK,
-                Content    = new StringContent("ok")
+                Content = new StringContent("ok")
             });
 
         var channel = new RocketChatChannel(
@@ -107,9 +108,9 @@ public sealed class RocketChatChannelTests
     {
         var payload = new NotificationPayload
         {
-            To      = "channel",
+            To = "channel",
             Subject = "",
-            Body    = "Body only"
+            Body = "Body only"
         };
 
         var handler = new Mock<HttpMessageHandler>();
@@ -128,7 +129,7 @@ public sealed class RocketChatChannelTests
             .ReturnsAsync(new HttpResponseMessage
             {
                 StatusCode = HttpStatusCode.OK,
-                Content    = new StringContent("ok")
+                Content = new StringContent("ok")
             });
 
         var channel = new RocketChatChannel(
@@ -162,7 +163,7 @@ public sealed class RocketChatChannelTests
             .ReturnsAsync(new HttpResponseMessage
             {
                 StatusCode = HttpStatusCode.OK,
-                Content    = new StringContent("ok")
+                Content = new StringContent("ok")
             });
 
         var channel = new RocketChatChannel(

@@ -5,12 +5,10 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using RecurPixel.Notify.Core.Channels;
-using RecurPixel.Notify.Core.Models;
-using RecurPixel.Notify.Core.Options;
-using RecurPixel.Notify.Core.Options.Channels;
+using RecurPixel.Notify.Channels;
+using RecurPixel.Notify.Configuration;
 
-namespace RecurPixel.Notify.Orchestrator.Dispatch;
+namespace RecurPixel.Notify;
 
 /// <summary>
 /// Resolves the correct channel adapter for a given payload and dispatches the send.

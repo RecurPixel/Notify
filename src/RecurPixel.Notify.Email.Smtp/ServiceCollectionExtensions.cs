@@ -1,10 +1,9 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
-using RecurPixel.Notify.Core.Channels;
-using RecurPixel.Notify.Core.Options;
-using RecurPixel.Notify.Core.Options.Providers;
+using RecurPixel.Notify.Channels;
+using RecurPixel.Notify.Configuration;
 
-namespace RecurPixel.Notify.Email.Smtp;
+namespace RecurPixel.Notify;
 
 /// <summary>
 /// DI registration extensions for the SMTP email adapter.
