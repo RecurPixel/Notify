@@ -4,6 +4,19 @@ Quick reference for each released version. For comprehensive change details, see
 
 ---
 
+## v0.2.0-beta.2 (March 2026)
+
+**Patch on top of beta.1 — no new breaking changes.**
+
+**Fixes:**
+- CI fix: `appsettings.integration.json` is now optional — integration tests gracefully skip when credentials are missing, so the GitHub Actions workflow passes without secrets
+
+**Package Count:** 35 (same as beta.1)
+
+**Tests:** 314 passing
+
+---
+
 ## v0.2.0-beta.1 (March 2026)
 
 **Key Changes:**

@@ -2,12 +2,15 @@
 
   <PropertyGroup>
     <TargetFrameworks>net8.0;net10.0</TargetFrameworks>
+    <IncludeBuildOutput>false</IncludeBuildOutput>
+    <NoWarn>$(NoWarn);NU5128</NoWarn>
     <Description>Full SDK meta-package for RecurPixel.Notify. Includes Core, Orchestrator, and all available notification adapters across Email, SMS, Push, WhatsApp, Chat, and Social channels. BETA: API is stable but pre-release.</Description>
   </PropertyGroup>
 
   <!-- RecurPixel.Notify meta-package (Core + Orchestrator) -->
   <ItemGroup>
-    <ProjectReference Include="..\RecurPixel.Notify\RecurPixel.Notify.csproj" />
+    <ProjectReference Include="..\RecurPixel.Notify.Core\RecurPixel.Notify.Core.csproj" />
+    <ProjectReference Include="..\RecurPixel.Notify.Orchestrator\RecurPixel.Notify.Orchestrator.csproj" />
   </ItemGroup>
 
   <!-- Email adapters -->

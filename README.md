@@ -30,9 +30,11 @@ dotnet add package RecurPixel.Notify.Sms.Twilio
 
 → [Getting Started](https://recurpixel.github.io/Notify/getting-started) · [Quick Start](https://recurpixel.github.io/Notify/quick-start) · [Usage Tiers](https://recurpixel.github.io/Notify/usage-tiers) · [Adapter Reference](https://recurpixel.github.io/Notify/adapters)
 
-> **⚠️ Upgrading from v0.1.0-beta.1?**  
-> v0.2.0-beta.1 includes breaking changes: namespace reorganization, new meta-package structure, typed `TriggerResult` returns, and explicit `UseHandler` for InApp channels.  
+> **⚠️ Upgrading from v0.1.0-beta.1?**
+> v0.2.0 includes breaking changes: namespace reorganization, new meta-package structure, typed `TriggerResult` returns, and explicit `UseHandler` for InApp channels.
 > **→ See the [Migration Guide](https://recurpixel.github.io/Notify#migration-from-v010-beta1)** for step-by-step upgrade instructions.
+>
+> **Upgrading from v0.2.0-beta.1?** Install v0.2.0-beta.2 as a drop-in replacement — no API changes, CI fix only.
 
 ---
 

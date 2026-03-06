@@ -6,7 +6,7 @@ All notable changes to RecurPixel.Notify will be documented here.
 
 ## v0.2.0-beta.2 — CI Fix
 
-This release includes all v0.2.0-beta.1 changes (see [CHANGELOG.md](CHANGELOG.md)) plus:
+This release includes all v0.2.0-beta.1 changes (see [v0.2.0-beta.1](#020-beta1--march-2026)) plus:
 
 ### Fixes
 - Fixed GitHub Actions integration tests configuration loading
