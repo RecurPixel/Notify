@@ -3,10 +3,12 @@
     Publishes all RecurPixel.Notify packages to NuGet.org in dependency order.
 
 .DESCRIPTION
-    Packs and pushes all 34 packages in three tiers:
+    Packs and pushes all 35 packages in five tiers:
       Tier 0: Core (no dependencies)
-      Tier 1: Orchestrator + all 31 adapters (depend on Core)
-      Tier 2: SDK meta-package (depends on everything)
+      Tier 1: Orchestrator (depends on Core)
+      Tier 2: RecurPixel.Notify meta-package (depends on Core + Orchestrator)
+      Tier 3: All 31 adapters (depend on Core)
+      Tier 4: SDK meta-package (depends on everything)
 
     Each tier waits for NuGet indexing before proceeding to the next.
 
@@ -58,8 +60,8 @@ $ErrorActionPreference = "Stop"
 # --- Configuration ---
 
 $SolutionRoot = $PSScriptRoot
-$OutputDir    = Join-Path $SolutionRoot "nupkgs"
-$SrcDir       = Join-Path $SolutionRoot "src"
+$NupkgsBaseDir = Join-Path $SolutionRoot "nupkgs"
+$SrcDir        = Join-Path $SolutionRoot "src"
 $Configuration = "Release"
 
 # Read version from Directory.Build.props
@@ -70,11 +72,15 @@ if (-not $Version) {
     exit 1
 }
 
+# Create version-specific output directory
+$OutputDir = Join-Path $NupkgsBaseDir $Version
+
 Write-Host ""
-Write-Host "=============================================" -ForegroundColor Cyan
-Write-Host "  RecurPixel.Notify NuGet Publisher"           -ForegroundColor Cyan
-Write-Host "  Version: $Version"                            -ForegroundColor Cyan
-Write-Host "=============================================" -ForegroundColor Cyan
+Write-Host "============================================="  -ForegroundColor Cyan
+Write-Host "  RecurPixel.Notify NuGet Publisher"            -ForegroundColor Cyan
+Write-Host "  Version: $Version"                             -ForegroundColor Cyan
+Write-Host "  Output: ./nupkgs/$Version/"                   -ForegroundColor Cyan
+Write-Host "==============================================" -ForegroundColor Cyan
 Write-Host ""
 
 # --- Validation ---
@@ -93,6 +99,14 @@ $Tier0 = @(
 $Tier1 = @(
     # Orchestrator
     "RecurPixel.Notify.Orchestrator"
+)
+
+$Tier2 = @(
+    # Meta-package (Core + Orchestrator)
+    "RecurPixel.Notify"
+)
+
+$Tier3 = @(
 
     # Email adapters
     "RecurPixel.Notify.Email.SendGrid"
@@ -138,11 +152,11 @@ $Tier1 = @(
     "RecurPixel.Notify.InApp"
 )
 
-$Tier2 = @(
+$Tier4 = @(
     "RecurPixel.Notify.Sdk"
 )
 
-$AllPackages = $Tier0 + $Tier1 + $Tier2
+$AllPackages = $Tier0 + $Tier1 + $Tier2 + $Tier3 + $Tier4
 
 # --- Helper functions ---
 
@@ -202,11 +216,15 @@ if (-not $SkipBuild) {
 if (-not $SkipPack) {
     Write-Step "Packing $($AllPackages.Count) packages (v$Version)"
 
-    # Clean output directory
-    if (Test-Path $OutputDir) {
-        Remove-Item $OutputDir -Recurse -Force
+    # Create version-specific output directory (preserve other versions)
+    if (-not (Test-Path $OutputDir)) {
+        New-Item -ItemType Directory -Path $OutputDir -Force | Out-Null
     }
-    New-Item -ItemType Directory -Path $OutputDir -Force | Out-Null
+    else {
+        # Clean only the version-specific folder, not all nupkgs
+        Remove-Item (Join-Path $OutputDir "*.nupkg") -Force -ErrorAction SilentlyContinue
+        Remove-Item (Join-Path $OutputDir "*.snupkg") -Force -ErrorAction SilentlyContinue
+    }
 
     $packFailed = @()
 
@@ -242,7 +260,7 @@ if (-not $SkipPack) {
     $nupkgCount = (Get-ChildItem $OutputDir -Filter "*.nupkg").Count
     $snupkgCount = (Get-ChildItem $OutputDir -Filter "*.snupkg").Count
     Write-Host ""
-    Write-Host "  Packed $nupkgCount .nupkg + $snupkgCount .snupkg files in ./nupkgs/" -ForegroundColor Cyan
+    Write-Host "  Packed $nupkgCount .nupkg + $snupkgCount .snupkg files in ./nupkgs/$Version/" -ForegroundColor Cyan
 }
 
 if ($PackOnly) {
@@ -305,12 +323,20 @@ function Push-Tier {
 Push-Tier -TierName "Tier 0 - Core" -Packages $Tier0
 Wait-ForIndexing -Seconds $IndexWaitSeconds -TierName "Core"
 
-# Tier 1: Orchestrator + all adapters
-Push-Tier -TierName "Tier 1 - Orchestrator + Adapters" -Packages $Tier1
-Wait-ForIndexing -Seconds $IndexWaitSeconds -TierName "Tier 1"
+# Tier 1: Orchestrator
+Push-Tier -TierName "Tier 1 - Orchestrator" -Packages $Tier1
+Wait-ForIndexing -Seconds $IndexWaitSeconds -TierName "Orchestrator"
 
-# Tier 2: SDK meta-package
-Push-Tier -TierName "Tier 2 - SDK Meta-package" -Packages $Tier2
+# Tier 2: RecurPixel.Notify meta-package
+Push-Tier -TierName "Tier 2 - RecurPixel.Notify Meta-package" -Packages $Tier2
+Wait-ForIndexing -Seconds $IndexWaitSeconds -TierName "RecurPixel.Notify"
+
+# Tier 3: Adapters
+Push-Tier -TierName "Tier 3 - Adapters" -Packages $Tier3
+Wait-ForIndexing -Seconds $IndexWaitSeconds -TierName "Adapters"
+
+# Tier 4: SDK meta-package
+Push-Tier -TierName "Tier 4 - SDK Meta-package" -Packages $Tier4
 
 # --- Done ---
 

@@ -10,6 +10,26 @@ Three complete setups — one per usage tier — plus a real-world production pa
 
 ---
 
+## Namespace Organization (v0.2.0-beta.1)
+
+As of v0.2.0-beta.1, the library uses a cleaner public API structure:
+
+```csharp
+// Core types and service
+using RecurPixel.Notify;                    // INotifyService, TriggerResult, BulkTriggerResult, NotifyContext, NotifyUser
+                                             // NotificationPayload, NotifyResult, NotifyOptions, etc.
+
+// Channel interfaces
+using RecurPixel.Notify.Channels;           // INotificationChannel, NotificationChannelBase, all channel implementations
+
+// Configuration
+using RecurPixel.Notify.Configuration;      // EmailOptions, SmsOptions, PushOptions, WhatsAppOptions, all provider credentials
+```
+
+> **Migrating from beta.1?** If you see compiler errors like "RecurPixel.Notify.Core.Models is not found", update your using statements to match the new namespaces above.
+
+---
+
 ## Tier 1 — Single-channel OTP service
 
 **Use case:** Send an OTP verification email with no orchestration overhead.
@@ -46,6 +66,9 @@ builder.Services.AddSendGridChannel(opts =>
 
 **Service:**
 ```csharp
+using RecurPixel.Notify;        // INotificationChannel, NotificationPayload, NotifyResult
+using RecurPixel.Notify.Channels;
+
 public class OtpService(
     [FromKeyedServices("email")] INotificationChannel email,
     ILogger<OtpService> logger)
@@ -112,10 +135,15 @@ dotnet add package RecurPixel.Notify.InApp
 
 **Registration (`Program.cs`):**
 ```csharp
-// ① InApp handler — must be registered before AddRecurPixelNotify
+using RecurPixel.Notify;
+using RecurPixel.Notify.Configuration;
+
+// ① InApp handler — must be registered BEFORE AddRecurPixelNotify
+// This is the implementation of "sending" an in-app notification (writing to database)
 builder.Services.AddInAppChannel(opts =>
     opts.UseHandler<IApplicationDbContext>(async (notification, db) =>
     {
+        // UseHandler IS the send operation — you return success/failure here
         await db.Notifications.AddAsync(new Notification
         {
             UserId  = notification.UserId,
@@ -136,7 +164,8 @@ builder.Services.AddRecurPixelNotify(
     },
     orchestratorOptions =>
     {
-        // Delivery audit — scoped DbContext resolved automatically per call
+        // ③ OnDelivery hook — fires AFTER every send (including the InApp send above)
+        // This is for audit logging, metrics, or external notifications — NOT the send itself
         orchestratorOptions.OnDelivery<IApplicationDbContext>(async (result, db) =>
         {
             await db.NotificationLogs.AddAsync(new NotificationLog
@@ -152,7 +181,7 @@ builder.Services.AddRecurPixelNotify(
             await db.SaveChangesAsync();
         });
 
-        // Event definitions
+        // ④ Event definitions
         orchestratorOptions
             .DefineEvent("order.placed", e => e
                 .UseChannels("email", "sms", "inapp")
@@ -165,12 +194,19 @@ builder.Services.AddRecurPixelNotify(
     });
 ```
 
+**Key distinction:**
+- **`UseHandler`** (step ①): The code that EXECUTES the send. For InApp, where you write to your database.
+- **`OnDelivery`** (step ③): An AUDIT hook that fires AFTER the send. Use it for logging, not for the send itself.
+
 **Service:**
 ```csharp
+using RecurPixel.Notify;
+
 public class OrderService(INotifyService notify, ILogger<OrderService> logger)
 {
     public async Task NotifyOrderPlacedAsync(Order order)
     {
+        // TriggerResult contains per-channel outcomes
         var result = await notify.TriggerAsync("order.placed", new NotifyContext
         {
             User = new NotifyUser
@@ -200,9 +236,13 @@ public class OrderService(INotifyService notify, ILogger<OrderService> logger)
             }
         });
 
+        // Check the aggregated result
         if (!result.AllSucceeded)
-            foreach (var f in result.Failures)
-                logger.LogWarning("Notify failed: channel={Ch} error={Err}", f.Channel, f.Error);
+        {
+            // Some or all channels failed — inspect failures
+            foreach (var failure in result.Failures)
+                logger.LogWarning("Channel {Ch} failed: {Err}", failure.Channel, failure.Error);
+        }
     }
 }
 ```

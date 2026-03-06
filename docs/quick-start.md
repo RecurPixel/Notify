@@ -10,6 +10,18 @@ Minimal, copy-paste-ready examples for each channel. All examples assume you hav
 
 ---
 
+## Using Statements
+
+All code examples use these namespaces:
+
+```csharp
+using RecurPixel.Notify;                    // INotifyService, TriggerResult, NotifyContext, NotifyUser
+using RecurPixel.Notify.Channels;           // INotificationChannel
+using RecurPixel.Notify.Configuration;      // Channel options
+```
+
+---
+
 ## Email
 
 ```json

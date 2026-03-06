@@ -13,6 +13,9 @@ A modular, DI-native NuGet notification library for ASP.NET Core. Drop it in. Br
 [Get Started](getting-started){: .btn .btn-primary .fs-5 .mb-4 .mb-md-0 .mr-2 }
 [Quick Start](quick-start){: .btn .fs-5 .mb-4 .mb-md-0 }
 
+> **Migrating from v0.1.0-beta.1?**  
+> The namespace structure has been reorganized in v0.2.0-beta.1. See the [Migration Guide](#migration-from-v011-beta1) below.
+
 ---
 
 ## What It Is
@@ -88,6 +91,95 @@ See [Usage Tiers](usage-tiers) to understand which option fits your use case.
 - **Config agnostic** — accepts `IConfiguration`, options builder, or a raw POCO
 - **Content agnostic** — we deliver the payload, you build the subject and body
 - **Hook-based logging** — `OnDelivery()` callback, you write to your own DB
+
+---
+
+## License
+
+MIT — see [LICENSE](https://github.com/RecurPixel/Notify/blob/main/LICENSE).
+
+---
+
+## Migration from v0.1.0-beta.1
+
+### Breaking Changes
+
+**1. Package structure:**
+- `RecurPixel.Notify.Core` and `RecurPixel.Notify.Orchestrator` are merged into `RecurPixel.Notify`
+- Remove both old packages and install `RecurPixel.Notify` instead:
+
+```bash
+dotnet remove package RecurPixel.Notify.Core
+dotnet remove package RecurPixel.Notify.Orchestrator
+dotnet add package RecurPixel.Notify
+```
+
+**2. Namespace reorganization:**
+
+Update your using statements:
+
+| Old Namespace                             | New Namespace                                                                                      |
+| ----------------------------------------- | -------------------------------------------------------------------------------------------------- |
+| `RecurPixel.Notify.Core.Models`           | `RecurPixel.Notify`                                                                                |
+| `RecurPixel.Notify.Core.Channels`         | `RecurPixel.Notify.Channels`                                                                       |
+| `RecurPixel.Notify.Core.Options`          | `RecurPixel.Notify` (core options) or `RecurPixel.Notify.Configuration` (channel/provider options) |
+| `RecurPixel.Notify.Orchestrator.Services` | `RecurPixel.Notify`                                                                                |
+| `RecurPixel.Notify.[Channel].[Provider]`  | `RecurPixel.Notify` (for ServiceCollectionExtensions)                                              |
+
+**3. Return types:**
+
+`TriggerAsync` now returns `TriggerResult` (not dynamic). `BulkTriggerAsync` returns `BulkTriggerResult`.
+
+```csharp
+// Before (v0.1.0-beta.1)
+dynamic result = await notify.TriggerAsync(...);
+if (result.Success) { ... }
+
+// After (v0.2.0-beta.1)
+TriggerResult result = await notify.TriggerAsync(...);
+if (result.AllSucceeded) { ... }  // Check all channels at once
+foreach (var failure in result.Failures) { ... }  // Inspect per-channel failures
+```
+
+**4. InApp handler setup:**
+
+The removal of `notifyOptions.InApp` and `notifyOptions.OnDelivery` properties is replaced with explicit calls:
+
+```csharp
+// Before (v0.1.0-beta.1)
+notifyOptions.InApp = new() { /* ... */ };
+notifyOptions.OnDelivery = async result => { /* ... */ };
+
+// After (v0.2.0-beta.1)
+// ① InApp handler — separate call before AddRecurPixelNotify
+builder.Services.AddInAppChannel(opts =>
+    opts.UseHandler<IApplicationDbContext>(async (notification, db) => { /* ... */ }));
+
+// ② Main registration
+builder.Services.AddRecurPixelNotify(
+    notifyOptions => { /* ... */ },
+    orchestratorOptions =>
+    {
+        // ③ Delivery hook — inside AddRecurPixelNotify
+        orchestratorOptions.OnDelivery<IApplicationDbContext>(async (result, db) => { /* ... */ });
+    });
+```
+
+**Key distinction in v0.2.0-beta.1:**
+- **`UseHandler`** — where you implement the send (e.g., write InApp notifications to DB)
+- **`OnDelivery`** — audit hook that fires after every send, for logging and metrics
+
+### Code Update Checklist
+
+- [ ] Remove `RecurPixel.Notify.Core` and `RecurPixel.Notify.Orchestrator` packages
+- [ ] Add `RecurPixel.Notify` package
+- [ ] Update `using RecurPixel.Notify.Core.*` → `using RecurPixel.Notify`
+- [ ] Update `using RecurPixel.Notify.Core.Options.*` → `using RecurPixel.Notify.Configuration`
+- [ ] Update `using RecurPixel.Notify.Core.Channels` → `using RecurPixel.Notify.Channels`
+- [ ] Update `using RecurPixel.Notify.Orchestrator.Services` → `using RecurPixel.Notify`
+- [ ] Move `notifyOptions.InApp` logic into `UseHandler<T>` call
+- [ ] Move `notifyOptions.OnDelivery` logic into `OnDelivery<T>` call
+- [ ] Update code that inspects `TriggerResult` (now strongly typed, not dynamic)
 
 ---
 

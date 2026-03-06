@@ -98,7 +98,11 @@ The library reads your configuration, validates it at startup, and registers onl
 ## Step 4 — Inject and send
 
 ```csharp
-public class OrderService(INotifyService notify)
+using RecurPixel.Notify;  // INotifyService, TriggerResult, NotifyContext
+using RecurPixel.Notify.Channels;  // INotificationChannel
+using RecurPixel.Notify.Configuration;  // EmailOptions, NotifyOptions
+
+public class OrderService(INotifyService notify, ILogger<OrderService> logger)
 {
     public async Task ConfirmOrderAsync(Order order)
     {
@@ -118,12 +122,35 @@ public class OrderService(INotifyService notify)
             }
         });
 
-        if (!result.AllSucceeded)
-            foreach (var f in result.Failures)
-                logger.LogWarning("Channel {Ch} failed: {Err}", f.Channel, f.Error);
+        // Check the result
+        if (result.AllSucceeded)
+        {
+            logger.LogInformation("Order notification sent successfully via all channels");
+        }
+        else if (result.AnySucceeded)
+        {
+            // Some channels worked, some didn't
+            foreach (var failure in result.Failures)
+                logger.LogWarning("Channel {Channel} failed: {Error}", failure.Channel, failure.Error);
+        }
+        else
+        {
+            logger.LogError("All notification channels failed");
+        }
     }
 }
 ```
+
+**About `TriggerResult`:** The return value is a `TriggerResult` object with the following properties:
+
+- `ChannelResults` — `IReadOnlyList<NotifyResult>` containing one result per channel
+- `AllSucceeded` — `bool`, true if all channels succeeded
+- `AnySucceeded` — `bool`, true if at least one channel succeeded
+- `Failures` — `IReadOnlyList<NotifyResult>`, all channels that failed
+- `EventName` — the event name you passed in
+- `UserId` — the user ID from the context (for tracing)
+
+Each `NotifyResult` contains: `Channel`, `Provider`, `Success`, `Recipient`, `ProviderId` (message ID), `Error`, `UsedFallback`, and `SentAt`.
 
 ---
 

@@ -21,6 +21,14 @@ All notable changes to RecurPixel.Notify will be documented here.
 - **Core setup method renamed** — `AddRecurPixelNotify` in Core renamed to `AddNotifyOptions` to avoid confusion with the Orchestrator overload
 - **`InAppOptions.OnDeliver` renamed to `UseHandler`** — aligns with the handler-as-implementation pattern
 - **Dead properties removed** — `NotifyOptions.OnDelivery` and `NotifyOptions.InApp` removed; use `OrchestratorOptions.OnDelivery` and `AddInAppChannel` respectively
+- **Namespace reorganization** — Major cleanup for cleaner public API surface:
+  - Models (`NotificationPayload`, `NotifyResult`, `BulkNotifyResult`, `NotifyContext`, `NotifyUser`) moved from `RecurPixel.Notify.Core.Models` → `RecurPixel.Notify`
+  - Channel interfaces and bases (`INotificationChannel`, `NotificationChannelBase`, `ChannelAdapterAttribute`) moved from `RecurPixel.Notify.Core.Channels` → `RecurPixel.Notify.Channels`
+  - Core options (`NotifyOptions`, `RetryOptions`, `FallbackOptions`, `BulkOptions`) moved from `RecurPixel.Notify.Core.Options` → `RecurPixel.Notify`
+  - Channel-specific options (`EmailOptions`, `SmsOptions`, `PushOptions`, `WhatsAppOptions`) and all provider credential options moved from `RecurPixel.Notify.Core.Options.*` → `RecurPixel.Notify.Configuration`
+  - All public channel implementation classes moved to `RecurPixel.Notify.Channels` (e.g., `SendGridChannel`, `SlackChannel`, `TwilioSmsChannel`, etc.)
+  - Services (`INotifyService`, `NotifyService`) moved from `RecurPixel.Notify.Orchestrator.Services` → `RecurPixel.Notify`
+  - All adapter `ServiceCollectionExtensions` moved from `RecurPixel.Notify.[Channel].[Provider]` → `RecurPixel.Notify`
 
 ### Bug Fixes
 - **Simple channel registration key mismatch** — all simple channels (InApp, Slack, Discord, Teams, Telegram, Facebook, Line, Viber, Mattermost, RocketChat) now register and resolve as `"channel:default"`
