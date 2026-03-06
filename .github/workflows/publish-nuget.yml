@@ -1,0 +1,64 @@
+name: Publish to NuGet
+
+on:
+  release:
+    types: [published]
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "8.0.x"
+
+      - name: Restore dependencies
+        run: dotnet restore
+
+      - name: Build (Release)
+        run: dotnet build --configuration Release --no-restore
+
+      - name: Run tests
+        run: dotnet test --configuration Release --no-build --verbosity normal
+
+      - name: Pack NuGet packages
+        run: |
+          mkdir -p ./nupkgs
+          dotnet pack --configuration Release --no-build --output ./nupkgs
+
+      - name: Extract NuGet API key from secrets
+        id: nuget_key
+        run: echo "key_length=${#NUGET_API_KEY}" >> $GITHUB_OUTPUT
+        env:
+          NUGET_API_KEY: ${{ secrets.NUGET_API_KEY }}
+
+      - name: Publish to NuGet.org
+        run: |
+          dotnet nuget push "./nupkgs/*.nupkg" \
+            --api-key "${{ secrets.NUGET_API_KEY }}" \
+            --source "https://api.nuget.org/v3/index.json" \
+            --skip-duplicate
+        if: ${{ secrets.NUGET_API_KEY != '' }}
+
+      - name: Upload packages as release assets
+        uses: softprops/action-gh-release@v1
+        with:
+          files: |
+            ./nupkgs/*.nupkg
+            ./nupkgs/*.snupkg
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Print release info
+        run: |
+          echo "✅ Published version: ${{ github.event.release.tag_name }}"
+          echo "📦 Packages: https://github.com/${{ github.repository }}/releases/tag/${{ github.event.release.tag_name }}"
+          echo "🔗 NuGet: https://www.nuget.org/packages?q=RecurPixel.Notify"
