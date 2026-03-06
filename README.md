@@ -30,6 +30,10 @@ dotnet add package RecurPixel.Notify.Sms.Twilio
 
 → [Getting Started](https://recurpixel.github.io/Notify/getting-started) · [Quick Start](https://recurpixel.github.io/Notify/quick-start) · [Usage Tiers](https://recurpixel.github.io/Notify/usage-tiers) · [Adapter Reference](https://recurpixel.github.io/Notify/adapters)
 
+> **⚠️ Upgrading from v0.1.0-beta.1?**  
+> v0.2.0-beta.1 includes breaking changes: namespace reorganization, new meta-package structure, typed `TriggerResult` returns, and explicit `UseHandler` for InApp channels.  
+> **→ See the [Migration Guide](https://recurpixel.github.io/Notify#migration-from-v010-beta1)** for step-by-step upgrade instructions.
+
 ---
 
 ## Adapter Status
@@ -39,7 +43,7 @@ dotnet add package RecurPixel.Notify.Sms.Twilio
 | `Email.SendGrid`       | Twilio SendGrid                   | Email     | ✅           | ✅                  | 🔲                  |
 | `Email.Smtp`           | Any SMTP server                   | Email     | ✅           | ✅                  | 🔲                  |
 | `Email.Mailgun`        | Mailgun                           | Email     | ✅           | 🔲                  | 🔲                  |
-| `Email.Resend`         | Resend                            | Email     | ✅           | 🔲                  | 🔲                  |
+| `Email.Resend`         | Resend                            | Email     | ✅           | ✅                  | 🔲                  |
 | `Email.Postmark`       | Postmark                          | Email     | ✅           | 🔲                  | 🔲                  |
 | `Email.AwsSes`         | AWS SES                           | Email     | ✅           | 🔲                  | 🔲                  |
 | `Email.AzureCommEmail` | Azure Communication Services      | Email     | ✅           | 🔲                  | 🔲                  |
