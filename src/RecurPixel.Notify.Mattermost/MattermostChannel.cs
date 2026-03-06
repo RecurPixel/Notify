@@ -1,17 +1,11 @@
-using System;
-using System.Net.Http;
 using System.Net.Http.Json;
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using System.Threading;
-using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using RecurPixel.Notify;
-using RecurPixel.Notify.Channels;
 using RecurPixel.Notify.Configuration;
 
-namespace RecurPixel.Notify.Mattermost;
+namespace RecurPixel.Notify.Channels;
 
 /// <summary>
 /// Notification channel adapter for Mattermost incoming webhooks.
@@ -22,7 +16,7 @@ namespace RecurPixel.Notify.Mattermost;
 public sealed class MattermostChannel : NotificationChannelBase
 {
     private readonly MattermostOptions _options;
-    private readonly HttpClient _http;
+    private readonly IHttpClientFactory _httpClientFactory;
     private readonly ILogger<MattermostChannel> _logger;
 
     /// <inheritdoc />
@@ -33,11 +27,11 @@ public sealed class MattermostChannel : NotificationChannelBase
     /// </summary>
     public MattermostChannel(
         IOptions<MattermostOptions> options,
-        HttpClient http,
+        IHttpClientFactory httpClientFactory,
         ILogger<MattermostChannel> logger)
     {
         _options = options.Value;
-        _http = http;
+        _httpClientFactory = httpClientFactory;
         _logger = logger;
     }
 
@@ -62,7 +56,8 @@ public sealed class MattermostChannel : NotificationChannelBase
                 Channel = _options.Channel
             };
 
-            var response = await _http.PostAsJsonAsync(
+            var http = _httpClientFactory.CreateClient();
+            var response = await http.PostAsJsonAsync(
                 _options.WebhookUrl, body, JsonOptions, ct);
 
             var raw = await response.Content.ReadAsStringAsync(ct);

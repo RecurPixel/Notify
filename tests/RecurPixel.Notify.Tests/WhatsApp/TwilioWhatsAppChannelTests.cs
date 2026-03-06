@@ -1,5 +1,3 @@
-using RecurPixel.Notify.WhatsApp.Twilio;
-
 namespace RecurPixel.Notify.Tests.WhatsApp;
 
 /// <summary>

@@ -1,10 +1,9 @@
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using RecurPixel.Notify;
-using RecurPixel.Notify.Channels;
 using RecurPixel.Notify.Configuration;
+using RecurPixel.Notify.Push.Fcm;
 
-namespace RecurPixel.Notify.Push.Fcm;
+namespace RecurPixel.Notify.Channels;
 
 /// <summary>
 /// Push notification channel adapter for Firebase Cloud Messaging (FCM).

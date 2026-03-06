@@ -1,20 +1,12 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using System.Threading;
-using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using RecurPixel.Notify;
-using RecurPixel.Notify.Channels;
 using RecurPixel.Notify.Configuration;
 
-namespace RecurPixel.Notify.Sms.Sinch;
+namespace RecurPixel.Notify.Channels;
 
 /// <summary>
 /// Notification channel adapter for Sinch SMS delivery.
@@ -24,7 +16,7 @@ namespace RecurPixel.Notify.Sms.Sinch;
 public sealed class SinchChannel : NotificationChannelBase
 {
     private readonly SinchOptions _options;
-    private readonly HttpClient _http;
+    private readonly IHttpClientFactory _httpClientFactory;
     private readonly ILogger<SinchChannel> _logger;
 
     /// <inheritdoc />
@@ -35,11 +27,11 @@ public sealed class SinchChannel : NotificationChannelBase
     /// </summary>
     public SinchChannel(
         IOptions<SinchOptions> options,
-        HttpClient http,
+        IHttpClientFactory httpClientFactory,
         ILogger<SinchChannel> logger)
     {
         _options = options.Value;
-        _http = http;
+        _httpClientFactory = httpClientFactory;
         _logger = logger;
     }
 
@@ -63,12 +55,13 @@ public sealed class SinchChannel : NotificationChannelBase
                 Body = payload.Body ?? string.Empty
             };
 
+            var http = _httpClientFactory.CreateClient();
             using var request = new HttpRequestMessage(HttpMethod.Post, url);
             request.Headers.Authorization =
                 new AuthenticationHeaderValue("Bearer", _options.ApiToken);
             request.Content = JsonContent.Create(body, options: JsonOptions);
 
-            var response = await _http.SendAsync(request, ct);
+            var response = await http.SendAsync(request, ct);
             var raw = await response.Content.ReadAsStringAsync(ct);
 
             if (!response.IsSuccessStatusCode)
@@ -139,12 +132,13 @@ public sealed class SinchChannel : NotificationChannelBase
                     Body = chunkList[0].Body ?? string.Empty
                 };
 
+                var http = _httpClientFactory.CreateClient();
                 using var request = new HttpRequestMessage(HttpMethod.Post, url);
                 request.Headers.Authorization =
                     new AuthenticationHeaderValue("Bearer", _options.ApiToken);
                 request.Content = JsonContent.Create(body, options: JsonOptions);
 
-                var response = await _http.SendAsync(request, ct);
+                var response = await http.SendAsync(request, ct);
                 var raw = await response.Content.ReadAsStringAsync(ct);
 
                 if (!response.IsSuccessStatusCode)

@@ -3,11 +3,9 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using RecurPixel.Notify;
-using RecurPixel.Notify.Channels;
 using RecurPixel.Notify.Configuration;
 
-namespace RecurPixel.Notify.Viber;
+namespace RecurPixel.Notify.Channels;
 
 /// <summary>
 /// Notification channel adapter for the Viber Business Messages API.
@@ -17,7 +15,7 @@ namespace RecurPixel.Notify.Viber;
 public sealed class ViberChannel : NotificationChannelBase
 {
     private readonly ViberOptions _options;
-    private readonly HttpClient _http;
+    private readonly IHttpClientFactory _httpClientFactory;
     private readonly ILogger<ViberChannel> _logger;
 
     private const string SendEndpoint = "https://chatapi.viber.com/pa/send_message";
@@ -30,11 +28,11 @@ public sealed class ViberChannel : NotificationChannelBase
     /// </summary>
     public ViberChannel(
         IOptions<ViberOptions> options,
-        HttpClient http,
+        IHttpClientFactory httpClientFactory,
         ILogger<ViberChannel> logger)
     {
         _options = options.Value;
-        _http = http;
+        _httpClientFactory = httpClientFactory;
         _logger = logger;
     }
 
@@ -63,11 +61,12 @@ public sealed class ViberChannel : NotificationChannelBase
                            : $"{payload.Subject}\n\n{payload.Body}"
             };
 
+            var http = _httpClientFactory.CreateClient();
             using var request = new HttpRequestMessage(HttpMethod.Post, SendEndpoint);
             request.Headers.Add("X-Viber-Auth-Token", _options.BotAuthToken);
             request.Content = JsonContent.Create(body, options: JsonOptions);
 
-            var response = await _http.SendAsync(request, ct);
+            var response = await http.SendAsync(request, ct);
             var raw = await response.Content.ReadAsStringAsync(ct);
 
             if (!response.IsSuccessStatusCode)

@@ -1,7 +1,3 @@
-using RecurPixel.Notify;
-using RecurPixel.Notify.Channels;
-using RecurPixel.Notify.Configuration;
-
 namespace RecurPixel.Notify.Tests;
 
 public sealed class PostmarkChannelTests
@@ -20,7 +16,7 @@ public sealed class PostmarkChannelTests
         Body = "Plain text body"
     };
 
-    private static HttpClient MakeClient(HttpStatusCode status, object responseBody)
+    private static IHttpClientFactory MakeFactory(HttpStatusCode status, object responseBody)
     {
         var json = JsonSerializer.Serialize(responseBody);
         var handler = new Mock<HttpMessageHandler>();
@@ -37,7 +33,10 @@ public sealed class PostmarkChannelTests
                 Content = new StringContent(json)
             });
 
-        return new HttpClient(handler.Object);
+        var client = new HttpClient(handler.Object);
+        var factory = new Mock<IHttpClientFactory>();
+        factory.Setup(f => f.CreateClient(It.IsAny<string>())).Returns(client);
+        return factory.Object;
     }
 
     // ── single send ──────────────────────────────────────────────────────────
@@ -54,7 +53,7 @@ public sealed class PostmarkChannelTests
 
         var channel = new PostmarkChannel(
             Options.Create(DefaultOptions),
-            MakeClient(HttpStatusCode.OK, response),
+            MakeFactory(HttpStatusCode.OK, response),
             NullLogger<PostmarkChannel>.Instance);
 
         var result = await channel.SendAsync(DefaultPayload);
@@ -95,9 +94,11 @@ public sealed class PostmarkChannelTests
                 }))
             });
 
+        var clientFactory = new Mock<IHttpClientFactory>();
+        clientFactory.Setup(f => f.CreateClient(It.IsAny<string>())).Returns(new HttpClient(handler.Object));
         var channel = new PostmarkChannel(
             Options.Create(DefaultOptions),
-            new HttpClient(handler.Object),
+            clientFactory.Object,
             NullLogger<PostmarkChannel>.Instance);
 
         await channel.SendAsync(DefaultPayload);
@@ -139,9 +140,11 @@ public sealed class PostmarkChannelTests
                 }))
             });
 
+        var clientFactory = new Mock<IHttpClientFactory>();
+        clientFactory.Setup(f => f.CreateClient(It.IsAny<string>())).Returns(new HttpClient(handler.Object));
         var channel = new PostmarkChannel(
             Options.Create(DefaultOptions),
-            new HttpClient(handler.Object),
+            clientFactory.Object,
             NullLogger<PostmarkChannel>.Instance);
 
         await channel.SendAsync(payload);
@@ -156,7 +159,7 @@ public sealed class PostmarkChannelTests
     {
         var channel = new PostmarkChannel(
             Options.Create(DefaultOptions),
-            MakeClient(HttpStatusCode.UnprocessableEntity, new { Message = "Invalid" }),
+            MakeFactory(HttpStatusCode.UnprocessableEntity, new { Message = "Invalid" }),
             NullLogger<PostmarkChannel>.Instance);
 
         var result = await channel.SendAsync(DefaultPayload);
@@ -178,9 +181,11 @@ public sealed class PostmarkChannelTests
                 ItExpr.IsAny<CancellationToken>())
             .ThrowsAsync(new HttpRequestException("Timeout"));
 
+        var clientFactory = new Mock<IHttpClientFactory>();
+        clientFactory.Setup(f => f.CreateClient(It.IsAny<string>())).Returns(new HttpClient(handler.Object));
         var channel = new PostmarkChannel(
             Options.Create(DefaultOptions),
-            new HttpClient(handler.Object),
+            clientFactory.Object,
             NullLogger<PostmarkChannel>.Instance);
 
         var result = await channel.SendAsync(DefaultPayload);
@@ -208,7 +213,7 @@ public sealed class PostmarkChannelTests
 
         var channel = new PostmarkChannel(
             Options.Create(DefaultOptions),
-            MakeClient(HttpStatusCode.OK, batchResponse),
+            MakeFactory(HttpStatusCode.OK, batchResponse),
             NullLogger<PostmarkChannel>.Instance);
 
         var result = await channel.SendBulkAsync(payloads);
@@ -236,7 +241,7 @@ public sealed class PostmarkChannelTests
 
         var channel = new PostmarkChannel(
             Options.Create(DefaultOptions),
-            MakeClient(HttpStatusCode.OK, batchResponse),
+            MakeFactory(HttpStatusCode.OK, batchResponse),
             NullLogger<PostmarkChannel>.Instance);
 
         var result = await channel.SendBulkAsync(payloads);
@@ -258,7 +263,7 @@ public sealed class PostmarkChannelTests
 
         var channel = new PostmarkChannel(
             Options.Create(DefaultOptions),
-            MakeClient(HttpStatusCode.Unauthorized, new { Message = "Unauthorized" }),
+            MakeFactory(HttpStatusCode.Unauthorized, new { Message = "Unauthorized" }),
             NullLogger<PostmarkChannel>.Instance);
 
         var result = await channel.SendBulkAsync(payloads);
@@ -274,7 +279,7 @@ public sealed class PostmarkChannelTests
     {
         var channel = new PostmarkChannel(
             Options.Create(DefaultOptions),
-            MakeClient(HttpStatusCode.OK, new { }),
+            MakeFactory(HttpStatusCode.OK, new { }),
             NullLogger<PostmarkChannel>.Instance);
 
         Assert.Equal("email", channel.ChannelName);
@@ -287,7 +292,7 @@ public sealed class PostmarkChannelTests
 
         var channel = new PostmarkChannel(
             Options.Create(DefaultOptions),
-            MakeClient(HttpStatusCode.OK, response),
+            MakeFactory(HttpStatusCode.OK, response),
             NullLogger<PostmarkChannel>.Instance);
 
         var result = await channel.SendAsync(DefaultPayload);

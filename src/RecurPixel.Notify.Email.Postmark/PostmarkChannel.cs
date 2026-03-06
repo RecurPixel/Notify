@@ -1,15 +1,8 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net.Http;
 using System.Net.Http.Json;
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using System.Threading;
-using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using RecurPixel.Notify.Channels;
 using RecurPixel.Notify.Configuration;
 
 namespace RecurPixel.Notify.Channels;
@@ -22,7 +15,7 @@ namespace RecurPixel.Notify.Channels;
 public sealed class PostmarkChannel : NotificationChannelBase
 {
     private readonly PostmarkOptions _options;
-    private readonly HttpClient _http;
+    private readonly IHttpClientFactory _httpClientFactory;
     private readonly ILogger<PostmarkChannel> _logger;
 
     private const string SingleEndpoint = "https://api.postmarkapp.com/email";
@@ -36,11 +29,11 @@ public sealed class PostmarkChannel : NotificationChannelBase
     /// </summary>
     public PostmarkChannel(
         IOptions<PostmarkOptions> options,
-        HttpClient http,
+        IHttpClientFactory httpClientFactory,
         ILogger<PostmarkChannel> logger)
     {
         _options = options.Value;
-        _http = http;
+        _httpClientFactory = httpClientFactory;
         _logger = logger;
     }
 
@@ -57,11 +50,12 @@ public sealed class PostmarkChannel : NotificationChannelBase
         {
             var body = BuildMessage(payload);
 
+            var http = _httpClientFactory.CreateClient();
             using var request = new HttpRequestMessage(HttpMethod.Post, SingleEndpoint);
             AddHeaders(request);
             request.Content = JsonContent.Create(body, options: JsonOptions);
 
-            var response = await _http.SendAsync(request, ct);
+            var response = await http.SendAsync(request, ct);
             var raw = await response.Content.ReadAsStringAsync(ct);
 
             if (!response.IsSuccessStatusCode)
@@ -124,11 +118,12 @@ public sealed class PostmarkChannel : NotificationChannelBase
             {
                 var messages = chunkList.Select(BuildMessage).ToList();
 
+                var http = _httpClientFactory.CreateClient();
                 using var request = new HttpRequestMessage(HttpMethod.Post, BatchEndpoint);
                 AddHeaders(request);
                 request.Content = JsonContent.Create(messages, options: JsonOptions);
 
-                var response = await _http.SendAsync(request, ct);
+                var response = await http.SendAsync(request, ct);
                 var raw = await response.Content.ReadAsStringAsync(ct);
 
                 if (!response.IsSuccessStatusCode)

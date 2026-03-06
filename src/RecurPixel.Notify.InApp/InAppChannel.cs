@@ -1,13 +1,8 @@
-using System;
-using System.Threading;
-using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using RecurPixel.Notify;
-using RecurPixel.Notify.Channels;
 using RecurPixel.Notify.Configuration;
 
-namespace RecurPixel.Notify.InApp;
+namespace RecurPixel.Notify.Channels;
 
 /// <summary>
 /// Notification channel adapter for in-app / inbox delivery.

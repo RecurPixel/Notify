@@ -1,5 +1,3 @@
-using RecurPixel.Notify.Facebook;
-
 namespace RecurPixel.Notify.Tests;
 
 public sealed class FacebookChannelTests
@@ -16,7 +14,7 @@ public sealed class FacebookChannelTests
         Body = "World"
     };
 
-    private static HttpClient MakeClient(HttpStatusCode status, object responseBody)
+    private static IHttpClientFactory MakeFactory(HttpStatusCode status, object responseBody)
     {
         var json = JsonSerializer.Serialize(responseBody);
         var handler = new Mock<HttpMessageHandler>();
@@ -33,7 +31,10 @@ public sealed class FacebookChannelTests
                 Content = new StringContent(json)
             });
 
-        return new HttpClient(handler.Object);
+        var client = new HttpClient(handler.Object);
+        var factory = new Mock<IHttpClientFactory>();
+        factory.Setup(f => f.CreateClient(It.IsAny<string>())).Returns(client);
+        return factory.Object;
     }
 
     // ── success ──────────────────────────────────────────────────────────────
@@ -49,7 +50,7 @@ public sealed class FacebookChannelTests
 
         var channel = new FacebookChannel(
             Options.Create(DefaultOptions),
-            MakeClient(HttpStatusCode.OK, response),
+            MakeFactory(HttpStatusCode.OK, response),
             NullLogger<FacebookChannel>.Instance);
 
         var result = await channel.SendAsync(DefaultPayload);
@@ -97,9 +98,11 @@ public sealed class FacebookChannelTests
                 Content = new StringContent(JsonSerializer.Serialize(response))
             });
 
+        var clientFactory = new Mock<IHttpClientFactory>();
+        clientFactory.Setup(f => f.CreateClient(It.IsAny<string>())).Returns(new HttpClient(handler.Object));
         var channel = new FacebookChannel(
             Options.Create(DefaultOptions),
-            new HttpClient(handler.Object),
+            clientFactory.Object,
             NullLogger<FacebookChannel>.Instance);
 
         var result = await channel.SendAsync(payload);
@@ -138,9 +141,11 @@ public sealed class FacebookChannelTests
                 Content = new StringContent(JsonSerializer.Serialize(response))
             });
 
+        var clientFactory = new Mock<IHttpClientFactory>();
+        clientFactory.Setup(f => f.CreateClient(It.IsAny<string>())).Returns(new HttpClient(handler.Object));
         var channel = new FacebookChannel(
             Options.Create(DefaultOptions),
-            new HttpClient(handler.Object),
+            clientFactory.Object,
             NullLogger<FacebookChannel>.Instance);
 
         var result = await channel.SendAsync(DefaultPayload);
@@ -163,7 +168,7 @@ public sealed class FacebookChannelTests
 
         var channel = new FacebookChannel(
             Options.Create(DefaultOptions),
-            MakeClient(HttpStatusCode.Unauthorized, response),
+            MakeFactory(HttpStatusCode.Unauthorized, response),
             NullLogger<FacebookChannel>.Instance);
 
         var result = await channel.SendAsync(DefaultPayload);
@@ -187,9 +192,11 @@ public sealed class FacebookChannelTests
                 ItExpr.IsAny<CancellationToken>())
             .ThrowsAsync(new HttpRequestException("Connection refused"));
 
+        var clientFactory = new Mock<IHttpClientFactory>();
+        clientFactory.Setup(f => f.CreateClient(It.IsAny<string>())).Returns(new HttpClient(handler.Object));
         var channel = new FacebookChannel(
             Options.Create(DefaultOptions),
-            new HttpClient(handler.Object),
+            clientFactory.Object,
             NullLogger<FacebookChannel>.Instance);
 
         var result = await channel.SendAsync(DefaultPayload);
@@ -206,7 +213,7 @@ public sealed class FacebookChannelTests
     {
         var channel = new FacebookChannel(
             Options.Create(DefaultOptions),
-            MakeClient(HttpStatusCode.OK, new { }),
+            MakeFactory(HttpStatusCode.OK, new { }),
             NullLogger<FacebookChannel>.Instance);
 
         Assert.Equal("facebook", channel.ChannelName);
@@ -223,7 +230,7 @@ public sealed class FacebookChannelTests
 
         var channel = new FacebookChannel(
             Options.Create(DefaultOptions),
-            MakeClient(HttpStatusCode.OK, response),
+            MakeFactory(HttpStatusCode.OK, response),
             NullLogger<FacebookChannel>.Instance);
 
         var result = await channel.SendAsync(DefaultPayload);
@@ -242,7 +249,7 @@ public sealed class FacebookChannelTests
 
         var channel = new FacebookChannel(
             Options.Create(DefaultOptions),
-            MakeClient(HttpStatusCode.OK, response),
+            MakeFactory(HttpStatusCode.OK, response),
             NullLogger<FacebookChannel>.Instance);
 
         var result = await channel.SendAsync(DefaultPayload);

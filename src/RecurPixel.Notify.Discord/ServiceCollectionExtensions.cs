@@ -5,7 +5,7 @@ using RecurPixel.Notify.Channels;
 using RecurPixel.Notify.Configuration;
 
 
-namespace RecurPixel.Notify.Discord;
+namespace RecurPixel.Notify;
 
 /// <summary>
 /// DI registration extensions for the Discord notification channel.

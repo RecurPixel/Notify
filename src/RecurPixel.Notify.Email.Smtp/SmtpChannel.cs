@@ -1,11 +1,7 @@
-using System;
 using System.Net;
 using System.Net.Mail;
-using System.Threading;
-using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using RecurPixel.Notify.Channels;
 using RecurPixel.Notify.Configuration;
 
 namespace RecurPixel.Notify.Channels;
@@ -31,7 +27,7 @@ public sealed class SmtpChannel : NotificationChannelBase
         ILogger<SmtpChannel> logger)
     {
         _options = options.Value;
-        _logger  = logger;
+        _logger = logger;
     }
 
     /// <inheritdoc />
@@ -46,15 +42,15 @@ public sealed class SmtpChannel : NotificationChannelBase
             using var client = new System.Net.Mail.SmtpClient(_options.Host, _options.Port)
             {
                 Credentials = new NetworkCredential(_options.Username, _options.Password),
-                EnableSsl   = _options.UseSsl
+                EnableSsl = _options.UseSsl
             };
 
-            var from    = new MailAddress(_options.FromEmail, _options.FromName);
-            var to      = new MailAddress(payload.To);
+            var from = new MailAddress(_options.FromEmail, _options.FromName);
+            var to = new MailAddress(payload.To);
             var message = new MailMessage(from, to)
             {
-                Subject    = payload.Subject,
-                Body       = payload.Body,
+                Subject = payload.Subject,
+                Body = payload.Body,
                 IsBodyHtml = true
             };
 
@@ -64,11 +60,11 @@ public sealed class SmtpChannel : NotificationChannelBase
 
             return new NotifyResult
             {
-                Success   = true,
-                Channel   = ChannelName,
-                Provider  = "smtp",
+                Success = true,
+                Channel = ChannelName,
+                Provider = "smtp",
                 Recipient = payload.To,
-                SentAt    = DateTime.UtcNow
+                SentAt = DateTime.UtcNow
             };
         }
         catch (Exception ex)
@@ -77,12 +73,12 @@ public sealed class SmtpChannel : NotificationChannelBase
 
             return new NotifyResult
             {
-                Success   = false,
-                Channel   = ChannelName,
-                Provider  = "smtp",
+                Success = false,
+                Channel = ChannelName,
+                Provider = "smtp",
                 Recipient = payload.To,
-                Error     = ex.Message,
-                SentAt    = DateTime.UtcNow
+                Error = ex.Message,
+                SentAt = DateTime.UtcNow
             };
         }
     }

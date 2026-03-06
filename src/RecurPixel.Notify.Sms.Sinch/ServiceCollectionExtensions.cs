@@ -1,11 +1,10 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Options;
-using RecurPixel.Notify;
 using RecurPixel.Notify.Channels;
 using RecurPixel.Notify.Configuration;
 
-namespace RecurPixel.Notify.Sms.Sinch;
+namespace RecurPixel.Notify;
 
 /// <summary>
 /// DI registration extensions for the Sinch SMS channel.

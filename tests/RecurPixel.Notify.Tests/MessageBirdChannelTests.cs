@@ -1,5 +1,3 @@
-using RecurPixel.Notify.Sms.MessageBird;
-
 namespace RecurPixel.Notify.Tests;
 
 public sealed class MessageBirdChannelTests
@@ -16,7 +14,7 @@ public sealed class MessageBirdChannelTests
         Body = "Hello from MessageBird"
     };
 
-    private static HttpClient MakeClient(HttpStatusCode status, object responseBody)
+    private static IHttpClientFactory MakeFactory(HttpStatusCode status, object responseBody)
     {
         var json = JsonSerializer.Serialize(responseBody);
         var handler = new Mock<HttpMessageHandler>();
@@ -33,7 +31,10 @@ public sealed class MessageBirdChannelTests
                 Content = new StringContent(json)
             });
 
-        return new HttpClient(handler.Object);
+        var client = new HttpClient(handler.Object);
+        var factory = new Mock<IHttpClientFactory>();
+        factory.Setup(f => f.CreateClient(It.IsAny<string>())).Returns(client);
+        return factory.Object;
     }
 
     // ── success ──────────────────────────────────────────────────────────────
@@ -49,7 +50,7 @@ public sealed class MessageBirdChannelTests
 
         var channel = new MessageBirdChannel(
             Options.Create(DefaultOptions),
-            MakeClient(HttpStatusCode.Created, response),
+            MakeFactory(HttpStatusCode.Created, response),
             NullLogger<MessageBirdChannel>.Instance);
 
         var result = await channel.SendAsync(DefaultPayload);
@@ -88,9 +89,11 @@ public sealed class MessageBirdChannelTests
                 }))
             });
 
+        var clientFactory = new Mock<IHttpClientFactory>();
+        clientFactory.Setup(f => f.CreateClient(It.IsAny<string>())).Returns(new HttpClient(handler.Object));
         var channel = new MessageBirdChannel(
             Options.Create(DefaultOptions),
-            new HttpClient(handler.Object),
+            clientFactory.Object,
             NullLogger<MessageBirdChannel>.Instance);
 
         await channel.SendAsync(DefaultPayload);
@@ -125,9 +128,11 @@ public sealed class MessageBirdChannelTests
                 }))
             });
 
+        var clientFactory = new Mock<IHttpClientFactory>();
+        clientFactory.Setup(f => f.CreateClient(It.IsAny<string>())).Returns(new HttpClient(handler.Object));
         var channel = new MessageBirdChannel(
             Options.Create(DefaultOptions),
-            new HttpClient(handler.Object),
+            clientFactory.Object,
             NullLogger<MessageBirdChannel>.Instance);
 
         await channel.SendAsync(DefaultPayload);
@@ -154,7 +159,7 @@ public sealed class MessageBirdChannelTests
 
         var channel = new MessageBirdChannel(
             Options.Create(DefaultOptions),
-            MakeClient(HttpStatusCode.Unauthorized, response),
+            MakeFactory(HttpStatusCode.Unauthorized, response),
             NullLogger<MessageBirdChannel>.Instance);
 
         var result = await channel.SendAsync(DefaultPayload);
@@ -176,9 +181,11 @@ public sealed class MessageBirdChannelTests
                 ItExpr.IsAny<CancellationToken>())
             .ThrowsAsync(new HttpRequestException("Network error"));
 
+        var clientFactory = new Mock<IHttpClientFactory>();
+        clientFactory.Setup(f => f.CreateClient(It.IsAny<string>())).Returns(new HttpClient(handler.Object));
         var channel = new MessageBirdChannel(
             Options.Create(DefaultOptions),
-            new HttpClient(handler.Object),
+            clientFactory.Object,
             NullLogger<MessageBirdChannel>.Instance);
 
         var result = await channel.SendAsync(DefaultPayload);
@@ -194,7 +201,7 @@ public sealed class MessageBirdChannelTests
     {
         var channel = new MessageBirdChannel(
             Options.Create(DefaultOptions),
-            MakeClient(HttpStatusCode.OK, new { }),
+            MakeFactory(HttpStatusCode.OK, new { }),
             NullLogger<MessageBirdChannel>.Instance);
 
         Assert.Equal("sms", channel.ChannelName);
@@ -207,7 +214,7 @@ public sealed class MessageBirdChannelTests
 
         var channel = new MessageBirdChannel(
             Options.Create(DefaultOptions),
-            MakeClient(HttpStatusCode.Created, response),
+            MakeFactory(HttpStatusCode.Created, response),
             NullLogger<MessageBirdChannel>.Instance);
 
         var result = await channel.SendAsync(DefaultPayload);
@@ -222,7 +229,7 @@ public sealed class MessageBirdChannelTests
 
         var channel = new MessageBirdChannel(
             Options.Create(DefaultOptions),
-            MakeClient(HttpStatusCode.Created, response),
+            MakeFactory(HttpStatusCode.Created, response),
             NullLogger<MessageBirdChannel>.Instance);
 
         var result = await channel.SendAsync(DefaultPayload);

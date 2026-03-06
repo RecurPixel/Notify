@@ -1,5 +1,3 @@
-using RecurPixel.Notify.WhatsApp.MetaCloud;
-
 namespace RecurPixel.Notify.Tests.WhatsApp;
 
 public class MetaCloudWhatsAppChannelTests

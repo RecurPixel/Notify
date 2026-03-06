@@ -1,11 +1,5 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using RecurPixel.Notify.Channels;
 using RecurPixel.Notify.Configuration;
 using SendGrid;
 using SendGrid.Helpers.Mail;
@@ -33,7 +27,7 @@ public sealed class SendGridChannel : NotificationChannelBase
         ILogger<SendGridChannel> logger)
     {
         _options = options.Value;
-        _logger  = logger;
+        _logger = logger;
     }
 
     /// <inheritdoc />
@@ -45,9 +39,9 @@ public sealed class SendGridChannel : NotificationChannelBase
 
         try
         {
-            var client  = new SendGridClient(_options.ApiKey);
-            var from    = new EmailAddress(_options.FromEmail, _options.FromName);
-            var to      = new EmailAddress(payload.To);
+            var client = new SendGridClient(_options.ApiKey);
+            var from = new EmailAddress(_options.FromEmail, _options.FromName);
+            var to = new EmailAddress(payload.To);
             var message = MailHelper.CreateSingleEmail(
                 from,
                 to,
@@ -69,16 +63,16 @@ public sealed class SendGridChannel : NotificationChannelBase
 
                 return new NotifyResult
                 {
-                    Success    = true,
-                    Channel    = ChannelName,
-                    Provider   = "sendgrid",
+                    Success = true,
+                    Channel = ChannelName,
+                    Provider = "sendgrid",
                     ProviderId = messageId,
-                    Recipient  = payload.To,
-                    SentAt     = DateTime.UtcNow
+                    Recipient = payload.To,
+                    SentAt = DateTime.UtcNow
                 };
             }
 
-            var body  = await response.Body.ReadAsStringAsync();
+            var body = await response.Body.ReadAsStringAsync();
             var error = $"SendGrid returned {response.StatusCode}: {body}";
 
             _logger.LogDebug(
@@ -87,12 +81,12 @@ public sealed class SendGridChannel : NotificationChannelBase
 
             return new NotifyResult
             {
-                Success   = false,
-                Channel   = ChannelName,
-                Provider  = "sendgrid",
+                Success = false,
+                Channel = ChannelName,
+                Provider = "sendgrid",
                 Recipient = payload.To,
-                Error     = error,
-                SentAt    = DateTime.UtcNow
+                Error = error,
+                SentAt = DateTime.UtcNow
             };
         }
         catch (Exception ex)
@@ -102,12 +96,12 @@ public sealed class SendGridChannel : NotificationChannelBase
 
             return new NotifyResult
             {
-                Success   = false,
-                Channel   = ChannelName,
-                Provider  = "sendgrid",
+                Success = false,
+                Channel = ChannelName,
+                Provider = "sendgrid",
                 Recipient = payload.To,
-                Error     = ex.Message,
-                SentAt    = DateTime.UtcNow
+                Error = ex.Message,
+                SentAt = DateTime.UtcNow
             };
         }
     }
@@ -124,23 +118,23 @@ public sealed class SendGridChannel : NotificationChannelBase
             "SendGrid: attempting bulk send for {Count} recipients", payloads.Count);
 
         var allResults = new List<NotifyResult>();
-        var client     = new SendGridClient(_options.ApiKey);
-        var from       = new EmailAddress(_options.FromEmail, _options.FromName);
-        var chunks     = payloads.Chunk(1000);
+        var client = new SendGridClient(_options.ApiKey);
+        var from = new EmailAddress(_options.FromEmail, _options.FromName);
+        var chunks = payloads.Chunk(1000);
 
         foreach (var chunk in chunks)
         {
             var personalizations = chunk.Select(p => new Personalization
             {
-                Tos     = new List<EmailAddress> { new EmailAddress(p.To) },
+                Tos = new List<EmailAddress> { new EmailAddress(p.To) },
                 Subject = p.Subject
             }).ToList();
 
             var message = new SendGridMessage
             {
-                From             = from,
+                From = from,
                 Personalizations = personalizations,
-                HtmlContent      = chunk.First().Body
+                HtmlContent = chunk.First().Body
             };
 
             try
@@ -161,18 +155,18 @@ public sealed class SendGridChannel : NotificationChannelBase
                     {
                         allResults.Add(new NotifyResult
                         {
-                            Success    = true,
-                            Channel    = ChannelName,
-                            Provider   = "sendgrid",
+                            Success = true,
+                            Channel = ChannelName,
+                            Provider = "sendgrid",
                             ProviderId = messageId,
-                            Recipient  = payload.To,
-                            SentAt     = DateTime.UtcNow
+                            Recipient = payload.To,
+                            SentAt = DateTime.UtcNow
                         });
                     }
                 }
                 else
                 {
-                    var body  = await response.Body.ReadAsStringAsync();
+                    var body = await response.Body.ReadAsStringAsync();
                     var error = $"SendGrid returned {response.StatusCode}: {body}";
 
                     _logger.LogDebug(
@@ -183,12 +177,12 @@ public sealed class SendGridChannel : NotificationChannelBase
                     {
                         allResults.Add(new NotifyResult
                         {
-                            Success   = false,
-                            Channel   = ChannelName,
-                            Provider  = "sendgrid",
+                            Success = false,
+                            Channel = ChannelName,
+                            Provider = "sendgrid",
                             Recipient = payload.To,
-                            Error     = error,
-                            SentAt    = DateTime.UtcNow
+                            Error = error,
+                            SentAt = DateTime.UtcNow
                         });
                     }
                 }
@@ -202,12 +196,12 @@ public sealed class SendGridChannel : NotificationChannelBase
                 {
                     allResults.Add(new NotifyResult
                     {
-                        Success   = false,
-                        Channel   = ChannelName,
-                        Provider  = "sendgrid",
+                        Success = false,
+                        Channel = ChannelName,
+                        Provider = "sendgrid",
                         Recipient = payload.To,
-                        Error     = ex.Message,
-                        SentAt    = DateTime.UtcNow
+                        Error = ex.Message,
+                        SentAt = DateTime.UtcNow
                     });
                 }
             }
@@ -215,8 +209,8 @@ public sealed class SendGridChannel : NotificationChannelBase
 
         return new BulkNotifyResult
         {
-            Results         = allResults,
-            Channel         = ChannelName,
+            Results = allResults,
+            Channel = ChannelName,
             UsedNativeBatch = true
         };
     }

@@ -1,5 +1,3 @@
-using RecurPixel.Notify.Teams;
-
 namespace RecurPixel.Notify.Tests.Teams;
 
 public class TeamsChannelTests

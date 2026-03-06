@@ -1,5 +1,3 @@
-using RecurPixel.Notify.Sms.Vonage;
-
 namespace RecurPixel.Notify.Tests;
 
 public sealed class VonageSmsChannelTests
@@ -30,7 +28,7 @@ public sealed class VonageSmsChannelTests
         return new { messages = new[] { msg } };
     }
 
-    private static HttpClient MakeClient(HttpStatusCode status, object responseBody)
+    private static IHttpClientFactory MakeFactory(HttpStatusCode status, object responseBody)
     {
         var json = JsonSerializer.Serialize(responseBody);
         var handler = new Mock<HttpMessageHandler>();
@@ -47,7 +45,10 @@ public sealed class VonageSmsChannelTests
                 Content = new StringContent(json)
             });
 
-        return new HttpClient(handler.Object);
+        var client = new HttpClient(handler.Object);
+        var factory = new Mock<IHttpClientFactory>();
+        factory.Setup(f => f.CreateClient(It.IsAny<string>())).Returns(client);
+        return factory.Object;
     }
 
     // ── success ──────────────────────────────────────────────────────────────
@@ -59,7 +60,7 @@ public sealed class VonageSmsChannelTests
 
         var channel = new VonageSmsChannel(
             Options.Create(DefaultOptions),
-            MakeClient(HttpStatusCode.OK, response),
+            MakeFactory(HttpStatusCode.OK, response),
             NullLogger<VonageSmsChannel>.Instance);
 
         var result = await channel.SendAsync(DefaultPayload);
@@ -79,7 +80,7 @@ public sealed class VonageSmsChannelTests
 
         var channel = new VonageSmsChannel(
             Options.Create(DefaultOptions),
-            MakeClient(HttpStatusCode.OK, response),
+            MakeFactory(HttpStatusCode.OK, response),
             NullLogger<VonageSmsChannel>.Instance);
 
         var result = await channel.SendAsync(DefaultPayload);
@@ -95,7 +96,7 @@ public sealed class VonageSmsChannelTests
     {
         var channel = new VonageSmsChannel(
             Options.Create(DefaultOptions),
-            MakeClient(HttpStatusCode.Unauthorized, new { message = "Unauthorized" }),
+            MakeFactory(HttpStatusCode.Unauthorized, new { message = "Unauthorized" }),
             NullLogger<VonageSmsChannel>.Instance);
 
         var result = await channel.SendAsync(DefaultPayload);
@@ -117,9 +118,11 @@ public sealed class VonageSmsChannelTests
                 ItExpr.IsAny<CancellationToken>())
             .ThrowsAsync(new HttpRequestException("Connection refused"));
 
+        var clientFactory = new Mock<IHttpClientFactory>();
+        clientFactory.Setup(f => f.CreateClient(It.IsAny<string>())).Returns(new HttpClient(handler.Object));
         var channel = new VonageSmsChannel(
             Options.Create(DefaultOptions),
-            new HttpClient(handler.Object),
+            clientFactory.Object,
             NullLogger<VonageSmsChannel>.Instance);
 
         var result = await channel.SendAsync(DefaultPayload);
@@ -143,7 +146,7 @@ public sealed class VonageSmsChannelTests
 
         var channel = new VonageSmsChannel(
             Options.Create(DefaultOptions),
-            MakeClient(HttpStatusCode.OK, response),
+            MakeFactory(HttpStatusCode.OK, response),
             NullLogger<VonageSmsChannel>.Instance);
 
         var result = await channel.SendBulkAsync(payloads);
@@ -160,7 +163,7 @@ public sealed class VonageSmsChannelTests
     {
         var channel = new VonageSmsChannel(
             Options.Create(DefaultOptions),
-            MakeClient(HttpStatusCode.OK, new { }),
+            MakeFactory(HttpStatusCode.OK, new { }),
             NullLogger<VonageSmsChannel>.Instance);
 
         Assert.Equal("sms", channel.ChannelName);
@@ -173,7 +176,7 @@ public sealed class VonageSmsChannelTests
 
         var channel = new VonageSmsChannel(
             Options.Create(DefaultOptions),
-            MakeClient(HttpStatusCode.OK, response),
+            MakeFactory(HttpStatusCode.OK, response),
             NullLogger<VonageSmsChannel>.Instance);
 
         var result = await channel.SendAsync(DefaultPayload);

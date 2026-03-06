@@ -1,5 +1,3 @@
-using RecurPixel.Notify.Sms.Twilio;
-
 namespace RecurPixel.Notify.Tests.Sms;
 
 public class TwilioSmsChannelTests

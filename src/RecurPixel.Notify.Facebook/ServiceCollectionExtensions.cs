@@ -6,7 +6,7 @@ using RecurPixel.Notify;
 using RecurPixel.Notify.Channels;
 using RecurPixel.Notify.Configuration;
 
-namespace RecurPixel.Notify.Facebook;
+namespace RecurPixel.Notify;
 
 /// <summary>
 /// DI registration extensions for the Facebook Messenger notification channel.

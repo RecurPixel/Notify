@@ -1,8 +1,4 @@
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging.Abstractions;
-using Microsoft.Extensions.Options;
-using RecurPixel.Notify;
-using RecurPixel.Notify.InApp;
 
 namespace RecurPixel.Notify.Tests;
 

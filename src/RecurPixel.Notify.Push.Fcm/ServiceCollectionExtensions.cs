@@ -1,12 +1,10 @@
-﻿using System;
-using Microsoft.Extensions.DependencyInjection;
+﻿using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
-using Microsoft.Extensions.Options;
-using RecurPixel.Notify;
 using RecurPixel.Notify.Channels;
 using RecurPixel.Notify.Configuration;
+using RecurPixel.Notify.Push.Fcm;
 
-namespace RecurPixel.Notify.Push.Fcm;
+namespace RecurPixel.Notify;
 
 /// <summary>
 /// Registers the FCM push notification channel adapter with the DI container.

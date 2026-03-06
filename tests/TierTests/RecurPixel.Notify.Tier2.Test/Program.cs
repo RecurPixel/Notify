@@ -8,12 +8,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using RecurPixel.Notify;
-using RecurPixel.Notify.Channels;
 using RecurPixel.Notify.Configuration;
-using RecurPixel.Notify.Core.Options.Channels;
-using RecurPixel.Notify.Core.Options.Providers;
-using RecurPixel.Notify.Orchestrator.Extensions;
-using RecurPixel.Notify.Orchestrator.Services;
 
 Console.WriteLine("=== Tier 2: Orchestrator + Selective Providers ===");
 Console.WriteLine();

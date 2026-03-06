@@ -1,19 +1,3 @@
-using System;
-using System.Net;
-using System.Net.Http;
-using System.Text.Json;
-using System.Threading;
-using System.Threading.Tasks;
-using Microsoft.Extensions.Logging.Abstractions;
-using Microsoft.Extensions.Options;
-using Moq;
-using Moq.Protected;
-using RecurPixel.Notify;
-using RecurPixel.Notify.Channels;
-using RecurPixel.Notify.Configuration;
-using RecurPixel.Notify.Mattermost;
-using Xunit;
-
 namespace RecurPixel.Notify.Tests;
 
 public sealed class MattermostChannelTests
@@ -32,7 +16,7 @@ public sealed class MattermostChannelTests
         Body = "World"
     };
 
-    private static HttpClient MakeClient(HttpStatusCode status, string responseBody = "ok")
+    private static IHttpClientFactory MakeFactory(HttpStatusCode status, string responseBody = "ok")
     {
         var handler = new Mock<HttpMessageHandler>();
 
@@ -48,7 +32,10 @@ public sealed class MattermostChannelTests
                 Content = new StringContent(responseBody)
             });
 
-        return new HttpClient(handler.Object);
+        var client = new HttpClient(handler.Object);
+        var factory = new Mock<IHttpClientFactory>();
+        factory.Setup(f => f.CreateClient(It.IsAny<string>())).Returns(client);
+        return factory.Object;
     }
 
     // ── success ──────────────────────────────────────────────────────────────
@@ -58,7 +45,7 @@ public sealed class MattermostChannelTests
     {
         var channel = new MattermostChannel(
             Options.Create(DefaultOptions),
-            MakeClient(HttpStatusCode.OK),
+            MakeFactory(HttpStatusCode.OK),
             NullLogger<MattermostChannel>.Instance);
 
         var result = await channel.SendAsync(DefaultPayload);
@@ -92,9 +79,11 @@ public sealed class MattermostChannelTests
                 Content = new StringContent("ok")
             });
 
+        var clientFactory = new Mock<IHttpClientFactory>();
+        clientFactory.Setup(f => f.CreateClient(It.IsAny<string>())).Returns(new HttpClient(handler.Object));
         var channel = new MattermostChannel(
             Options.Create(DefaultOptions),
-            new HttpClient(handler.Object),
+            clientFactory.Object,
             NullLogger<MattermostChannel>.Instance);
 
         await channel.SendAsync(DefaultPayload);
@@ -133,9 +122,11 @@ public sealed class MattermostChannelTests
                 Content = new StringContent("ok")
             });
 
+        var clientFactory = new Mock<IHttpClientFactory>();
+        clientFactory.Setup(f => f.CreateClient(It.IsAny<string>())).Returns(new HttpClient(handler.Object));
         var channel = new MattermostChannel(
             Options.Create(DefaultOptions),
-            new HttpClient(handler.Object),
+            clientFactory.Object,
             NullLogger<MattermostChannel>.Instance);
 
         await channel.SendAsync(payload);
@@ -167,9 +158,11 @@ public sealed class MattermostChannelTests
                 Content = new StringContent("ok")
             });
 
+        var clientFactory = new Mock<IHttpClientFactory>();
+        clientFactory.Setup(f => f.CreateClient(It.IsAny<string>())).Returns(new HttpClient(handler.Object));
         var channel = new MattermostChannel(
             Options.Create(DefaultOptions),
-            new HttpClient(handler.Object),
+            clientFactory.Object,
             NullLogger<MattermostChannel>.Instance);
 
         await channel.SendAsync(DefaultPayload);
@@ -185,7 +178,7 @@ public sealed class MattermostChannelTests
     {
         var channel = new MattermostChannel(
             Options.Create(DefaultOptions),
-            MakeClient(HttpStatusCode.Unauthorized, "Invalid token"),
+            MakeFactory(HttpStatusCode.Unauthorized, "Invalid token"),
             NullLogger<MattermostChannel>.Instance);
 
         var result = await channel.SendAsync(DefaultPayload);
@@ -207,9 +200,11 @@ public sealed class MattermostChannelTests
                 ItExpr.IsAny<CancellationToken>())
             .ThrowsAsync(new HttpRequestException("Connection refused"));
 
+        var clientFactory = new Mock<IHttpClientFactory>();
+        clientFactory.Setup(f => f.CreateClient(It.IsAny<string>())).Returns(new HttpClient(handler.Object));
         var channel = new MattermostChannel(
             Options.Create(DefaultOptions),
-            new HttpClient(handler.Object),
+            clientFactory.Object,
             NullLogger<MattermostChannel>.Instance);
 
         var result = await channel.SendAsync(DefaultPayload);
@@ -225,7 +220,7 @@ public sealed class MattermostChannelTests
     {
         var channel = new MattermostChannel(
             Options.Create(DefaultOptions),
-            MakeClient(HttpStatusCode.OK),
+            MakeFactory(HttpStatusCode.OK),
             NullLogger<MattermostChannel>.Instance);
 
         Assert.Equal("mattermost", channel.ChannelName);
@@ -236,7 +231,7 @@ public sealed class MattermostChannelTests
     {
         var channel = new MattermostChannel(
             Options.Create(DefaultOptions),
-            MakeClient(HttpStatusCode.OK),
+            MakeFactory(HttpStatusCode.OK),
             NullLogger<MattermostChannel>.Instance);
 
         var result = await channel.SendAsync(DefaultPayload);
@@ -249,7 +244,7 @@ public sealed class MattermostChannelTests
     {
         var channel = new MattermostChannel(
             Options.Create(DefaultOptions),
-            MakeClient(HttpStatusCode.OK),
+            MakeFactory(HttpStatusCode.OK),
             NullLogger<MattermostChannel>.Instance);
 
         var result = await channel.SendAsync(DefaultPayload);

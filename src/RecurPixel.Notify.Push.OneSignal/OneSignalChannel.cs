@@ -1,20 +1,12 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using System.Threading;
-using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using RecurPixel.Notify;
-using RecurPixel.Notify.Channels;
 using RecurPixel.Notify.Configuration;
 
-namespace RecurPixel.Notify.Push.OneSignal;
+namespace RecurPixel.Notify.Channels;
 
 /// <summary>
 /// Notification channel adapter for OneSignal push notification delivery.
@@ -24,7 +16,7 @@ namespace RecurPixel.Notify.Push.OneSignal;
 public sealed class OneSignalChannel : NotificationChannelBase
 {
     private readonly OneSignalOptions _options;
-    private readonly HttpClient _http;
+    private readonly IHttpClientFactory _httpClientFactory;
     private readonly ILogger<OneSignalChannel> _logger;
 
     private const string SendEndpoint = "https://onesignal.com/api/v1/notifications";
@@ -37,11 +29,11 @@ public sealed class OneSignalChannel : NotificationChannelBase
     /// </summary>
     public OneSignalChannel(
         IOptions<OneSignalOptions> options,
-        HttpClient http,
+        IHttpClientFactory httpClientFactory,
         ILogger<OneSignalChannel> logger)
     {
         _options = options.Value;
-        _http = http;
+        _httpClientFactory = httpClientFactory;
         _logger = logger;
     }
 
@@ -64,12 +56,13 @@ public sealed class OneSignalChannel : NotificationChannelBase
                 Contents = new OneSignalContent { En = payload.Body ?? string.Empty }
             };
 
+            var http = _httpClientFactory.CreateClient();
             using var request = new HttpRequestMessage(HttpMethod.Post, SendEndpoint);
             request.Headers.Authorization =
                 new AuthenticationHeaderValue("Basic", _options.ApiKey);
             request.Content = JsonContent.Create(body, options: JsonOptions);
 
-            var response = await _http.SendAsync(request, ct);
+            var response = await http.SendAsync(request, ct);
             var raw = await response.Content.ReadAsStringAsync(ct);
 
             if (!response.IsSuccessStatusCode)
@@ -140,12 +133,13 @@ public sealed class OneSignalChannel : NotificationChannelBase
                     Contents = new OneSignalContent { En = first.Body ?? string.Empty }
                 };
 
+                var http = _httpClientFactory.CreateClient();
                 using var request = new HttpRequestMessage(HttpMethod.Post, SendEndpoint);
                 request.Headers.Authorization =
                     new AuthenticationHeaderValue("Basic", _options.ApiKey);
                 request.Content = JsonContent.Create(body, options: JsonOptions);
 
-                var response = await _http.SendAsync(request, ct);
+                var response = await http.SendAsync(request, ct);
                 var raw = await response.Content.ReadAsStringAsync(ct);
 
                 if (!response.IsSuccessStatusCode)

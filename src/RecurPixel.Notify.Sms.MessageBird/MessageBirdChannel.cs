@@ -1,18 +1,12 @@
-using System;
-using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using System.Threading;
-using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using RecurPixel.Notify;
-using RecurPixel.Notify.Channels;
 using RecurPixel.Notify.Configuration;
 
-namespace RecurPixel.Notify.Sms.MessageBird;
+namespace RecurPixel.Notify.Channels;
 
 /// <summary>
 /// Notification channel adapter for MessageBird SMS delivery.
@@ -22,7 +16,7 @@ namespace RecurPixel.Notify.Sms.MessageBird;
 public sealed class MessageBirdChannel : NotificationChannelBase
 {
     private readonly MessageBirdOptions _options;
-    private readonly HttpClient _http;
+    private readonly IHttpClientFactory _httpClientFactory;
     private readonly ILogger<MessageBirdChannel> _logger;
 
     private const string SendEndpoint = "https://rest.messagebird.com/messages";
@@ -35,11 +29,11 @@ public sealed class MessageBirdChannel : NotificationChannelBase
     /// </summary>
     public MessageBirdChannel(
         IOptions<MessageBirdOptions> options,
-        HttpClient http,
+        IHttpClientFactory httpClientFactory,
         ILogger<MessageBirdChannel> logger)
     {
         _options = options.Value;
-        _http = http;
+        _httpClientFactory = httpClientFactory;
         _logger = logger;
     }
 
@@ -61,12 +55,13 @@ public sealed class MessageBirdChannel : NotificationChannelBase
                 Body = payload.Body ?? string.Empty
             };
 
+            var http = _httpClientFactory.CreateClient();
             using var request = new HttpRequestMessage(HttpMethod.Post, SendEndpoint);
             request.Headers.Authorization =
                 new AuthenticationHeaderValue("AccessKey", _options.ApiKey);
             request.Content = JsonContent.Create(body, options: JsonOptions);
 
-            var response = await _http.SendAsync(request, ct);
+            var response = await http.SendAsync(request, ct);
             var raw = await response.Content.ReadAsStringAsync(ct);
 
             if (!response.IsSuccessStatusCode)

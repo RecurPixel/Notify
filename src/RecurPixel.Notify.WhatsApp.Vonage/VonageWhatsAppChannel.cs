@@ -5,11 +5,9 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using RecurPixel.Notify;
-using RecurPixel.Notify.Channels;
 using RecurPixel.Notify.Configuration;
 
-namespace RecurPixel.Notify.WhatsApp.Vonage;
+namespace RecurPixel.Notify.Channels;
 
 /// <summary>
 /// Notification channel adapter for Vonage WhatsApp Business messaging.
@@ -20,7 +18,7 @@ namespace RecurPixel.Notify.WhatsApp.Vonage;
 public sealed class VonageWhatsAppChannel : NotificationChannelBase
 {
     private readonly VonageWhatsAppOptions _options;
-    private readonly HttpClient _http;
+    private readonly IHttpClientFactory _httpClientFactory;
     private readonly ILogger<VonageWhatsAppChannel> _logger;
 
     private const string SendEndpoint = "https://messages-sandbox.nexmo.com/v1/messages";
@@ -33,11 +31,11 @@ public sealed class VonageWhatsAppChannel : NotificationChannelBase
     /// </summary>
     public VonageWhatsAppChannel(
         IOptions<VonageWhatsAppOptions> options,
-        HttpClient http,
+        IHttpClientFactory httpClientFactory,
         ILogger<VonageWhatsAppChannel> logger)
     {
         _options = options.Value;
-        _http = http;
+        _httpClientFactory = httpClientFactory;
         _logger = logger;
     }
 
@@ -69,12 +67,13 @@ public sealed class VonageWhatsAppChannel : NotificationChannelBase
             var credentials = Convert.ToBase64String(
                 Encoding.ASCII.GetBytes($"{_options.ApiKey}:{_options.ApiSecret}"));
 
+            var http = _httpClientFactory.CreateClient();
             using var request = new HttpRequestMessage(HttpMethod.Post, SendEndpoint);
             request.Headers.Authorization =
                 new AuthenticationHeaderValue("Basic", credentials);
             request.Content = JsonContent.Create(body, options: JsonOptions);
 
-            var response = await _http.SendAsync(request, ct);
+            var response = await http.SendAsync(request, ct);
             var raw = await response.Content.ReadAsStringAsync(ct);
 
             if (!response.IsSuccessStatusCode)

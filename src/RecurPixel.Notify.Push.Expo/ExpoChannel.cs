@@ -1,20 +1,12 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using System.Threading;
-using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using RecurPixel.Notify;
-using RecurPixel.Notify.Channels;
 using RecurPixel.Notify.Configuration;
 
-namespace RecurPixel.Notify.Push.Expo;
+namespace RecurPixel.Notify.Channels;
 
 /// <summary>
 /// Notification channel adapter for Expo push notification delivery.
@@ -24,7 +16,7 @@ namespace RecurPixel.Notify.Push.Expo;
 public sealed class ExpoChannel : NotificationChannelBase
 {
     private readonly ExpoOptions _options;
-    private readonly HttpClient _http;
+    private readonly IHttpClientFactory _httpClientFactory;
     private readonly ILogger<ExpoChannel> _logger;
 
     private const string SendEndpoint = "https://exp.host/--/api/v2/push/send";
@@ -37,11 +29,11 @@ public sealed class ExpoChannel : NotificationChannelBase
     /// </summary>
     public ExpoChannel(
         IOptions<ExpoOptions> options,
-        HttpClient http,
+        IHttpClientFactory httpClientFactory,
         ILogger<ExpoChannel> logger)
     {
         _options = options.Value;
-        _http = http;
+        _httpClientFactory = httpClientFactory;
         _logger = logger;
     }
 
@@ -58,8 +50,9 @@ public sealed class ExpoChannel : NotificationChannelBase
         {
             var message = BuildMessage(payload);
 
+            var http = _httpClientFactory.CreateClient();
             using var request = BuildRequest(new[] { message });
-            var response = await _http.SendAsync(request, ct);
+            var response = await http.SendAsync(request, ct);
             var raw = await response.Content.ReadAsStringAsync(ct);
 
             if (!response.IsSuccessStatusCode)
@@ -134,8 +127,9 @@ public sealed class ExpoChannel : NotificationChannelBase
             {
                 var messages = chunkList.Select(BuildMessage).ToList();
 
+                var http = _httpClientFactory.CreateClient();
                 using var request = BuildRequest(messages);
-                var response = await _http.SendAsync(request, ct);
+                var response = await http.SendAsync(request, ct);
                 var raw = await response.Content.ReadAsStringAsync(ct);
 
                 if (!response.IsSuccessStatusCode)

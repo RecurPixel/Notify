@@ -1,5 +1,3 @@
-using RecurPixel.Notify.Discord;
-
 namespace RecurPixel.Notify.Tests.Discord;
 
 public class DiscordChannelTests

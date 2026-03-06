@@ -1,15 +1,4 @@
-using System;
-using System.Threading;
-using System.Threading.Tasks;
-using Microsoft.Extensions.Logging.Abstractions;
-using Microsoft.Extensions.Options;
-using Moq;
-using RecurPixel.Notify;
-using RecurPixel.Notify.Channels;
-using RecurPixel.Notify.Configuration;
 using RecurPixel.Notify.Email.AzureCommEmail;
-using Xunit;
-
 namespace RecurPixel.Notify.Tests;
 
 public sealed class AzureCommEmailChannelTests

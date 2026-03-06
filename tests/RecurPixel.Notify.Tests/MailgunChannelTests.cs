@@ -1,7 +1,3 @@
-using RecurPixel.Notify;
-using RecurPixel.Notify.Channels;
-using RecurPixel.Notify.Configuration;
-
 namespace RecurPixel.Notify.Tests;
 
 public sealed class MailgunChannelTests
@@ -21,7 +17,7 @@ public sealed class MailgunChannelTests
         Body = "World"
     };
 
-    private static HttpClient MakeClient(HttpStatusCode status, object responseBody)
+    private static IHttpClientFactory MakeFactory(HttpStatusCode status, object responseBody)
     {
         var json = JsonSerializer.Serialize(responseBody);
         var handler = new Mock<HttpMessageHandler>();
@@ -38,7 +34,10 @@ public sealed class MailgunChannelTests
                 Content = new StringContent(json)
             });
 
-        return new HttpClient(handler.Object);
+        var client = new HttpClient(handler.Object);
+        var factory = new Mock<IHttpClientFactory>();
+        factory.Setup(f => f.CreateClient(It.IsAny<string>())).Returns(client);
+        return factory.Object;
     }
 
     [Fact]
@@ -48,7 +47,7 @@ public sealed class MailgunChannelTests
 
         var channel = new MailgunChannel(
             Options.Create(DefaultOptions),
-            MakeClient(HttpStatusCode.OK, response),
+            MakeFactory(HttpStatusCode.OK, response),
             NullLogger<MailgunChannel>.Instance);
 
         var result = await channel.SendAsync(DefaultPayload);
@@ -66,7 +65,7 @@ public sealed class MailgunChannelTests
     {
         var channel = new MailgunChannel(
             Options.Create(DefaultOptions),
-            MakeClient(HttpStatusCode.Unauthorized, new { message = "Forbidden" }),
+            MakeFactory(HttpStatusCode.Unauthorized, new { message = "Forbidden" }),
             NullLogger<MailgunChannel>.Instance);
 
         var result = await channel.SendAsync(DefaultPayload);
@@ -88,9 +87,11 @@ public sealed class MailgunChannelTests
                 ItExpr.IsAny<CancellationToken>())
             .ThrowsAsync(new HttpRequestException("Network error"));
 
+        var clientFactory = new Mock<IHttpClientFactory>();
+        clientFactory.Setup(f => f.CreateClient(It.IsAny<string>())).Returns(new HttpClient(handler.Object));
         var channel = new MailgunChannel(
             Options.Create(DefaultOptions),
-            new HttpClient(handler.Object),
+            clientFactory.Object,
             NullLogger<MailgunChannel>.Instance);
 
         var result = await channel.SendAsync(DefaultPayload);
@@ -112,7 +113,7 @@ public sealed class MailgunChannelTests
 
         var channel = new MailgunChannel(
             Options.Create(DefaultOptions),
-            MakeClient(HttpStatusCode.OK, response),
+            MakeFactory(HttpStatusCode.OK, response),
             NullLogger<MailgunChannel>.Instance);
 
         var result = await channel.SendBulkAsync(payloads);
@@ -134,7 +135,7 @@ public sealed class MailgunChannelTests
 
         var channel = new MailgunChannel(
             Options.Create(DefaultOptions),
-            MakeClient(HttpStatusCode.Unauthorized, new { message = "Forbidden" }),
+            MakeFactory(HttpStatusCode.Unauthorized, new { message = "Forbidden" }),
             NullLogger<MailgunChannel>.Instance);
 
         var result = await channel.SendBulkAsync(payloads);
@@ -148,7 +149,7 @@ public sealed class MailgunChannelTests
     {
         var channel = new MailgunChannel(
             Options.Create(DefaultOptions),
-            MakeClient(HttpStatusCode.OK, new { }),
+            MakeFactory(HttpStatusCode.OK, new { }),
             NullLogger<MailgunChannel>.Instance);
 
         Assert.Equal("email", channel.ChannelName);

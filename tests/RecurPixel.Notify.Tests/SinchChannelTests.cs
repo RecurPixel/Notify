@@ -1,5 +1,3 @@
-using RecurPixel.Notify.Sms.Sinch;
-
 namespace RecurPixel.Notify.Tests;
 
 public sealed class SinchChannelTests
@@ -17,7 +15,7 @@ public sealed class SinchChannelTests
         Body = "Hello from Sinch"
     };
 
-    private static HttpClient MakeClient(HttpStatusCode status, object responseBody)
+    private static IHttpClientFactory MakeFactory(HttpStatusCode status, object responseBody)
     {
         var json = JsonSerializer.Serialize(responseBody);
         var handler = new Mock<HttpMessageHandler>();
@@ -34,7 +32,10 @@ public sealed class SinchChannelTests
                 Content = new StringContent(json)
             });
 
-        return new HttpClient(handler.Object);
+        var client = new HttpClient(handler.Object);
+        var factory = new Mock<IHttpClientFactory>();
+        factory.Setup(f => f.CreateClient(It.IsAny<string>())).Returns(client);
+        return factory.Object;
     }
 
     // ── success ──────────────────────────────────────────────────────────────
@@ -50,7 +51,7 @@ public sealed class SinchChannelTests
 
         var channel = new SinchChannel(
             Options.Create(DefaultOptions),
-            MakeClient(HttpStatusCode.Created, response),
+            MakeFactory(HttpStatusCode.Created, response),
             NullLogger<SinchChannel>.Instance);
 
         var result = await channel.SendAsync(DefaultPayload);
@@ -89,9 +90,11 @@ public sealed class SinchChannelTests
                 }))
             });
 
+        var clientFactory = new Mock<IHttpClientFactory>();
+        clientFactory.Setup(f => f.CreateClient(It.IsAny<string>())).Returns(new HttpClient(handler.Object));
         var channel = new SinchChannel(
             Options.Create(DefaultOptions),
-            new HttpClient(handler.Object),
+            clientFactory.Object,
             NullLogger<SinchChannel>.Instance);
 
         await channel.SendAsync(DefaultPayload);
@@ -105,7 +108,7 @@ public sealed class SinchChannelTests
     {
         var channel = new SinchChannel(
             Options.Create(DefaultOptions),
-            MakeClient(HttpStatusCode.Unauthorized, new { code = 401, text = "Unauthorized" }),
+            MakeFactory(HttpStatusCode.Unauthorized, new { code = 401, text = "Unauthorized" }),
             NullLogger<SinchChannel>.Instance);
 
         var result = await channel.SendAsync(DefaultPayload);
@@ -127,9 +130,11 @@ public sealed class SinchChannelTests
                 ItExpr.IsAny<CancellationToken>())
             .ThrowsAsync(new HttpRequestException("Timeout"));
 
+        var clientFactory = new Mock<IHttpClientFactory>();
+        clientFactory.Setup(f => f.CreateClient(It.IsAny<string>())).Returns(new HttpClient(handler.Object));
         var channel = new SinchChannel(
             Options.Create(DefaultOptions),
-            new HttpClient(handler.Object),
+            clientFactory.Object,
             NullLogger<SinchChannel>.Instance);
 
         var result = await channel.SendAsync(DefaultPayload);
@@ -157,7 +162,7 @@ public sealed class SinchChannelTests
 
         var channel = new SinchChannel(
             Options.Create(DefaultOptions),
-            MakeClient(HttpStatusCode.Created, response),
+            MakeFactory(HttpStatusCode.Created, response),
             NullLogger<SinchChannel>.Instance);
 
         var result = await channel.SendBulkAsync(payloads);
@@ -179,7 +184,7 @@ public sealed class SinchChannelTests
 
         var channel = new SinchChannel(
             Options.Create(DefaultOptions),
-            MakeClient(HttpStatusCode.Unauthorized, new { code = 401, text = "Unauthorized" }),
+            MakeFactory(HttpStatusCode.Unauthorized, new { code = 401, text = "Unauthorized" }),
             NullLogger<SinchChannel>.Instance);
 
         var result = await channel.SendBulkAsync(payloads);
@@ -205,7 +210,7 @@ public sealed class SinchChannelTests
 
         var channel = new SinchChannel(
             Options.Create(DefaultOptions),
-            MakeClient(HttpStatusCode.Created, response),
+            MakeFactory(HttpStatusCode.Created, response),
             NullLogger<SinchChannel>.Instance);
 
         var result = await channel.SendBulkAsync(payloads);
@@ -220,7 +225,7 @@ public sealed class SinchChannelTests
     {
         var channel = new SinchChannel(
             Options.Create(DefaultOptions),
-            MakeClient(HttpStatusCode.OK, new { }),
+            MakeFactory(HttpStatusCode.OK, new { }),
             NullLogger<SinchChannel>.Instance);
 
         Assert.Equal("sms", channel.ChannelName);
@@ -233,7 +238,7 @@ public sealed class SinchChannelTests
 
         var channel = new SinchChannel(
             Options.Create(DefaultOptions),
-            MakeClient(HttpStatusCode.Created, response),
+            MakeFactory(HttpStatusCode.Created, response),
             NullLogger<SinchChannel>.Instance);
 
         var result = await channel.SendAsync(DefaultPayload);
@@ -248,7 +253,7 @@ public sealed class SinchChannelTests
 
         var channel = new SinchChannel(
             Options.Create(DefaultOptions),
-            MakeClient(HttpStatusCode.Created, response),
+            MakeFactory(HttpStatusCode.Created, response),
             NullLogger<SinchChannel>.Instance);
 
         var result = await channel.SendAsync(DefaultPayload);

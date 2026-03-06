@@ -4,11 +4,9 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using RecurPixel.Notify;
-using RecurPixel.Notify.Channels;
 using RecurPixel.Notify.Configuration;
 
-namespace RecurPixel.Notify.Line;
+namespace RecurPixel.Notify.Channels;
 
 /// <summary>
 /// Notification channel adapter for the LINE Messaging API.
@@ -18,7 +16,7 @@ namespace RecurPixel.Notify.Line;
 public sealed class LineChannel : NotificationChannelBase
 {
     private readonly LineOptions _options;
-    private readonly HttpClient _http;
+    private readonly IHttpClientFactory _httpClientFactory;
     private readonly ILogger<LineChannel> _logger;
 
     private const string PushEndpoint = "https://api.line.me/v2/bot/message/push";
@@ -31,11 +29,11 @@ public sealed class LineChannel : NotificationChannelBase
     /// </summary>
     public LineChannel(
         IOptions<LineOptions> options,
-        HttpClient http,
+        IHttpClientFactory httpClientFactory,
         ILogger<LineChannel> logger)
     {
         _options = options.Value;
-        _http = http;
+        _httpClientFactory = httpClientFactory;
         _logger = logger;
     }
 
@@ -64,12 +62,13 @@ public sealed class LineChannel : NotificationChannelBase
                 }
             };
 
+            var http = _httpClientFactory.CreateClient();
             using var request = new HttpRequestMessage(HttpMethod.Post, PushEndpoint);
             request.Headers.Authorization =
                 new AuthenticationHeaderValue("Bearer", _options.ChannelAccessToken);
             request.Content = JsonContent.Create(body, options: JsonOptions);
 
-            var response = await _http.SendAsync(request, ct);
+            var response = await http.SendAsync(request, ct);
             var raw = await response.Content.ReadAsStringAsync(ct);
 
             if (!response.IsSuccessStatusCode)

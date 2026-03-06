@@ -1,5 +1,3 @@
-using RecurPixel.Notify.WhatsApp.Vonage;
-
 namespace RecurPixel.Notify.Tests;
 
 public sealed class VonageWhatsAppChannelTests
@@ -18,7 +16,7 @@ public sealed class VonageWhatsAppChannelTests
         Body = "World"
     };
 
-    private static HttpClient MakeClient(HttpStatusCode status, object responseBody)
+    private static IHttpClientFactory MakeFactory(HttpStatusCode status, object responseBody)
     {
         var json = JsonSerializer.Serialize(responseBody);
         var handler = new Mock<HttpMessageHandler>();
@@ -35,7 +33,10 @@ public sealed class VonageWhatsAppChannelTests
                 Content = new StringContent(json)
             });
 
-        return new HttpClient(handler.Object);
+        var client = new HttpClient(handler.Object);
+        var factory = new Mock<IHttpClientFactory>();
+        factory.Setup(f => f.CreateClient(It.IsAny<string>())).Returns(client);
+        return factory.Object;
     }
 
     // ── success ──────────────────────────────────────────────────────────────
@@ -47,7 +48,7 @@ public sealed class VonageWhatsAppChannelTests
 
         var channel = new VonageWhatsAppChannel(
             Options.Create(DefaultOptions),
-            MakeClient(HttpStatusCode.Accepted, response),
+            MakeFactory(HttpStatusCode.Accepted, response),
             NullLogger<VonageWhatsAppChannel>.Instance);
 
         var result = await channel.SendAsync(DefaultPayload);
@@ -83,9 +84,11 @@ public sealed class VonageWhatsAppChannelTests
                     new { message_uuid = "uuid-1" }))
             });
 
+        var clientFactory = new Mock<IHttpClientFactory>();
+        clientFactory.Setup(f => f.CreateClient(It.IsAny<string>())).Returns(new HttpClient(handler.Object));
         var channel = new VonageWhatsAppChannel(
             Options.Create(DefaultOptions),
-            new HttpClient(handler.Object),
+            clientFactory.Object,
             NullLogger<VonageWhatsAppChannel>.Instance);
 
         await channel.SendAsync(DefaultPayload);
@@ -117,9 +120,11 @@ public sealed class VonageWhatsAppChannelTests
                     new { message_uuid = "uuid-1" }))
             });
 
+        var clientFactory = new Mock<IHttpClientFactory>();
+        clientFactory.Setup(f => f.CreateClient(It.IsAny<string>())).Returns(new HttpClient(handler.Object));
         var channel = new VonageWhatsAppChannel(
             Options.Create(DefaultOptions),
-            new HttpClient(handler.Object),
+            clientFactory.Object,
             NullLogger<VonageWhatsAppChannel>.Instance);
 
         await channel.SendAsync(DefaultPayload);
@@ -159,9 +164,11 @@ public sealed class VonageWhatsAppChannelTests
                     new { message_uuid = "uuid-1" }))
             });
 
+        var clientFactory = new Mock<IHttpClientFactory>();
+        clientFactory.Setup(f => f.CreateClient(It.IsAny<string>())).Returns(new HttpClient(handler.Object));
         var channel = new VonageWhatsAppChannel(
             Options.Create(DefaultOptions),
-            new HttpClient(handler.Object),
+            clientFactory.Object,
             NullLogger<VonageWhatsAppChannel>.Instance);
 
         await channel.SendAsync(payload);
@@ -180,7 +187,7 @@ public sealed class VonageWhatsAppChannelTests
 
         var channel = new VonageWhatsAppChannel(
             Options.Create(DefaultOptions),
-            MakeClient(HttpStatusCode.Unauthorized, response),
+            MakeFactory(HttpStatusCode.Unauthorized, response),
             NullLogger<VonageWhatsAppChannel>.Instance);
 
         var result = await channel.SendAsync(DefaultPayload);
@@ -202,9 +209,11 @@ public sealed class VonageWhatsAppChannelTests
                 ItExpr.IsAny<CancellationToken>())
             .ThrowsAsync(new HttpRequestException("DNS failure"));
 
+        var clientFactory = new Mock<IHttpClientFactory>();
+        clientFactory.Setup(f => f.CreateClient(It.IsAny<string>())).Returns(new HttpClient(handler.Object));
         var channel = new VonageWhatsAppChannel(
             Options.Create(DefaultOptions),
-            new HttpClient(handler.Object),
+            clientFactory.Object,
             NullLogger<VonageWhatsAppChannel>.Instance);
 
         var result = await channel.SendAsync(DefaultPayload);
@@ -220,7 +229,7 @@ public sealed class VonageWhatsAppChannelTests
     {
         var channel = new VonageWhatsAppChannel(
             Options.Create(DefaultOptions),
-            MakeClient(HttpStatusCode.OK, new { }),
+            MakeFactory(HttpStatusCode.OK, new { }),
             NullLogger<VonageWhatsAppChannel>.Instance);
 
         Assert.Equal("whatsapp", channel.ChannelName);
@@ -233,7 +242,7 @@ public sealed class VonageWhatsAppChannelTests
 
         var channel = new VonageWhatsAppChannel(
             Options.Create(DefaultOptions),
-            MakeClient(HttpStatusCode.Accepted, response),
+            MakeFactory(HttpStatusCode.Accepted, response),
             NullLogger<VonageWhatsAppChannel>.Instance);
 
         var result = await channel.SendAsync(DefaultPayload);
@@ -248,7 +257,7 @@ public sealed class VonageWhatsAppChannelTests
 
         var channel = new VonageWhatsAppChannel(
             Options.Create(DefaultOptions),
-            MakeClient(HttpStatusCode.Accepted, response),
+            MakeFactory(HttpStatusCode.Accepted, response),
             NullLogger<VonageWhatsAppChannel>.Instance);
 
         var result = await channel.SendAsync(DefaultPayload);

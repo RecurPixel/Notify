@@ -1,16 +1,10 @@
-using System;
-using System.Net.Http;
 using System.Net.Http.Json;
 using System.Text.Json.Serialization;
-using System.Threading;
-using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using RecurPixel.Notify;
-using RecurPixel.Notify.Channels;
 using RecurPixel.Notify.Configuration;
 
-namespace RecurPixel.Notify.WhatsApp.MetaCloud;
+namespace RecurPixel.Notify.Channels;
 
 // ── Internal HTTP client abstraction ─────────────────────────────────────────
 

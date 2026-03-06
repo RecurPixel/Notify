@@ -1,5 +1,3 @@
-using RecurPixel.Notify.Push.Expo;
-
 namespace RecurPixel.Notify.Tests;
 
 public sealed class ExpoChannelTests
@@ -21,7 +19,7 @@ public sealed class ExpoChannelTests
         Body = "World"
     };
 
-    private static HttpClient MakeClient(HttpStatusCode status, object responseBody)
+    private static IHttpClientFactory MakeFactory(HttpStatusCode status, object responseBody)
     {
         var json = JsonSerializer.Serialize(responseBody);
         var handler = new Mock<HttpMessageHandler>();
@@ -38,7 +36,10 @@ public sealed class ExpoChannelTests
                 Content = new StringContent(json)
             });
 
-        return new HttpClient(handler.Object);
+        var client = new HttpClient(handler.Object);
+        var factory = new Mock<IHttpClientFactory>();
+        factory.Setup(f => f.CreateClient(It.IsAny<string>())).Returns(client);
+        return factory.Object;
     }
 
     // ── success ──────────────────────────────────────────────────────────────
@@ -56,7 +57,7 @@ public sealed class ExpoChannelTests
 
         var channel = new ExpoChannel(
             Options.Create(DefaultOptions),
-            MakeClient(HttpStatusCode.OK, response),
+            MakeFactory(HttpStatusCode.OK, response),
             NullLogger<ExpoChannel>.Instance);
 
         var result = await channel.SendAsync(DefaultPayload);
@@ -88,7 +89,7 @@ public sealed class ExpoChannelTests
 
         var channel = new ExpoChannel(
             Options.Create(DefaultOptions),
-            MakeClient(HttpStatusCode.OK, response),
+            MakeFactory(HttpStatusCode.OK, response),
             NullLogger<ExpoChannel>.Instance);
 
         var result = await channel.SendAsync(DefaultPayload);
@@ -124,9 +125,11 @@ public sealed class ExpoChannelTests
                 }))
             });
 
+        var clientFactory = new Mock<IHttpClientFactory>();
+        clientFactory.Setup(f => f.CreateClient(It.IsAny<string>())).Returns(new HttpClient(handler.Object));
         var channel = new ExpoChannel(
             Options.Create(DefaultOptions),
-            new HttpClient(handler.Object),
+            clientFactory.Object,
             NullLogger<ExpoChannel>.Instance);
 
         await channel.SendAsync(DefaultPayload);
@@ -160,9 +163,11 @@ public sealed class ExpoChannelTests
                 }))
             });
 
+        var clientFactory = new Mock<IHttpClientFactory>();
+        clientFactory.Setup(f => f.CreateClient(It.IsAny<string>())).Returns(new HttpClient(handler.Object));
         var channel = new ExpoChannel(
             Options.Create(NoTokenOptions),
-            new HttpClient(handler.Object),
+            clientFactory.Object,
             NullLogger<ExpoChannel>.Instance);
 
         await channel.SendAsync(DefaultPayload);
@@ -175,7 +180,7 @@ public sealed class ExpoChannelTests
     {
         var channel = new ExpoChannel(
             Options.Create(DefaultOptions),
-            MakeClient(HttpStatusCode.TooManyRequests, new { error = "Rate limit exceeded" }),
+            MakeFactory(HttpStatusCode.TooManyRequests, new { error = "Rate limit exceeded" }),
             NullLogger<ExpoChannel>.Instance);
 
         var result = await channel.SendAsync(DefaultPayload);
@@ -197,9 +202,11 @@ public sealed class ExpoChannelTests
                 ItExpr.IsAny<CancellationToken>())
             .ThrowsAsync(new HttpRequestException("Timeout"));
 
+        var clientFactory = new Mock<IHttpClientFactory>();
+        clientFactory.Setup(f => f.CreateClient(It.IsAny<string>())).Returns(new HttpClient(handler.Object));
         var channel = new ExpoChannel(
             Options.Create(DefaultOptions),
-            new HttpClient(handler.Object),
+            clientFactory.Object,
             NullLogger<ExpoChannel>.Instance);
 
         var result = await channel.SendAsync(DefaultPayload);
@@ -230,7 +237,7 @@ public sealed class ExpoChannelTests
 
         var channel = new ExpoChannel(
             Options.Create(DefaultOptions),
-            MakeClient(HttpStatusCode.OK, response),
+            MakeFactory(HttpStatusCode.OK, response),
             NullLogger<ExpoChannel>.Instance);
 
         var result = await channel.SendBulkAsync(payloads);
@@ -262,7 +269,7 @@ public sealed class ExpoChannelTests
 
         var channel = new ExpoChannel(
             Options.Create(DefaultOptions),
-            MakeClient(HttpStatusCode.OK, response),
+            MakeFactory(HttpStatusCode.OK, response),
             NullLogger<ExpoChannel>.Instance);
 
         var result = await channel.SendBulkAsync(payloads);
@@ -284,7 +291,7 @@ public sealed class ExpoChannelTests
 
         var channel = new ExpoChannel(
             Options.Create(DefaultOptions),
-            MakeClient(HttpStatusCode.TooManyRequests, new { error = "Rate limit" }),
+            MakeFactory(HttpStatusCode.TooManyRequests, new { error = "Rate limit" }),
             NullLogger<ExpoChannel>.Instance);
 
         var result = await channel.SendBulkAsync(payloads);
@@ -300,7 +307,7 @@ public sealed class ExpoChannelTests
     {
         var channel = new ExpoChannel(
             Options.Create(DefaultOptions),
-            MakeClient(HttpStatusCode.OK, new { }),
+            MakeFactory(HttpStatusCode.OK, new { }),
             NullLogger<ExpoChannel>.Instance);
 
         Assert.Equal("push", channel.ChannelName);
@@ -316,7 +323,7 @@ public sealed class ExpoChannelTests
 
         var channel = new ExpoChannel(
             Options.Create(DefaultOptions),
-            MakeClient(HttpStatusCode.OK, response),
+            MakeFactory(HttpStatusCode.OK, response),
             NullLogger<ExpoChannel>.Instance);
 
         var result = await channel.SendAsync(DefaultPayload);
@@ -334,7 +341,7 @@ public sealed class ExpoChannelTests
 
         var channel = new ExpoChannel(
             Options.Create(DefaultOptions),
-            MakeClient(HttpStatusCode.OK, response),
+            MakeFactory(HttpStatusCode.OK, response),
             NullLogger<ExpoChannel>.Instance);
 
         var result = await channel.SendAsync(DefaultPayload);

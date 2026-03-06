@@ -1,9 +1,5 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using RecurPixel.Notify;
-using RecurPixel.Notify.Channels;
-using RecurPixel.Notify.Configuration;
-using RecurPixel.Notify.InApp;
 using RecurPixel.Notify.IntegrationTests.Infrastructure;
 
 namespace RecurPixel.Notify.IntegrationTests.InApp;
@@ -25,15 +21,15 @@ public sealed class InAppIntegrationTests : ChannelIntegrationTest
     {
         services.AddInAppChannel(opts => opts.UseHandler(_ => Task.FromResult(new NotifyResult
         {
-            Success    = true,
+            Success = true,
             ProviderId = Guid.NewGuid().ToString()
         })));
     }
 
     protected override NotificationPayload BuildPayload(IConfiguration config) => new()
     {
-        To      = "test-user-id-001",
+        To = "test-user-id-001",
         Subject = "RecurPixel.Notify Integration Test",
-        Body    = $"InApp notification — {DateTime.UtcNow:HH:mm:ss} UTC"
+        Body = $"InApp notification — {DateTime.UtcNow:HH:mm:ss} UTC"
     };
 }

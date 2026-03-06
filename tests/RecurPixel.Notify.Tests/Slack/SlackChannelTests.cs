@@ -1,5 +1,3 @@
-using RecurPixel.Notify.Slack;
-
 namespace RecurPixel.Notify.Tests.Slack;
 
 public class SlackChannelTests

@@ -1,16 +1,9 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using System.Threading;
-using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using RecurPixel.Notify.Channels;
 using RecurPixel.Notify.Configuration;
 
 namespace RecurPixel.Notify.Channels;
@@ -23,7 +16,7 @@ namespace RecurPixel.Notify.Channels;
 public sealed class MailgunChannel : NotificationChannelBase
 {
     private readonly MailgunOptions _options;
-    private readonly HttpClient _http;
+    private readonly IHttpClientFactory _httpClientFactory;
     private readonly ILogger<MailgunChannel> _logger;
 
     /// <inheritdoc />
@@ -34,11 +27,11 @@ public sealed class MailgunChannel : NotificationChannelBase
     /// </summary>
     public MailgunChannel(
         IOptions<MailgunOptions> options,
-        HttpClient http,
+        IHttpClientFactory httpClientFactory,
         ILogger<MailgunChannel> logger)
     {
         _options = options.Value;
-        _http = http;
+        _httpClientFactory = httpClientFactory;
         _logger = logger;
     }
 
@@ -189,7 +182,8 @@ public sealed class MailgunChannel : NotificationChannelBase
         request.Headers.Authorization =
             new AuthenticationHeaderValue("Basic", credentials);
 
-        return _http.SendAsync(request, ct);
+        var http = _httpClientFactory.CreateClient();
+        return http.SendAsync(request, ct);
     }
 
     private MultipartFormDataContent BuildForm(

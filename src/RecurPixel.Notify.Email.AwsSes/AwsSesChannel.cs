@@ -2,7 +2,6 @@ using Amazon.SimpleEmailV2;
 using Amazon.SimpleEmailV2.Model;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using RecurPixel.Notify.Channels;
 using RecurPixel.Notify.Configuration;
 
 namespace RecurPixel.Notify.Channels;

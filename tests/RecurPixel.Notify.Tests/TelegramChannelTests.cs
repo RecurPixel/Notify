@@ -1,5 +1,3 @@
-using RecurPixel.Notify.Telegram;
-
 namespace RecurPixel.Notify.Tests;
 
 public sealed class TelegramChannelTests

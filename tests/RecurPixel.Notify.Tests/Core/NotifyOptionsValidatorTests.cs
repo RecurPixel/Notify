@@ -1,5 +1,3 @@
-using RecurPixel.Notify;
-
 namespace RecurPixel.Notify.Tests.Core;
 
 public class NotifyOptionsValidatorTests

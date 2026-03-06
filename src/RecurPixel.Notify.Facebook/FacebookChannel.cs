@@ -1,17 +1,11 @@
-using System;
-using System.Net.Http;
 using System.Net.Http.Json;
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using System.Threading;
-using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using RecurPixel.Notify;
-using RecurPixel.Notify.Channels;
 using RecurPixel.Notify.Configuration;
 
-namespace RecurPixel.Notify.Facebook;
+namespace RecurPixel.Notify.Channels;
 
 /// <summary>
 /// Notification channel adapter for the Meta Messenger Send API.
@@ -21,7 +15,7 @@ namespace RecurPixel.Notify.Facebook;
 public sealed class FacebookChannel : NotificationChannelBase
 {
     private readonly FacebookOptions _options;
-    private readonly HttpClient _http;
+    private readonly IHttpClientFactory _httpClientFactory;
     private readonly ILogger<FacebookChannel> _logger;
 
     /// <inheritdoc />
@@ -32,11 +26,11 @@ public sealed class FacebookChannel : NotificationChannelBase
     /// </summary>
     public FacebookChannel(
         IOptions<FacebookOptions> options,
-        HttpClient http,
+        IHttpClientFactory httpClientFactory,
         ILogger<FacebookChannel> logger)
     {
         _options = options.Value;
-        _http = http;
+        _httpClientFactory = httpClientFactory;
         _logger = logger;
     }
 
@@ -64,7 +58,8 @@ public sealed class FacebookChannel : NotificationChannelBase
                 }
             };
 
-            var response = await _http.PostAsJsonAsync(url, body, ct);
+            var http = _httpClientFactory.CreateClient();
+            var response = await http.PostAsJsonAsync(url, body, ct);
             var raw = await response.Content.ReadAsStringAsync(ct);
 
             if (!response.IsSuccessStatusCode)

@@ -1,19 +1,13 @@
-using System;
-using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using System.Threading;
-using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using RecurPixel.Notify;
-using RecurPixel.Notify.Channels;
 using RecurPixel.Notify.Configuration;
 
-namespace RecurPixel.Notify.Sms.Plivo;
+namespace RecurPixel.Notify.Channels;
 
 /// <summary>
 /// Notification channel adapter for Plivo SMS delivery.
@@ -23,7 +17,7 @@ namespace RecurPixel.Notify.Sms.Plivo;
 public sealed class PlivoChannel : NotificationChannelBase
 {
     private readonly PlivoOptions _options;
-    private readonly HttpClient _http;
+    private readonly IHttpClientFactory _httpClientFactory;
     private readonly ILogger<PlivoChannel> _logger;
 
     /// <inheritdoc />
@@ -34,11 +28,11 @@ public sealed class PlivoChannel : NotificationChannelBase
     /// </summary>
     public PlivoChannel(
         IOptions<PlivoOptions> options,
-        HttpClient http,
+        IHttpClientFactory httpClientFactory,
         ILogger<PlivoChannel> logger)
     {
         _options = options.Value;
-        _http = http;
+        _httpClientFactory = httpClientFactory;
         _logger = logger;
     }
 
@@ -62,6 +56,7 @@ public sealed class PlivoChannel : NotificationChannelBase
                 Text = payload.Body ?? string.Empty
             };
 
+            var http = _httpClientFactory.CreateClient();
             using var request = new HttpRequestMessage(HttpMethod.Post, url);
 
             var credentials = Convert.ToBase64String(
@@ -71,7 +66,7 @@ public sealed class PlivoChannel : NotificationChannelBase
 
             request.Content = JsonContent.Create(body, options: JsonOptions);
 
-            var response = await _http.SendAsync(request, ct);
+            var response = await http.SendAsync(request, ct);
             var raw = await response.Content.ReadAsStringAsync(ct);
 
             if (!response.IsSuccessStatusCode)

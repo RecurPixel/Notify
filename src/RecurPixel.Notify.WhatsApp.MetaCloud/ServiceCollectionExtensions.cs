@@ -1,11 +1,9 @@
-﻿using System;
-using Microsoft.Extensions.DependencyInjection;
+﻿using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
-using RecurPixel.Notify;
 using RecurPixel.Notify.Channels;
 using RecurPixel.Notify.Configuration;
 
-namespace RecurPixel.Notify.WhatsApp.MetaCloud;
+namespace RecurPixel.Notify;
 
 /// <summary>
 /// Registers the Meta WhatsApp Cloud channel adapter with the DI container.

@@ -1,11 +1,9 @@
-﻿using System;
-using Microsoft.Extensions.DependencyInjection;
+﻿using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
-using RecurPixel.Notify;
 using RecurPixel.Notify.Channels;
 using RecurPixel.Notify.Configuration;
 
-namespace RecurPixel.Notify.WhatsApp.Twilio;
+namespace RecurPixel.Notify;
 
 /// <summary>
 /// Registers the Twilio WhatsApp channel adapter with the DI container.

@@ -5,8 +5,9 @@ using Microsoft.Extensions.Options;
 using RecurPixel.Notify;
 using RecurPixel.Notify.Channels;
 using RecurPixel.Notify.Configuration;
+using RecurPixel.Notify.Email.AzureCommEmail;
 
-namespace RecurPixel.Notify.Email.AzureCommEmail;
+namespace RecurPixel.Notify;
 
 /// <summary>
 /// DI registration extensions for the Azure Communication Services Email channel.

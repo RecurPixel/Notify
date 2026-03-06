@@ -4,7 +4,7 @@ using Microsoft.Extensions.Options;
 using RecurPixel.Notify.Channels;
 using RecurPixel.Notify.Configuration;
 
-namespace RecurPixel.Notify.InApp;
+namespace RecurPixel.Notify;
 
 /// <summary>
 /// DI registration extensions for the in-app notification channel.

@@ -1,18 +1,3 @@
-using System;
-using System.Net;
-using System.Net.Http;
-using System.Threading;
-using System.Threading.Tasks;
-using Microsoft.Extensions.Logging.Abstractions;
-using Microsoft.Extensions.Options;
-using Moq;
-using Moq.Protected;
-using RecurPixel.Notify;
-using RecurPixel.Notify.Channels;
-using RecurPixel.Notify.Configuration;
-using RecurPixel.Notify.RocketChat;
-using Xunit;
-
 namespace RecurPixel.Notify.Tests;
 
 public sealed class RocketChatChannelTests
@@ -31,7 +16,7 @@ public sealed class RocketChatChannelTests
         Body = "World"
     };
 
-    private static HttpClient MakeClient(HttpStatusCode status, string responseBody = "ok")
+    private static IHttpClientFactory MakeFactory(HttpStatusCode status, string responseBody = "ok")
     {
         var handler = new Mock<HttpMessageHandler>();
 
@@ -47,7 +32,10 @@ public sealed class RocketChatChannelTests
                 Content = new StringContent(responseBody)
             });
 
-        return new HttpClient(handler.Object);
+        var client = new HttpClient(handler.Object);
+        var factory = new Mock<IHttpClientFactory>();
+        factory.Setup(f => f.CreateClient(It.IsAny<string>())).Returns(client);
+        return factory.Object;
     }
 
     // ── success ──────────────────────────────────────────────────────────────
@@ -57,7 +45,7 @@ public sealed class RocketChatChannelTests
     {
         var channel = new RocketChatChannel(
             Options.Create(DefaultOptions),
-            MakeClient(HttpStatusCode.OK),
+            MakeFactory(HttpStatusCode.OK),
             NullLogger<RocketChatChannel>.Instance);
 
         var result = await channel.SendAsync(DefaultPayload);
@@ -91,9 +79,11 @@ public sealed class RocketChatChannelTests
                 Content = new StringContent("ok")
             });
 
+        var clientFactory = new Mock<IHttpClientFactory>();
+        clientFactory.Setup(f => f.CreateClient(It.IsAny<string>())).Returns(new HttpClient(handler.Object));
         var channel = new RocketChatChannel(
             Options.Create(DefaultOptions),
-            new HttpClient(handler.Object),
+            clientFactory.Object,
             NullLogger<RocketChatChannel>.Instance);
 
         await channel.SendAsync(DefaultPayload);
@@ -132,9 +122,11 @@ public sealed class RocketChatChannelTests
                 Content = new StringContent("ok")
             });
 
+        var clientFactory = new Mock<IHttpClientFactory>();
+        clientFactory.Setup(f => f.CreateClient(It.IsAny<string>())).Returns(new HttpClient(handler.Object));
         var channel = new RocketChatChannel(
             Options.Create(DefaultOptions),
-            new HttpClient(handler.Object),
+            clientFactory.Object,
             NullLogger<RocketChatChannel>.Instance);
 
         await channel.SendAsync(payload);
@@ -166,9 +158,11 @@ public sealed class RocketChatChannelTests
                 Content = new StringContent("ok")
             });
 
+        var clientFactory = new Mock<IHttpClientFactory>();
+        clientFactory.Setup(f => f.CreateClient(It.IsAny<string>())).Returns(new HttpClient(handler.Object));
         var channel = new RocketChatChannel(
             Options.Create(DefaultOptions),
-            new HttpClient(handler.Object),
+            clientFactory.Object,
             NullLogger<RocketChatChannel>.Instance);
 
         await channel.SendAsync(DefaultPayload);
@@ -184,7 +178,7 @@ public sealed class RocketChatChannelTests
     {
         var channel = new RocketChatChannel(
             Options.Create(DefaultOptions),
-            MakeClient(HttpStatusCode.Unauthorized, "Invalid token"),
+            MakeFactory(HttpStatusCode.Unauthorized, "Invalid token"),
             NullLogger<RocketChatChannel>.Instance);
 
         var result = await channel.SendAsync(DefaultPayload);
@@ -206,9 +200,11 @@ public sealed class RocketChatChannelTests
                 ItExpr.IsAny<CancellationToken>())
             .ThrowsAsync(new HttpRequestException("Connection refused"));
 
+        var clientFactory = new Mock<IHttpClientFactory>();
+        clientFactory.Setup(f => f.CreateClient(It.IsAny<string>())).Returns(new HttpClient(handler.Object));
         var channel = new RocketChatChannel(
             Options.Create(DefaultOptions),
-            new HttpClient(handler.Object),
+            clientFactory.Object,
             NullLogger<RocketChatChannel>.Instance);
 
         var result = await channel.SendAsync(DefaultPayload);
@@ -224,7 +220,7 @@ public sealed class RocketChatChannelTests
     {
         var channel = new RocketChatChannel(
             Options.Create(DefaultOptions),
-            MakeClient(HttpStatusCode.OK),
+            MakeFactory(HttpStatusCode.OK),
             NullLogger<RocketChatChannel>.Instance);
 
         Assert.Equal("rocketchat", channel.ChannelName);
@@ -235,7 +231,7 @@ public sealed class RocketChatChannelTests
     {
         var channel = new RocketChatChannel(
             Options.Create(DefaultOptions),
-            MakeClient(HttpStatusCode.OK),
+            MakeFactory(HttpStatusCode.OK),
             NullLogger<RocketChatChannel>.Instance);
 
         var result = await channel.SendAsync(DefaultPayload);
@@ -248,7 +244,7 @@ public sealed class RocketChatChannelTests
     {
         var channel = new RocketChatChannel(
             Options.Create(DefaultOptions),
-            MakeClient(HttpStatusCode.OK),
+            MakeFactory(HttpStatusCode.OK),
             NullLogger<RocketChatChannel>.Instance);
 
         var result = await channel.SendAsync(DefaultPayload);

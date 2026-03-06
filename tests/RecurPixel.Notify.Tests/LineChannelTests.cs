@@ -1,5 +1,4 @@
 using System.Net.Http.Headers;
-using RecurPixel.Notify.Line;
 
 namespace RecurPixel.Notify.Tests;
 
@@ -17,7 +16,7 @@ public sealed class LineChannelTests
         Body = "World"
     };
 
-    private static HttpClient MakeClient(
+    private static IHttpClientFactory MakeFactory(
         HttpStatusCode status,
         object responseBody,
         string? requestId = "line-request-id-xyz")
@@ -42,7 +41,10 @@ public sealed class LineChannelTests
                 ItExpr.IsAny<CancellationToken>())
             .ReturnsAsync(httpResponse);
 
-        return new HttpClient(handler.Object);
+        var client = new HttpClient(handler.Object);
+        var factory = new Mock<IHttpClientFactory>();
+        factory.Setup(f => f.CreateClient(It.IsAny<string>())).Returns(client);
+        return factory.Object;
     }
 
     // ── success ──────────────────────────────────────────────────────────────
@@ -52,7 +54,7 @@ public sealed class LineChannelTests
     {
         var channel = new LineChannel(
             Options.Create(DefaultOptions),
-            MakeClient(HttpStatusCode.OK, new { }, "line-request-id-xyz"),
+            MakeFactory(HttpStatusCode.OK, new { }, "line-request-id-xyz"),
             NullLogger<LineChannel>.Instance);
 
         var result = await channel.SendAsync(DefaultPayload);
@@ -70,7 +72,7 @@ public sealed class LineChannelTests
     {
         var channel = new LineChannel(
             Options.Create(DefaultOptions),
-            MakeClient(HttpStatusCode.OK, new { }, requestId: null),
+            MakeFactory(HttpStatusCode.OK, new { }, requestId: null),
             NullLogger<LineChannel>.Instance);
 
         var result = await channel.SendAsync(DefaultPayload);
@@ -111,9 +113,11 @@ public sealed class LineChannelTests
             })
             .ReturnsAsync(httpResponse);
 
+        var clientFactory = new Mock<IHttpClientFactory>();
+        clientFactory.Setup(f => f.CreateClient(It.IsAny<string>())).Returns(new HttpClient(handler.Object));
         var channel = new LineChannel(
             Options.Create(DefaultOptions),
-            new HttpClient(handler.Object),
+            clientFactory.Object,
             NullLogger<LineChannel>.Instance);
 
         var result = await channel.SendAsync(payload);
@@ -149,9 +153,11 @@ public sealed class LineChannelTests
             })
             .ReturnsAsync(httpResponse);
 
+        var clientFactory = new Mock<IHttpClientFactory>();
+        clientFactory.Setup(f => f.CreateClient(It.IsAny<string>())).Returns(new HttpClient(handler.Object));
         var channel = new LineChannel(
             Options.Create(DefaultOptions),
-            new HttpClient(handler.Object),
+            clientFactory.Object,
             NullLogger<LineChannel>.Instance);
 
         await channel.SendAsync(DefaultPayload);
@@ -170,7 +176,7 @@ public sealed class LineChannelTests
 
         var channel = new LineChannel(
             Options.Create(DefaultOptions),
-            MakeClient(HttpStatusCode.BadRequest, response, requestId: null),
+            MakeFactory(HttpStatusCode.BadRequest, response, requestId: null),
             NullLogger<LineChannel>.Instance);
 
         var result = await channel.SendAsync(DefaultPayload);
@@ -194,9 +200,11 @@ public sealed class LineChannelTests
                 ItExpr.IsAny<CancellationToken>())
             .ThrowsAsync(new HttpRequestException("Timeout"));
 
+        var clientFactory = new Mock<IHttpClientFactory>();
+        clientFactory.Setup(f => f.CreateClient(It.IsAny<string>())).Returns(new HttpClient(handler.Object));
         var channel = new LineChannel(
             Options.Create(DefaultOptions),
-            new HttpClient(handler.Object),
+            clientFactory.Object,
             NullLogger<LineChannel>.Instance);
 
         var result = await channel.SendAsync(DefaultPayload);
@@ -213,7 +221,7 @@ public sealed class LineChannelTests
     {
         var channel = new LineChannel(
             Options.Create(DefaultOptions),
-            MakeClient(HttpStatusCode.OK, new { }),
+            MakeFactory(HttpStatusCode.OK, new { }),
             NullLogger<LineChannel>.Instance);
 
         Assert.Equal("line", channel.ChannelName);
@@ -224,7 +232,7 @@ public sealed class LineChannelTests
     {
         var channel = new LineChannel(
             Options.Create(DefaultOptions),
-            MakeClient(HttpStatusCode.OK, new { }),
+            MakeFactory(HttpStatusCode.OK, new { }),
             NullLogger<LineChannel>.Instance);
 
         var result = await channel.SendAsync(DefaultPayload);
@@ -237,7 +245,7 @@ public sealed class LineChannelTests
     {
         var channel = new LineChannel(
             Options.Create(DefaultOptions),
-            MakeClient(HttpStatusCode.OK, new { }),
+            MakeFactory(HttpStatusCode.OK, new { }),
             NullLogger<LineChannel>.Instance);
 
         var result = await channel.SendAsync(DefaultPayload);

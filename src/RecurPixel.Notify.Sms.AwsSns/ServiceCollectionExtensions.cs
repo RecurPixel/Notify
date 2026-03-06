@@ -3,11 +3,10 @@ using Amazon.SimpleNotificationService;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Options;
-using RecurPixel.Notify;
 using RecurPixel.Notify.Channels;
 using RecurPixel.Notify.Configuration;
 
-namespace RecurPixel.Notify.Sms.AwsSns;
+namespace RecurPixel.Notify;
 
 /// <summary>
 /// DI registration extensions for the AWS SNS SMS channel.

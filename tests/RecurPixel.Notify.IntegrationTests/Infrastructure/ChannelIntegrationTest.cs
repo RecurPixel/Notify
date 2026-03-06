@@ -1,6 +1,5 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using RecurPixel.Notify;
 using RecurPixel.Notify.Channels;
 using Xunit;
 

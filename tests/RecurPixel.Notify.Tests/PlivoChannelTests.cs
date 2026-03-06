@@ -1,5 +1,3 @@
-using RecurPixel.Notify.Sms.Plivo;
-
 namespace RecurPixel.Notify.Tests;
 
 public sealed class PlivoChannelTests
@@ -17,7 +15,7 @@ public sealed class PlivoChannelTests
         Body = "Hello from Plivo"
     };
 
-    private static HttpClient MakeClient(HttpStatusCode status, object responseBody)
+    private static IHttpClientFactory MakeFactory(HttpStatusCode status, object responseBody)
     {
         var json = JsonSerializer.Serialize(responseBody);
         var handler = new Mock<HttpMessageHandler>();
@@ -34,7 +32,10 @@ public sealed class PlivoChannelTests
                 Content = new StringContent(json)
             });
 
-        return new HttpClient(handler.Object);
+        var client = new HttpClient(handler.Object);
+        var factory = new Mock<IHttpClientFactory>();
+        factory.Setup(f => f.CreateClient(It.IsAny<string>())).Returns(client);
+        return factory.Object;
     }
 
     // ── success ──────────────────────────────────────────────────────────────
@@ -50,7 +51,7 @@ public sealed class PlivoChannelTests
 
         var channel = new PlivoChannel(
             Options.Create(DefaultOptions),
-            MakeClient(HttpStatusCode.Accepted, response),
+            MakeFactory(HttpStatusCode.Accepted, response),
             NullLogger<PlivoChannel>.Instance);
 
         var result = await channel.SendAsync(DefaultPayload);
@@ -91,9 +92,11 @@ public sealed class PlivoChannelTests
                 Content = new StringContent(JsonSerializer.Serialize(response))
             });
 
+        var clientFactory = new Mock<IHttpClientFactory>();
+        clientFactory.Setup(f => f.CreateClient(It.IsAny<string>())).Returns(new HttpClient(handler.Object));
         var channel = new PlivoChannel(
             Options.Create(DefaultOptions),
-            new HttpClient(handler.Object),
+            clientFactory.Object,
             NullLogger<PlivoChannel>.Instance);
 
         await channel.SendAsync(DefaultPayload);
@@ -107,7 +110,7 @@ public sealed class PlivoChannelTests
     {
         var channel = new PlivoChannel(
             Options.Create(DefaultOptions),
-            MakeClient(HttpStatusCode.Unauthorized, new { error = "Invalid credentials" }),
+            MakeFactory(HttpStatusCode.Unauthorized, new { error = "Invalid credentials" }),
             NullLogger<PlivoChannel>.Instance);
 
         var result = await channel.SendAsync(DefaultPayload);
@@ -129,9 +132,11 @@ public sealed class PlivoChannelTests
                 ItExpr.IsAny<CancellationToken>())
             .ThrowsAsync(new HttpRequestException("DNS failure"));
 
+        var clientFactory = new Mock<IHttpClientFactory>();
+        clientFactory.Setup(f => f.CreateClient(It.IsAny<string>())).Returns(new HttpClient(handler.Object));
         var channel = new PlivoChannel(
             Options.Create(DefaultOptions),
-            new HttpClient(handler.Object),
+            clientFactory.Object,
             NullLogger<PlivoChannel>.Instance);
 
         var result = await channel.SendAsync(DefaultPayload);
@@ -151,7 +156,7 @@ public sealed class PlivoChannelTests
 
         var channel = new PlivoChannel(
             Options.Create(DefaultOptions),
-            MakeClient(HttpStatusCode.Accepted, response),
+            MakeFactory(HttpStatusCode.Accepted, response),
             NullLogger<PlivoChannel>.Instance);
 
         var result = await channel.SendAsync(DefaultPayload);
@@ -167,7 +172,7 @@ public sealed class PlivoChannelTests
     {
         var channel = new PlivoChannel(
             Options.Create(DefaultOptions),
-            MakeClient(HttpStatusCode.OK, new { }),
+            MakeFactory(HttpStatusCode.OK, new { }),
             NullLogger<PlivoChannel>.Instance);
 
         Assert.Equal("sms", channel.ChannelName);
@@ -184,7 +189,7 @@ public sealed class PlivoChannelTests
 
         var channel = new PlivoChannel(
             Options.Create(DefaultOptions),
-            MakeClient(HttpStatusCode.Accepted, response),
+            MakeFactory(HttpStatusCode.Accepted, response),
             NullLogger<PlivoChannel>.Instance);
 
         var result = await channel.SendAsync(DefaultPayload);
@@ -203,7 +208,7 @@ public sealed class PlivoChannelTests
 
         var channel = new PlivoChannel(
             Options.Create(DefaultOptions),
-            MakeClient(HttpStatusCode.Accepted, response),
+            MakeFactory(HttpStatusCode.Accepted, response),
             NullLogger<PlivoChannel>.Instance);
 
         var result = await channel.SendAsync(DefaultPayload);

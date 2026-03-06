@@ -1,5 +1,4 @@
 using dotAPNS;
-using RecurPixel.Notify.Push.Apns;
 
 namespace RecurPixel.Notify.Tests.Push;
 

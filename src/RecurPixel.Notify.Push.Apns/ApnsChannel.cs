@@ -1,15 +1,9 @@
-using System;
-using System.Net.Http;
-using System.Threading;
-using System.Threading.Tasks;
 using dotAPNS;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using RecurPixel.Notify;
-using RecurPixel.Notify.Channels;
 using RecurPixel.Notify.Configuration;
 
-namespace RecurPixel.Notify.Push.Apns;
+namespace RecurPixel.Notify.Channels;
 
 /// <summary>
 /// Push notification channel adapter for Apple Push Notification service (APNs).
