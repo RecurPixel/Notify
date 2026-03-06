@@ -4,6 +4,18 @@ All notable changes to RecurPixel.Notify will be documented here.
 
 ---
 
+## v0.2.0-beta.2 — CI Fix
+
+This release includes all v0.2.0-beta.1 changes (see [CHANGELOG.md](CHANGELOG.md)) plus:
+
+### Fixes
+- Fixed GitHub Actions integration tests configuration loading
+- `appsettings.integration.json` is now optional in CI — tests gracefully skip when credentials are missing
+
+**Status:** Ready for NuGet publication
+
+---
+
 ## [0.2.0-beta.1] — March 2026
 
 ### New Packages
