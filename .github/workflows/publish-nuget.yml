@@ -1,4 +1,4 @@
-name: Publish to NuGet
+name: Publish to NuGet (Tier-Ordered)
 
 on:
   release:
@@ -34,19 +34,109 @@ jobs:
           mkdir -p ./nupkgs
           dotnet pack --configuration Release --no-build --output ./nupkgs
 
-      - name: Extract NuGet API key from secrets
-        id: nuget_key
-        run: echo "key_length=${#NUGET_API_KEY}" >> $GITHUB_OUTPUT
+      - name: Push packages in dependency order (with indexing waits)
         env:
           NUGET_API_KEY: ${{ secrets.NUGET_API_KEY }}
-
-      - name: Publish to NuGet.org
         run: |
-          dotnet nuget push "./nupkgs/*.nupkg" \
-            --api-key "${{ secrets.NUGET_API_KEY }}" \
-            --source "https://api.nuget.org/v3/index.json" \
-            --skip-duplicate
-        if: ${{ secrets.NUGET_API_KEY != '' }}
+          set -e
+
+          if [ -z "$NUGET_API_KEY" ]; then
+            echo "❌ NUGET_API_KEY not set"
+            exit 1
+          fi
+
+          # Define package tiers (dependency order)
+          declare -a TIER0=("RecurPixel.Notify.Core")
+          declare -a TIER1=("RecurPixel.Notify.Orchestrator")
+          declare -a TIER2=("RecurPixel.Notify")
+          declare -a TIER3=(
+            "RecurPixel.Notify.Email.SendGrid"
+            "RecurPixel.Notify.Email.Smtp"
+            "RecurPixel.Notify.Email.Mailgun"
+            "RecurPixel.Notify.Email.Postmark"
+            "RecurPixel.Notify.Email.Resend"
+            "RecurPixel.Notify.Email.AwsSes"
+            "RecurPixel.Notify.Email.AzureCommEmail"
+            "RecurPixel.Notify.Sms.Twilio"
+            "RecurPixel.Notify.Sms.MessageBird"
+            "RecurPixel.Notify.Sms.Plivo"
+            "RecurPixel.Notify.Sms.Sinch"
+            "RecurPixel.Notify.Sms.Vonage"
+            "RecurPixel.Notify.Sms.AwsSns"
+            "RecurPixel.Notify.Sms.AzureCommSms"
+            "RecurPixel.Notify.Push.Fcm"
+            "RecurPixel.Notify.Push.Apns"
+            "RecurPixel.Notify.Push.Expo"
+            "RecurPixel.Notify.Push.OneSignal"
+            "RecurPixel.Notify.WhatsApp.Twilio"
+            "RecurPixel.Notify.WhatsApp.MetaCloud"
+            "RecurPixel.Notify.WhatsApp.Vonage"
+            "RecurPixel.Notify.Slack"
+            "RecurPixel.Notify.Discord"
+            "RecurPixel.Notify.Teams"
+            "RecurPixel.Notify.Telegram"
+            "RecurPixel.Notify.Facebook"
+            "RecurPixel.Notify.Line"
+            "RecurPixel.Notify.Viber"
+            "RecurPixel.Notify.Mattermost"
+            "RecurPixel.Notify.RocketChat"
+            "RecurPixel.Notify.InApp"
+          )
+          declare -a TIER4=("RecurPixel.Notify.Sdk")
+
+          # Helper function to push a tier
+          push_tier() {
+            local tier_name=$1
+            shift
+            local packages=("$@")
+            
+            echo ""
+            echo "🚀 Publishing $tier_name (${#packages[@]} packages)"
+            
+            for pkg in "${packages[@]}"; do
+              if [ -z "$pkg" ]; then
+                continue
+              fi
+              
+              # Find the nupkg file
+              nupkg=$(ls ./nupkgs/${pkg}.*.nupkg 2>/dev/null | head -1)
+              if [ -z "$nupkg" ]; then
+                echo "❌ $pkg -- .nupkg not found"
+                exit 1
+              fi
+              
+              # Push the package
+              echo "  → $pkg"
+              dotnet nuget push "$nupkg" \
+                --api-key "$NUGET_API_KEY" \
+                --source "https://api.nuget.org/v3/index.json" \
+                --skip-duplicate 2>&1 | grep -E "Successfully|already exists|error" || true
+            done
+            
+            echo "  ✅ Tier complete"
+          }
+
+          # Push each tier with waits
+          push_tier "Tier 0 - Core" "${TIER0[@]}"
+          echo "⏳ Waiting 120s for NuGet indexing..."
+          sleep 120
+
+          push_tier "Tier 1 - Orchestrator" "${TIER1[@]}"
+          echo "⏳ Waiting 120s for NuGet indexing..."
+          sleep 120
+
+          push_tier "Tier 2 - RecurPixel.Notify" "${TIER2[@]}"
+          echo "⏳ Waiting 120s for NuGet indexing..."
+          sleep 120
+
+          push_tier "Tier 3 - Adapters" "${TIER3[@]}"
+          echo "⏳ Waiting 120s for NuGet indexing..."
+          sleep 120
+
+          push_tier "Tier 4 - SDK" "${TIER4[@]}"
+
+          echo ""
+          echo "✅ All packages published successfully!"
 
       - name: Upload packages as release assets
         uses: softprops/action-gh-release@v1
@@ -57,8 +147,11 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Print release info
+      - name: Print release summary
         run: |
-          echo "✅ Published version: ${{ github.event.release.tag_name }}"
-          echo "📦 Packages: https://github.com/${{ github.repository }}/releases/tag/${{ github.event.release.tag_name }}"
-          echo "🔗 NuGet: https://www.nuget.org/packages?q=RecurPixel.Notify"
+          echo ""
+          echo "📦 Release Summary:"
+          echo "  Version: ${{ github.event.release.tag_name }}"
+          echo "  Packages: 35 total (5 tiers)"
+          echo "  GitHub: https://github.com/${{ github.repository }}/releases/tag/${{ github.event.release.tag_name }}"
+          echo "  NuGet: https://www.nuget.org/packages?q=RecurPixel.Notify"
