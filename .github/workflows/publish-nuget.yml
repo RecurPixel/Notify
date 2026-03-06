@@ -32,7 +32,7 @@ jobs:
       - name: Pack NuGet packages
         run: |
           mkdir -p ./nupkgs
-          dotnet pack --configuration Release --no-build --output ./nupkgs
+          dotnet pack --configuration Release --no-restore --output ./nupkgs
 
       - name: Push packages in dependency order (with indexing waits)
         env:
@@ -107,10 +107,17 @@ jobs:
               
               # Push the package
               echo "  → $pkg"
-              dotnet nuget push "$nupkg" \
+              push_output=$(dotnet nuget push "$nupkg" \
                 --api-key "$NUGET_API_KEY" \
                 --source "https://api.nuget.org/v3/index.json" \
-                --skip-duplicate 2>&1 | grep -E "Successfully|already exists|error" || true
+                --skip-duplicate \
+                --no-symbols 2>&1)
+              push_exit=$?
+              echo "$push_output" | grep -E "Successfully|already exists|error" || echo "$push_output"
+              if [ $push_exit -ne 0 ]; then
+                echo "❌ Push failed for $pkg"
+                exit 1
+              fi
             done
             
             echo "  ✅ Tier complete"
