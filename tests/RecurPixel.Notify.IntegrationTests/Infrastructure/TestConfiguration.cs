@@ -17,7 +17,7 @@ internal static class TestConfiguration
     {
         return new ConfigurationBuilder()
             .SetBasePath(AppContext.BaseDirectory)
-            .AddJsonFile("appsettings.integration.json", optional: false, reloadOnChange: false)
+            .AddJsonFile("appsettings.integration.json", optional: true, reloadOnChange: false)
             .Build();
     }
 
