@@ -3,8 +3,9 @@
   <PropertyGroup>
     <TargetFrameworks>net8.0;net10.0</TargetFrameworks>
     <IncludeBuildOutput>false</IncludeBuildOutput>
+    <IsPackable>true</IsPackable>
     <NoWarn>$(NoWarn);NU5128</NoWarn>
-    <Description>Base install package for RecurPixel.Notify. Includes Core interfaces, models, and the Orchestrator for event-based notification triggering. Install this package alongside one or more adapter packages (RecurPixel.Notify.Email.*, RecurPixel.Notify.Sms.*, etc.). BETA: API is stable but pre-release.</Description>
+    <Description>Base install package for RecurPixel.Notify. Includes Core interfaces, models, and the Orchestrator for event-based notification triggering. Install this package alongside one or more adapter packages (RecurPixel.Notify.Email.*, RecurPixel.Notify.Sms.*, etc.).</Description>
   </PropertyGroup>
 
   <ItemGroup>

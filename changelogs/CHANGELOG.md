@@ -4,6 +4,118 @@ All notable changes to RecurPixel.Notify will be documented here.
 
 ---
 
+## [0.2.0] — March 2026 — STABLE
+
+**🎉 STABLE RELEASE — Production Ready**
+
+The v0.2.0 stable release brings a fully restructured, production-ready notification library with 35+ adapter packages across 13+ channels and providers.
+
+### Adapter Maturity Matrix
+
+This table reflects the testing and verification status of each adapter in v0.2.0. All adapters are included in the stable release. The matrix **validates the "stable" label** — unit tests confirm core logic, integration tests verify provider APIs for adapters marked ✅, and community-backed adapters provide real-world usage assurance.
+
+| Package                | Provider                          | Channel   | Unit Tested | Integration Tested | Community Approved |
+| ---------------------- | --------------------------------- | --------- | ----------- | ------------------ | ------------------ |
+| `Email.SendGrid`       | Twilio SendGrid                   | Email     | ✅           | ✅                  | 🔲                  |
+| `Email.Smtp`           | Any SMTP server                   | Email     | ✅           | ✅                  | 🔲                  |
+| `Email.Mailgun`        | Mailgun                           | Email     | ✅           | 🔲                  | 🔲                  |
+| `Email.Resend`         | Resend                            | Email     | ✅           | ✅                  | 🔲                  |
+| `Email.Postmark`       | Postmark                          | Email     | ✅           | 🔲                  | 🔲                  |
+| `Email.AwsSes`         | AWS SES                           | Email     | ✅           | 🔲                  | 🔲                  |
+| `Email.AzureCommEmail` | Azure Communication Services      | Email     | ✅           | 🔲                  | 🔲                  |
+| `Sms.Twilio`           | Twilio                            | SMS       | ✅           | ✅                  | 🔲                  |
+| `Sms.Vonage`           | Vonage (Nexmo)                    | SMS       | ✅           | 🔲                  | 🔲                  |
+| `Sms.Plivo`            | Plivo                             | SMS       | ✅           | 🔲                  | 🔲                  |
+| `Sms.Sinch`            | Sinch                             | SMS       | ✅           | 🔲                  | 🔲                  |
+| `Sms.MessageBird`      | MessageBird                       | SMS       | ✅           | 🔲                  | 🔲                  |
+| `Sms.AwsSns`           | AWS SNS                           | SMS       | ✅           | 🔲                  | 🔲                  |
+| `Sms.AzureCommSms`     | Azure Communication Services      | SMS       | ✅           | 🔲                  | 🔲                  |
+| `Push.Fcm`             | Firebase Cloud Messaging          | Push      | ✅           | 🔲                  | 🔲                  |
+| `Push.Apns`            | Apple Push Notification Service   | Push      | ✅           | 🔲                  | 🔲                  |
+| `Push.OneSignal`       | OneSignal                         | Push      | ✅           | 🔲                  | 🔲                  |
+| `Push.Expo`            | Expo Push                         | Push      | ✅           | 🔲                  | 🔲                  |
+| `WhatsApp.Twilio`      | Twilio WhatsApp                   | WhatsApp  | ✅           | ✅                  | 🔲                  |
+| `WhatsApp.MetaCloud`   | Meta Cloud API                    | WhatsApp  | ✅           | 🔲                  | 🔲                  |
+| `WhatsApp.Vonage`      | Vonage WhatsApp                   | WhatsApp  | ✅           | 🔲                  | 🔲                  |
+| `Slack`                | Slack Webhooks / Bot API          | Team Chat | ✅           | ✅                  | 🔲                  |
+| `Discord`              | Discord Webhooks                  | Team Chat | ✅           | ✅                  | 🔲                  |
+| `Teams`                | Microsoft Teams Webhooks          | Team Chat | ✅           | 🔲                  | 🔲                  |
+| `Mattermost`           | Mattermost Webhooks               | Team Chat | ✅           | 🔲                  | 🔲                  |
+| `RocketChat`           | Rocket.Chat Webhooks              | Team Chat | ✅           | 🔲                  | 🔲                  |
+| `Facebook`             | Meta Messenger API                | Social    | ✅           | 🔲                  | 🔲                  |
+| `Telegram`             | Telegram Bot API                  | Social    | ✅           | ✅                  | 🔲                  |
+| `Line`                 | LINE Messaging API                | Social    | ✅           | 🔲                  | 🔲                  |
+| `Viber`                | Viber Business Messages           | Social    | ✅           | 🔲                  | 🔲                  |
+| `InApp`                | Hook-based (user-defined storage) | In-App    | ✅           | ✅                  | 🔲                  |
+
+### What's New in v0.2.0
+
+- **21 new or majorly restructured packages** — complete channel expansion
+- **Backward-incompatible improvements** — API refined for production patterns
+- **Zero SaaS platform dependency** — pure .NET library, full control
+- **Auto-discovery of adapters** — install a package, configure credentials, go
+- **DI-native setup** — single `AddRecurPixelNotify()` call
+- **Delivery hooks** — custom logging to your own database
+- **Retry with backoff** — built-in resilience
+- **Fallback chains** — automatic failover between providers
+- **Scoped service support** — `DbContext` and scoped dependencies work natively
+
+### Breaking Changes from v0.2.0-beta.1/beta.2
+
+**See [v0.2.0-beta.1](#020-beta1--march-2026) for complete breaking change documentation.**
+
+Key differences:
+- `TriggerAsync` now returns `TriggerResult` with typed channel results
+- Package namespace reorganization (Core models moved to root namespace)
+- InApp `OnDeliver` renamed to `UseHandler`
+- Meta-package structure (install `RecurPixel.Notify` + adapters instead of separate Core + Orchestrator)
+
+### What's Next: v0.3.0 Roadmap
+
+We're committing to a structured v0.3.0 release with three major feature areas and a new Dashboard package:
+
+#### 1. **Dashboard Package** (`RecurPixel.Notify.Dashboard`) — Delivery Tracking & Observability
+
+**Build Order (Data-First Approach):**
+
+The dashboard is implemented in phases. **UI is built last**, not first, ensuring data accuracy before visualization:
+
+**Phase 1: Data Layer (Foundation)**
+- `NotificationLog` entity — stores delivery attempts, results, retry context, provider responses
+- `INotificationLogStore` interface — abstraction for log persistence (SQL, NoSQL, file, etc.)
+- Wire `OnDelivery` hook into core Orchestrator — calls `INotificationLogStore.LogDeliveryAsync()`
+- Verify logs are actually being written correctly — unit tests for store implementations
+
+**Phase 2: API Layer (Backend)**
+- JSON REST endpoints for log queries, filtering by date/channel/status, aggregations
+- Batcher support — delivery history per `BulkBatchId`
+- Performance queries (built-in pagination, indexing guidance)
+
+**Phase 3: UI Layer (Client)**
+- Embedded HTML dashboard — runs in your app's auth context
+- Real-time delivery logs table, channel status breakdown, failure histogram
+- Retry history and per-message provider responses
+- **Why last:** UI is only useful if the data layer is solid
+
+**Critical Change in Orchestrator:**
+- `BulkTriggerAsync` generates a `BulkBatchId` (ULID/Guid) and passes it through to each individual `NotifyResult`
+- Minimal, isolated change: only `BulkTriggerAsync` and `NotifyResult` touched
+- Prototype this early (before UI work) to validate the plumbing
+
+#### 2. **Adapter Improvements**
+
+- **Community Adapter Approval Process** — peer-reviewed providers to earn 🟢 status
+- **Circuit Breaker Pattern** — auto-disable broken channels without code changes
+- **Adapter Analytics** — built-in success/failure rate tracking (feeds Dashboard)
+
+#### 3. **Developer Experience**
+
+- **Scheduled Send** — send notifications at future times
+- **Template Engine** — inline or DB-backed notification templates
+- **OpenTelemetry Integration** — full tracing for all channels
+
+---
+
 ## v0.2.0-beta.2 — CI Fix
 
 This release includes all v0.2.0-beta.1 changes (see [v0.2.0-beta.1](#020-beta1--march-2026)) plus:

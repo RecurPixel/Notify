@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <Description>Orchestrator service for RecurPixel.Notify. Provides event-based notification triggering, retry policies, fallback channels, conditional routing, and delivery hooks. BETA: API is stable but pre-release.</Description>
+    <Description>Orchestrator service for RecurPixel.Notify. Provides event-based notification triggering, retry policies, fallback channels, conditional routing, and delivery hooks.</Description>
   </PropertyGroup>
 
   <ItemGroup>

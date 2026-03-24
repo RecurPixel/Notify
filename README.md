@@ -5,6 +5,8 @@ A modular, DI-native NuGet notification library for ASP.NET Core. Drop it in. Br
 [![NuGet](https://img.shields.io/nuget/v/RecurPixel.Notify.Sdk)](https://www.nuget.org/packages/RecurPixel.Notify.Sdk)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
+**✅ v0.2.0 STABLE** — Production-ready with 35+ adapters across 13+ channels
+
 ---
 
 ## What It Is
@@ -16,29 +18,9 @@ RecurPixel.Notify is a pure .NET library — not a platform, not SaaS, no extern
 
 ---
 
-## Install
+## Adapter Coverage & Test Matrix
 
-```bash
-# Full SDK — everything included
-dotnet add package RecurPixel.Notify.Sdk
-
-# Or install only what you need
-dotnet add package RecurPixel.Notify
-dotnet add package RecurPixel.Notify.Email.SendGrid
-dotnet add package RecurPixel.Notify.Sms.Twilio
-```
-
-→ [Getting Started](https://recurpixel.github.io/Notify/getting-started) · [Quick Start](https://recurpixel.github.io/Notify/quick-start) · [Usage Tiers](https://recurpixel.github.io/Notify/usage-tiers) · [Adapter Reference](https://recurpixel.github.io/Notify/adapters)
-
-> **⚠️ Upgrading from v0.1.0-beta.1?**
-> v0.2.0 includes breaking changes: namespace reorganization, new meta-package structure, typed `TriggerResult` returns, and explicit `UseHandler` for InApp channels.
-> **→ See the [Migration Guide](https://recurpixel.github.io/Notify#migration-from-v010-beta1)** for step-by-step upgrade instructions.
->
-> **Upgrading from v0.2.0-beta.1?** Install v0.2.0-beta.2 as a drop-in replacement — no API changes, CI fix only.
-
----
-
-## Adapter Status
+All adapters are unit-tested. The table below shows which have integration testing (real API verification) and community usage. This matrix validates the **"stable" label** — you're not betting on guesses.
 
 | Package                | Provider                          | Channel   | Unit Tested | Integration Tested | Community Approved |
 | ---------------------- | --------------------------------- | --------- | ----------- | ------------------ | ------------------ |
@@ -78,6 +60,26 @@ dotnet add package RecurPixel.Notify.Sms.Twilio
 
 ---
 
+## Install
+
+```bash
+# Full SDK — everything included
+dotnet add package RecurPixel.Notify.Sdk
+
+# Or install only what you need
+dotnet add package RecurPixel.Notify
+dotnet add package RecurPixel.Notify.Email.SendGrid
+dotnet add package RecurPixel.Notify.Sms.Twilio
+```
+
+→ [Getting Started](https://recurpixel.github.io/Notify/getting-started) · [Quick Start](https://recurpixel.github.io/Notify/quick-start) · [Usage Tiers](https://recurpixel.github.io/Notify/usage-tiers) · [Adapter Reference](https://recurpixel.github.io/Notify/adapters)
+
+> **⚠️ Upgrading from v0.1.0-beta.1?**
+> v0.2.0 includes breaking changes: namespace reorganization, new meta-package structure, typed `TriggerResult` returns, and explicit `UseHandler` for InApp channels.
+> **→ See the [Migration Guide](https://recurpixel.github.io/Notify#migration-from-v010-beta1)** for step-by-step upgrade instructions.
+
+---
+
 ## Design Principles
 
 - **Zero infrastructure** — pure library, no platform to host or sign up for
@@ -86,6 +88,36 @@ dotnet add package RecurPixel.Notify.Sms.Twilio
 - **Config agnostic** — accepts `IConfiguration`, options builder, or a raw POCO
 - **Content agnostic** — we deliver the payload, you build the subject and body
 - **Hook-based logging** — `OnDelivery()` callback, you write to your own DB
+
+---
+
+## What's Coming in v0.3.0
+
+### Dashboard Package (`RecurPixel.Notify.Dashboard`)
+
+A new observability package for delivery tracking and troubleshooting, built with a **data-first approach**: data layer solidified first, REST API second, UI last.
+
+**Key Features:**
+- **NotificationLog Entity & INotificationLogStore** — Pluggable persistence (SQL Server, PostgreSQL, SQLite, custom)
+- **OnDelivery Hook Integration** — Logs automatically captured for every delivery
+- **BulkBatchId Grouping** — Track all notifications in a bulk send as a unit (requires minor Orchestrator update to `BulkTriggerAsync`)
+- **REST API** — Query logs, filter by channel/status/date, retrieve retry history, view batch history
+- **Embedded HTML Dashboard** — Real-time logs table, channel status breakdown, failure histogram, live send testing
+
+**Why This Order Matters:**
+Dashboard development follows strict phases — UI is built last, not first. Data accuracy is verified before any visualization. See [v0.3.0 implementation plan](changelogs/v0.3.0-DASHBOARD-PLAN.md) for detailed build order.
+
+### Adapter Improvements
+
+- **Circuit Breaker Pattern** — Auto-disable broken channels without code changes
+- **Community Adapter Approval** — Peer-reviewed providers earn 🟢 status
+- **Adapter Analytics** — Success/failure rate tracking per provider (feeds Dashboard)
+
+### Developer Experience
+
+- **Scheduled Send** — Send notifications at future times
+- **Template Engine** — Inline or database-backed notification templates
+- **OpenTelemetry Integration** — Full distributed tracing for all channels
 
 ---
 

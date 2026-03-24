@@ -10,9 +10,9 @@ Three complete setups — one per usage tier — plus a real-world production pa
 
 ---
 
-## Namespace Organization (v0.2.0-beta.1)
+## Namespace Organization (v0.2.0)
 
-As of v0.2.0-beta.1, the library uses a cleaner public API structure:
+As of v0.2.0, the library uses a cleaner public API structure:
 
 ```csharp
 // Core types and service
@@ -26,7 +26,7 @@ using RecurPixel.Notify.Channels;           // INotificationChannel, Notificatio
 using RecurPixel.Notify.Configuration;      // EmailOptions, SmsOptions, PushOptions, WhatsAppOptions, all provider credentials
 ```
 
-> **Migrating from beta.1?** If you see compiler errors like "RecurPixel.Notify.Core.Models is not found", update your using statements to match the new namespaces above.
+> **Migrating from v0.1.0-beta.1?** If you see compiler errors like "RecurPixel.Notify.Core.Models is not found", update your using statements to match the new namespaces above.
 
 ---
 

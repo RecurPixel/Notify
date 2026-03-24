@@ -1,0 +1,42 @@
+# Test workflow locally - mimics GitHub Actions ubuntu-latest environment
+FROM mcr.microsoft.com/dotnet/sdk:latest
+
+WORKDIR /workspace
+
+# Copy entire project
+COPY . .
+
+# Restore deps
+RUN dotnet restore
+
+# Build Release
+RUN dotnet build --configuration Release --no-restore
+
+# Run tests
+RUN dotnet test --configuration Release --no-build --verbosity normal
+
+# Clean and pack NuGet packages
+RUN rm -rf ./nupkgs && mkdir -p ./nupkgs && \
+    dotnet pack --configuration Release --no-restore --output ./nupkgs
+
+# Verify all 35 packages were created
+RUN echo "📦 Checking packed packages..." && \
+    nupkg_count=$(find ./nupkgs -name "*.nupkg" ! -name "*.snupkg" | wc -l) && \
+    echo "Total .nupkg files: $nupkg_count" && \
+    if [ "$nupkg_count" -ne 35 ]; then \
+    echo "❌ ERROR: Expected 35 packages, found $nupkg_count" && \
+    echo "" && \
+    echo "Packages found:" && \
+    find ./nupkgs -name "*.nupkg" ! -name "*.snupkg" | sort | nl && \
+    exit 1; \
+    fi && \
+    echo "✅ All 35 packages present!" && \
+    echo "" && \
+    echo "📋 Final Package List:" && \
+    find ./nupkgs -name "*.nupkg" ! -name "*.snupkg" -type f | sort | nl && \
+    echo "" && \
+    total_size=$(du -sh ./nupkgs | cut -f1) && \
+    echo "📊 Total package size: $total_size"
+
+# Keep container alive for inspection
+CMD ["/bin/bash"]

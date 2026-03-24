@@ -10,11 +10,14 @@ permalink: /
 A modular, DI-native NuGet notification library for ASP.NET Core. Drop it in. Bring your own API keys. Own your data.
 {: .fs-6 .fw-300 }
 
+**✅ v0.2.0 STABLE** — Production-ready with 35+ adapters across 13+ channels
+{: .fs-5 }
+
 [Get Started](getting-started){: .btn .btn-primary .fs-5 .mb-4 .mb-md-0 .mr-2 }
 [Quick Start](quick-start){: .btn .fs-5 .mb-4 .mb-md-0 }
 
 > **Migrating from v0.1.0-beta.1?**  
-> The namespace structure has been reorganized in v0.2.0-beta.1. See the [Migration Guide](#migration-from-v011-beta1) below.
+> The namespace structure has been reorganized in v0.2.0. See the [Migration Guide](#migration-from-v010-beta1) below.
 
 ---
 
@@ -94,9 +97,21 @@ See [Usage Tiers](usage-tiers) to understand which option fits your use case.
 
 ---
 
-## License
+## What's Coming in v0.3.0
 
-MIT — see [LICENSE](https://github.com/RecurPixel/Notify/blob/main/LICENSE).
+v0.3.0 introduces a **Dashboard package** for delivery tracking and observability:
+
+- **RecurPixel.Notify.Dashboard** — New observability package with delivery logs, batch tracking, and embedded HTML dashboard
+- **NotificationLog Entity & INotificationLogStore** — Pluggable persistence (SQL Server, PostgreSQL, SQLite, custom implementations)
+- **BulkBatchId Grouping** — Track all notifications in a bulk send as a unit
+- **REST API** — Query logs, filter by channel/status/date, retrieve provider responses
+- **Circuit Breaker Pattern** — Auto-disable broken channels without code changes
+- **Community Adapter Approval** — Peer-reviewed providers earn special status
+- **Scheduled Send** — Send notifications at future times
+- **Template Engine** — Inline or database-backed templates
+- **OpenTelemetry Integration** — Full distributed tracing
+
+See the [v0.3.0 implementation plan](../changelogs/v0.3.0-DASHBOARD-PLAN.md) for detailed build order and architecture.
 
 ---
 
@@ -135,7 +150,7 @@ Update your using statements:
 dynamic result = await notify.TriggerAsync(...);
 if (result.Success) { ... }
 
-// After (v0.2.0-beta.1)
+// After (v0.2.0)
 TriggerResult result = await notify.TriggerAsync(...);
 if (result.AllSucceeded) { ... }  // Check all channels at once
 foreach (var failure in result.Failures) { ... }  // Inspect per-channel failures
@@ -150,7 +165,7 @@ The removal of `notifyOptions.InApp` and `notifyOptions.OnDelivery` properties i
 notifyOptions.InApp = new() { /* ... */ };
 notifyOptions.OnDelivery = async result => { /* ... */ };
 
-// After (v0.2.0-beta.1)
+// After (v0.2.0)
 // ① InApp handler — separate call before AddRecurPixelNotify
 builder.Services.AddInAppChannel(opts =>
     opts.UseHandler<IApplicationDbContext>(async (notification, db) => { /* ... */ }));
@@ -165,7 +180,7 @@ builder.Services.AddRecurPixelNotify(
     });
 ```
 
-**Key distinction in v0.2.0-beta.1:**
+**Key distinction in v0.2.0:**
 - **`UseHandler`** — where you implement the send (e.g., write InApp notifications to DB)
 - **`OnDelivery`** — audit hook that fires after every send, for logging and metrics
 
