@@ -298,27 +298,30 @@ WhatsApp.Twilio (all use vendor SDKs that own their own HttpClient).
 
 ---
 
-## Phase 15 — Dashboard data layer 🔲
+## Phase 15 — Dashboard data layer ✅
 
 > Phase 14 must be complete first — NotifyResult needs BulkBatchId before we design the log entity.
 > Two packages: Dashboard (interface + entity) and Dashboard.EfCore (EF Core implementation).
 > The Dashboard package auto-wires into OnDelivery during AddNotifyDashboard() — no user code change.
 
-- 🔲 Create `src/RecurPixel.Notify.Dashboard` project
-- 🔲 `NotificationLog.cs` entity (all NotifyResult fields + BulkBatchId, EventName, IsBulk)
-- 🔲 `NotificationLogQuery.cs` — filter object (channel, status, date range, recipient, eventName, bulkBatchId)
-- 🔲 `INotificationLogStore.cs` — AddAsync, QueryAsync, GetBatchAsync
-- 🔲 `DashboardOptions.cs` — RoutePrefix, PageTitle, RequireRole, PolicyName, PageSize
-- 🔲 Auto-wire: `AddNotifyDashboard()` registers an internal `OnDelivery` handler that writes to `INotificationLogStore`
-- 🔲 Create `src/RecurPixel.Notify.Dashboard.EfCore` project
-- 🔲 `NotifyDashboardDbContext.cs` — standalone context (Option A)
-- 🔲 `NotificationLogEntityTypeConfiguration.cs` — `IEntityTypeConfiguration<NotificationLog>`
-- 🔲 `ModelBuilderExtensions.cs` — `builder.AddNotifyDashboard()` for Option B (existing DbContext)
-- 🔲 `EfCoreNotificationLogStore.cs` — implements `INotificationLogStore`
-- 🔲 `AddNotifyDashboardEfCore()` extension on `IServiceCollection`
-- 🔲 Add both packages to `RecurPixel.Notify.Sdk`
-- 🔲 Write unit tests for store, query, entity configuration
-- 🔲 `dotnet test` — all green
+- ✅ Create `src/RecurPixel.Notify.Dashboard` project
+- ✅ `NotificationLog.cs` entity (all NotifyResult fields + BulkBatchId, EventName, IsBulk)
+- ✅ `NotificationLogQuery.cs` — filter object (channel, provider, status, date range, recipient, eventName, bulkBatchId, isBulk, page, pageSize)
+- ✅ `NotificationLogStats.cs` — TotalSent, SuccessCount, FailureCount, SuccessRate, ActiveChannelCount
+- ✅ `INotificationLogStore.cs` — AddAsync, QueryAsync, GetBatchAsync, GetTodayStatsAsync
+- ✅ `DashboardOptions.cs` — RoutePrefix, PageTitle, RequireRole, PolicyName, PageSize
+- ✅ `INotifyDeliveryObserver` — extension point in Core; Orchestrator discovers and invokes all registered observers
+- ✅ Auto-wire: `AddNotifyDashboard()` registers `DashboardDeliveryObserver : INotifyDeliveryObserver`; no changes to existing Orchestrator setup calls required
+- ✅ `NotifyResult.Subject` — added to Core; stamped from payload.Subject in Orchestrator TriggerAsync
+- ✅ Create `src/RecurPixel.Notify.Dashboard.EfCore` project
+- ✅ `NotifyDashboardDbContext.cs` — standalone context (Option A)
+- ✅ `NotificationLogEntityTypeConfiguration.cs` — `IEntityTypeConfiguration<NotificationLog>` with full column constraints and indexes
+- ✅ `ModelBuilderExtensions.cs` — `builder.AddNotifyDashboard()` for Option B (existing DbContext)
+- ✅ `EfCoreNotificationLogStore.cs` — implements `INotificationLogStore` with full query filtering + paging
+- ✅ `AddNotifyDashboardEfCore(Action<DbContextOptionsBuilder>)` — provider-agnostic, user brings their EF Core provider
+- ✅ Add both packages to `RecurPixel.Notify.Sdk`
+- ✅ Write unit tests for store, query, entity configuration, observer, DI wiring
+- ✅ `dotnet test` — all green (386 passed)
 
 **Resume prompt:**
 ```

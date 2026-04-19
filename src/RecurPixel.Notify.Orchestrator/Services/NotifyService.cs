@@ -21,6 +21,7 @@ internal sealed class NotifyService : INotifyService
     private readonly NotifyOptions _notifyOptions;
     private readonly IServiceProvider _serviceProvider;
     private readonly ILogger<NotifyService> _logger;
+    private readonly IReadOnlyList<INotifyDeliveryObserver> _observers;
 
     public NotifyService(
         EventRegistry registry,
@@ -28,7 +29,8 @@ internal sealed class NotifyService : INotifyService
         OrchestratorOptions orchOptions,
         IOptions<NotifyOptions> notifyOptions,
         IServiceProvider serviceProvider,
-        ILogger<NotifyService> logger)
+        ILogger<NotifyService> logger,
+        IEnumerable<INotifyDeliveryObserver> observers)
     {
         _registry        = registry;
         _dispatcher      = dispatcher;
@@ -36,6 +38,7 @@ internal sealed class NotifyService : INotifyService
         _notifyOptions   = notifyOptions.Value;
         _serviceProvider = serviceProvider;
         _logger          = logger;
+        _observers       = observers.ToList();
     }
 
     // ── Direct channel properties ─────────────────────────────────────────────
@@ -120,9 +123,11 @@ internal sealed class NotifyService : INotifyService
                 continue;
             }
 
-            var dispatchResult = await _dispatcher.DispatchAsync(channelName, ResolvePayload(context.Channels[channelName], channelName, context.User), retryOptions, ct);
+            var payload = context.Channels[channelName];
+            var dispatchResult = await _dispatcher.DispatchAsync(channelName, ResolvePayload(payload, channelName, context.User), retryOptions, ct);
             dispatchResult.EventName = eventName;
             dispatchResult.Metadata  = context.Metadata;
+            dispatchResult.Subject   = payload.Subject;
             channelResults.Add(dispatchResult);
             dispatchedResults.Add(dispatchResult);
         }
@@ -299,7 +304,7 @@ internal sealed class NotifyService : INotifyService
 
     private async Task InvokeDeliveryHookAsync(IEnumerable<NotifyResult> results)
     {
-        if (!_orchOptions.HasDeliveryHandlers) return;
+        if (!_orchOptions.HasDeliveryHandlers && _observers.Count == 0) return;
 
         var hookTasks = results.Select(r => InvokeHookSafe(r));
         await Task.WhenAll(hookTasks);
@@ -307,15 +312,28 @@ internal sealed class NotifyService : INotifyService
 
     private async Task InvokeHookSafe(NotifyResult result)
     {
-        if (!_orchOptions.HasDeliveryHandlers) return;
-        try
+        if (_orchOptions.HasDeliveryHandlers)
         {
-            await _orchOptions.InvokeDeliveryHandlers(result, _serviceProvider);
+            try
+            {
+                await _orchOptions.InvokeDeliveryHandlers(result, _serviceProvider);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogDebug(ex, "OnDelivery hook threw for channel={Channel}", result.Channel);
+            }
         }
-        catch (Exception ex)
+
+        foreach (var observer in _observers)
         {
-            // Hook failures must never crash the dispatch path
-            _logger.LogDebug(ex, "OnDelivery hook threw for channel={Channel}", result.Channel);
+            try
+            {
+                await observer.OnDeliveryAsync(result);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogDebug(ex, "INotifyDeliveryObserver threw for channel={Channel}", result.Channel);
+            }
         }
     }
 }

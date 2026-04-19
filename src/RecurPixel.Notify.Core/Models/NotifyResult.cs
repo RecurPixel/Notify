@@ -76,4 +76,11 @@ public class NotifyResult
     /// Null when no metadata was set on the context, or on direct channel sends.
     /// </summary>
     public Dictionary<string, object>? Metadata { get; set; }
+
+    /// <summary>
+    /// The notification subject (email subject line, push title etc.) from the original payload.
+    /// Populated by the Orchestrator for orchestrated sends; null for direct channel sends.
+    /// Stored in the dashboard log so operators can identify what was sent without reading the body.
+    /// </summary>
+    public string? Subject { get; set; }
 }

@@ -48,6 +48,12 @@
     <ProjectReference Include="..\..\src\RecurPixel.Notify.Sms.AzureCommSms\RecurPixel.Notify.Sms.AzureCommSms.csproj" />
     <ProjectReference Include="..\..\src\RecurPixel.Notify.Mattermost\RecurPixel.Notify.Mattermost.csproj" />
     <ProjectReference Include="..\..\src\RecurPixel.Notify.RocketChat\RecurPixel.Notify.RocketChat.csproj" />
+    <ProjectReference Include="..\..\src\RecurPixel.Notify.Dashboard\RecurPixel.Notify.Dashboard.csproj" />
+    <ProjectReference Include="..\..\src\RecurPixel.Notify.Dashboard.EfCore\RecurPixel.Notify.Dashboard.EfCore.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" Version="8.0.11" />
   </ItemGroup>
 
 </Project>

@@ -69,4 +69,10 @@
     <ProjectReference Include="..\RecurPixel.Notify.InApp\RecurPixel.Notify.InApp.csproj" />
   </ItemGroup>
 
+  <!-- Dashboard -->
+  <ItemGroup>
+    <ProjectReference Include="..\RecurPixel.Notify.Dashboard\RecurPixel.Notify.Dashboard.csproj" />
+    <ProjectReference Include="..\RecurPixel.Notify.Dashboard.EfCore\RecurPixel.Notify.Dashboard.EfCore.csproj" />
+  </ItemGroup>
+
 </Project>

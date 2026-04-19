@@ -1,0 +1,13 @@
+{
+  "permissions": {
+    "allow": [
+      "Read(//c/Temp/notify-smoke-test/sdk-test/**)",
+      "Bash(cp \"../nuget.config\" .)",
+      "Bash(dotnet add package RecurPixel.Notify.Sdk --version 0.2.0-beta.2)",
+      "Read(//c/Temp/notify-smoke-test/selective-test/**)",
+      "Bash(dotnet new console --no-restore -f net8.0)",
+      "Bash(dotnet add package RecurPixel.Notify --version 0.2.0-beta.2)",
+      "Bash(dotnet add package RecurPixel.Notify.Email.SendGrid --version 0.2.0-beta.2)"
+    ]
+  }
+}
