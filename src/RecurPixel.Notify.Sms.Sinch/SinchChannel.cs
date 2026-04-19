@@ -55,7 +55,7 @@ public sealed class SinchChannel : NotificationChannelBase
                 Body = payload.Body ?? string.Empty
             };
 
-            var http = _httpClientFactory.CreateClient();
+            var http = _httpClientFactory.CreateClient("sms:sinch");
             using var request = new HttpRequestMessage(HttpMethod.Post, url);
             request.Headers.Authorization =
                 new AuthenticationHeaderValue("Bearer", _options.ApiToken);
@@ -132,7 +132,7 @@ public sealed class SinchChannel : NotificationChannelBase
                     Body = chunkList[0].Body ?? string.Empty
                 };
 
-                var http = _httpClientFactory.CreateClient();
+                var http = _httpClientFactory.CreateClient("sms:sinch");
                 using var request = new HttpRequestMessage(HttpMethod.Post, url);
                 request.Headers.Authorization =
                     new AuthenticationHeaderValue("Bearer", _options.ApiToken);

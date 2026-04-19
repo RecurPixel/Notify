@@ -1,3 +1,4 @@
+using System.Net.Http;
 using dotAPNS;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -20,12 +21,13 @@ public sealed class ApnsChannel : NotificationChannelBase
     public override string ChannelName => "push";
 
     /// <summary>
-    /// DI constructor — builds the real APNs client from options.
+    /// DI constructor — builds the real APNs client using an IHttpClientFactory-managed HttpClient.
     /// </summary>
     public ApnsChannel(
         IOptions<ApnsOptions> options,
+        IHttpClientFactory httpClientFactory,
         ILogger<ApnsChannel> logger)
-        : this(options, CreateClient(options.Value), logger) { }
+        : this(options, CreateClient(options.Value, httpClientFactory), logger) { }
 
     /// <summary>
     /// Internal constructor — accepts a mock client for testing.
@@ -104,7 +106,7 @@ public sealed class ApnsChannel : NotificationChannelBase
     // No SendBulkAsync override — APNs has no native bulk API.
     // The base class loop handles bulk automatically.
 
-    private static IApnsClient CreateClient(ApnsOptions options)
+    private static IApnsClient CreateClient(ApnsOptions options, IHttpClientFactory httpClientFactory)
     {
         var jwtOptions = new ApnsJwtOptions
         {
@@ -114,6 +116,6 @@ public sealed class ApnsChannel : NotificationChannelBase
             CertContent = options.PrivateKey
         };
 
-        return ApnsClient.CreateUsingJwt(new HttpClient(), jwtOptions);
+        return ApnsClient.CreateUsingJwt(httpClientFactory.CreateClient("push:apns"), jwtOptions);
     }
 }

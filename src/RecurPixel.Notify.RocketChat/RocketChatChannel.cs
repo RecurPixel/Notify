@@ -56,7 +56,7 @@ public sealed class RocketChatChannel : NotificationChannelBase
                 Channel = _options.Channel
             };
 
-            var http = _httpClientFactory.CreateClient();
+            var http = _httpClientFactory.CreateClient("rocketchat:default");
             var response = await http.PostAsJsonAsync(
                 _options.WebhookUrl, body, JsonOptions, ct);
 

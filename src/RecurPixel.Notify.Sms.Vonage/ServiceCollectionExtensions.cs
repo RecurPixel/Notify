@@ -24,7 +24,10 @@ public static class ServiceCollectionExtensions
     {
         services.AddSingleton(Options.Create(options));
 
-        services.AddHttpClient<VonageSmsChannel>();
+        services.AddHttpClient("sms:vonage", http =>
+        {
+            http.Timeout = TimeSpan.FromSeconds(30);
+        });
 
         services.TryAddKeyedSingleton<INotificationChannel, VonageSmsChannel>("sms:vonage");
 

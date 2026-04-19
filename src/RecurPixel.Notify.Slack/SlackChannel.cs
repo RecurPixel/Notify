@@ -74,7 +74,7 @@ public sealed class SlackChannel : NotificationChannelBase
                 messageBody = new { text = payload.Body };
             }
 
-            using var client = _httpClientFactory.CreateClient();
+            var client = _httpClientFactory.CreateClient("slack:default");
             var response = await client.PostAsJsonAsync(webhookUrl, messageBody, ct);
 
             if (!response.IsSuccessStatusCode)

@@ -12,7 +12,7 @@ namespace RecurPixel.Notify;
 public static class ServiceCollectionExtensions
 {
     /// <summary>
-    /// Registers <see cref="PostmarkChannel"/> and its typed <see cref="System.Net.Http.HttpClient"/>
+    /// Registers <see cref="PostmarkChannel"/> with a named <see cref="System.Net.Http.HttpClient"/>
     /// into the service collection.
     /// </summary>
     /// <param name="services">The service collection to register into.</param>
@@ -24,7 +24,10 @@ public static class ServiceCollectionExtensions
     {
         services.AddSingleton(Options.Create(options));
 
-        services.AddHttpClient<PostmarkChannel>();
+        services.AddHttpClient("email:postmark", http =>
+        {
+            http.Timeout = TimeSpan.FromSeconds(30);
+        });
 
         services.TryAddKeyedSingleton<INotificationChannel, PostmarkChannel>("email:postmark");
 

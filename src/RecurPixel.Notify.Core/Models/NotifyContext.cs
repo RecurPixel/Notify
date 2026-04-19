@@ -18,4 +18,10 @@ public class NotifyContext
     /// Only channels present in this dictionary will be attempted.
     /// </summary>
     public Dictionary<string, NotificationPayload> Channels { get; set; } = new();
+
+    /// <summary>
+    /// Caller-defined metadata passed through to every NotifyResult produced by this context.
+    /// Use for correlation IDs, request IDs, or any context you need inside OnDelivery.
+    /// </summary>
+    public Dictionary<string, object>? Metadata { get; set; }
 }

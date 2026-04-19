@@ -56,7 +56,7 @@ public sealed class MattermostChannel : NotificationChannelBase
                 Channel = _options.Channel
             };
 
-            var http = _httpClientFactory.CreateClient();
+            var http = _httpClientFactory.CreateClient("mattermost:default");
             var response = await http.PostAsJsonAsync(
                 _options.WebhookUrl, body, JsonOptions, ct);
 

@@ -52,7 +52,7 @@ public sealed class DiscordChannel : NotificationChannelBase
 
             var messageBody = new { content };
 
-            using var client = _httpClientFactory.CreateClient();
+            var client = _httpClientFactory.CreateClient("discord:default");
             var response = await client.PostAsJsonAsync(_options.WebhookUrl, messageBody, ct);
 
             if (!response.IsSuccessStatusCode)

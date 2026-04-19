@@ -62,7 +62,7 @@ public sealed class LineChannel : NotificationChannelBase
                 }
             };
 
-            var http = _httpClientFactory.CreateClient();
+            var http = _httpClientFactory.CreateClient("line:default");
             using var request = new HttpRequestMessage(HttpMethod.Post, PushEndpoint);
             request.Headers.Authorization =
                 new AuthenticationHeaderValue("Bearer", _options.ChannelAccessToken);

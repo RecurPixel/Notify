@@ -67,7 +67,7 @@ public sealed class VonageWhatsAppChannel : NotificationChannelBase
             var credentials = Convert.ToBase64String(
                 Encoding.ASCII.GetBytes($"{_options.ApiKey}:{_options.ApiSecret}"));
 
-            var http = _httpClientFactory.CreateClient();
+            var http = _httpClientFactory.CreateClient("whatsapp:vonage");
             using var request = new HttpRequestMessage(HttpMethod.Post, SendEndpoint);
             request.Headers.Authorization =
                 new AuthenticationHeaderValue("Basic", credentials);

@@ -57,7 +57,7 @@ public sealed class TeamsChannel : NotificationChannelBase
                 text = payload.Body
             };
 
-            using var client = _httpClientFactory.CreateClient();
+            var client = _httpClientFactory.CreateClient("teams:default");
             var response = await client.PostAsJsonAsync(_options.WebhookUrl, messageBody, ct);
 
             if (!response.IsSuccessStatusCode)

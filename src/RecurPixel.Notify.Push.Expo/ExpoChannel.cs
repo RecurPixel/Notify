@@ -50,7 +50,7 @@ public sealed class ExpoChannel : NotificationChannelBase
         {
             var message = BuildMessage(payload);
 
-            var http = _httpClientFactory.CreateClient();
+            var http = _httpClientFactory.CreateClient("push:expo");
             using var request = BuildRequest(new[] { message });
             var response = await http.SendAsync(request, ct);
             var raw = await response.Content.ReadAsStringAsync(ct);
@@ -127,7 +127,7 @@ public sealed class ExpoChannel : NotificationChannelBase
             {
                 var messages = chunkList.Select(BuildMessage).ToList();
 
-                var http = _httpClientFactory.CreateClient();
+                var http = _httpClientFactory.CreateClient("push:expo");
                 using var request = BuildRequest(messages);
                 var response = await http.SendAsync(request, ct);
                 var raw = await response.Content.ReadAsStringAsync(ct);

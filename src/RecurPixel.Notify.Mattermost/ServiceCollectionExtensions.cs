@@ -25,7 +25,10 @@ public static class ServiceCollectionExtensions
     {
         services.AddSingleton(Options.Create(options));
 
-        services.AddHttpClient<MattermostChannel>();
+        services.AddHttpClient("mattermost:default", http =>
+        {
+            http.Timeout = TimeSpan.FromSeconds(30);
+        });
 
         services.TryAddKeyedSingleton<INotificationChannel, MattermostChannel>(
             "mattermost:default");

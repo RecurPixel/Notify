@@ -24,7 +24,10 @@ public static class ServiceCollectionExtensions
     {
         services.AddSingleton(Options.Create(options));
 
-        services.AddHttpClient<ViberChannel>();
+        services.AddHttpClient("viber:default", http =>
+        {
+            http.Timeout = TimeSpan.FromSeconds(30);
+        });
 
         services.TryAddKeyedSingleton<INotificationChannel, ViberChannel>("viber:default");
 

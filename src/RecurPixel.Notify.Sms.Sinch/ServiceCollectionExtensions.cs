@@ -24,7 +24,10 @@ public static class ServiceCollectionExtensions
     {
         services.AddSingleton(Options.Create(options));
 
-        services.AddHttpClient<SinchChannel>();
+        services.AddHttpClient("sms:sinch", http =>
+        {
+            http.Timeout = TimeSpan.FromSeconds(30);
+        });
 
         services.TryAddKeyedSingleton<INotificationChannel, SinchChannel>("sms:sinch");
 

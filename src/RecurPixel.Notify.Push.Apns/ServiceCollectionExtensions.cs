@@ -47,6 +47,11 @@ public static class ServiceCollectionExtensions
             o.PrivateKey = options.PrivateKey;
         });
 
+        services.AddHttpClient("push:apns", http =>
+        {
+            http.Timeout = TimeSpan.FromSeconds(30);
+        });
+
         services.TryAddKeyedSingleton<INotificationChannel, ApnsChannel>("push:apns");
 
         return services;

@@ -437,6 +437,142 @@ public class NotifyServiceTests
         Assert.Equal("override@example.com", captured.To); // explicit To is preserved
     }
 
+    // ── 14A — EventName, BulkBatchId, Metadata ───────────────────────────────
+
+    [Fact]
+    public async Task TriggerAsync_EventName_StampedOnEveryChannelResult()
+    {
+        var emailMock = MakeMock("email");
+        var smsMock   = MakeMock("sms");
+        var (svc, _) = BuildService(
+            o => o.DefineEvent("order.placed", e => e.UseChannels("email", "sms")),
+            n => { },
+            emailMock, smsMock);
+
+        var result = await svc.TriggerAsync("order.placed", MakeContext());
+
+        Assert.All(result.ChannelResults, r => Assert.Equal("order.placed", r.EventName));
+    }
+
+    [Fact]
+    public async Task TriggerAsync_Metadata_PassedThroughToChannelResults()
+    {
+        var emailMock = MakeMock("email");
+        var (svc, _) = BuildService(
+            o => o.DefineEvent("order.placed", e => e.UseChannels("email")),
+            n => { },
+            emailMock: emailMock);
+
+        var ctx = MakeContext();
+        ctx.Metadata = new Dictionary<string, object> { ["requestId"] = "req-123" };
+
+        var result = await svc.TriggerAsync("order.placed", ctx);
+
+        Assert.Single(result.ChannelResults);
+        Assert.Equal("req-123", result.ChannelResults[0].Metadata!["requestId"]);
+    }
+
+    [Fact]
+    public async Task TriggerAsync_NoMetadata_MetadataIsNull()
+    {
+        var emailMock = MakeMock("email");
+        var (svc, _) = BuildService(
+            o => o.DefineEvent("order.placed", e => e.UseChannels("email")),
+            n => { },
+            emailMock: emailMock);
+
+        var result = await svc.TriggerAsync("order.placed", MakeContext());
+
+        Assert.Null(result.ChannelResults[0].Metadata);
+    }
+
+    [Fact]
+    public async Task TriggerAsync_BulkBatchId_IsNullForSingleSend()
+    {
+        var emailMock = MakeMock("email");
+        var (svc, _) = BuildService(
+            o => o.DefineEvent("order.placed", e => e.UseChannels("email")),
+            n => { },
+            emailMock: emailMock);
+
+        var result = await svc.TriggerAsync("order.placed", MakeContext());
+
+        Assert.All(result.ChannelResults, r => Assert.Null(r.BulkBatchId));
+    }
+
+    [Fact]
+    public async Task BulkTriggerAsync_BulkBatchId_SameAcrossAllResults()
+    {
+        var emailMock = MakeMock("email");
+        var (svc, _) = BuildService(
+            o => o.DefineEvent("promo.blast", e => e.UseChannels("email")),
+            n => { },
+            emailMock: emailMock);
+
+        var contexts = new List<NotifyContext>
+        {
+            new() { User = new() { UserId = "u1" }, Channels = new() { ["email"] = new() { To = "a@b.com", Subject = "s", Body = "b" } } },
+            new() { User = new() { UserId = "u2" }, Channels = new() { ["email"] = new() { To = "c@d.com", Subject = "s", Body = "b" } } },
+            new() { User = new() { UserId = "u3" }, Channels = new() { ["email"] = new() { To = "e@f.com", Subject = "s", Body = "b" } } }
+        };
+
+        var bulk = await svc.BulkTriggerAsync("promo.blast", contexts);
+
+        var allBatchIds = bulk.Results
+            .SelectMany(r => r.ChannelResults)
+            .Select(r => r.BulkBatchId)
+            .ToList();
+
+        Assert.All(allBatchIds, id => Assert.NotNull(id));
+        Assert.Single(allBatchIds.Distinct());
+    }
+
+    [Fact]
+    public async Task BulkTriggerAsync_EventName_StampedOnAllResults()
+    {
+        var emailMock = MakeMock("email");
+        var (svc, _) = BuildService(
+            o => o.DefineEvent("promo.blast", e => e.UseChannels("email")),
+            n => { },
+            emailMock: emailMock);
+
+        var contexts = new List<NotifyContext>
+        {
+            new() { User = new() { UserId = "u1" }, Channels = new() { ["email"] = new() { To = "a@b.com", Subject = "s", Body = "b" } } },
+            new() { User = new() { UserId = "u2" }, Channels = new() { ["email"] = new() { To = "c@d.com", Subject = "s", Body = "b" } } }
+        };
+
+        var bulk = await svc.BulkTriggerAsync("promo.blast", contexts);
+
+        var allEventNames = bulk.Results.SelectMany(r => r.ChannelResults).Select(r => r.EventName);
+        Assert.All(allEventNames, name => Assert.Equal("promo.blast", name));
+    }
+
+    [Fact]
+    public async Task BulkTriggerAsync_TwoBatches_HaveDifferentBatchIds()
+    {
+        var emailMock = MakeMock("email");
+        var (svc, _) = BuildService(
+            o => o.DefineEvent("promo.blast", e => e.UseChannels("email")),
+            n => { },
+            emailMock: emailMock);
+
+        var contexts = new List<NotifyContext>
+        {
+            new() { User = new() { UserId = "u1" }, Channels = new() { ["email"] = new() { To = "a@b.com", Subject = "s", Body = "b" } } }
+        };
+
+        var bulk1 = await svc.BulkTriggerAsync("promo.blast", contexts);
+        var batchId1 = bulk1.Results[0].ChannelResults[0].BulkBatchId;
+
+        var bulk2 = await svc.BulkTriggerAsync("promo.blast", contexts);
+        var batchId2 = bulk2.Results[0].ChannelResults[0].BulkBatchId;
+
+        Assert.NotNull(batchId1);
+        Assert.NotNull(batchId2);
+        Assert.NotEqual(batchId1, batchId2);
+    }
+
     // ── Direct channel access ──────────────────────────────────────────────────
 
     [Fact]

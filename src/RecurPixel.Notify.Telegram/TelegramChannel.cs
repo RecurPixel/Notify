@@ -60,7 +60,7 @@ public sealed class TelegramChannel : NotificationChannelBase
                 ParseMode = string.IsNullOrWhiteSpace(_options.ParseMode) ? null : _options.ParseMode
             };
 
-            var http = _httpClientFactory.CreateClient();
+            var http = _httpClientFactory.CreateClient("telegram:default");
             var response = await http.PostAsJsonAsync(url, body, ct);
             var raw = await response.Content.ReadAsStringAsync(ct);
 

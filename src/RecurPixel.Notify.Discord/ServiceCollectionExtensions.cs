@@ -29,7 +29,10 @@ public static class ServiceCollectionExtensions
             o.WebhookUrl = options.WebhookUrl;
         });
 
-        services.AddHttpClient();
+        services.AddHttpClient("discord:default", http =>
+        {
+            http.Timeout = TimeSpan.FromSeconds(30);
+        });
 
         services.TryAddKeyedSingleton<INotificationChannel, DiscordChannel>("discord:default");
 

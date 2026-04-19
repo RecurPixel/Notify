@@ -182,7 +182,7 @@ public sealed class MailgunChannel : NotificationChannelBase
         request.Headers.Authorization =
             new AuthenticationHeaderValue("Basic", credentials);
 
-        var http = _httpClientFactory.CreateClient();
+        var http = _httpClientFactory.CreateClient("email:mailgun");
         return http.SendAsync(request, ct);
     }
 

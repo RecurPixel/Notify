@@ -61,7 +61,7 @@ public sealed class ViberChannel : NotificationChannelBase
                            : $"{payload.Subject}\n\n{payload.Body}"
             };
 
-            var http = _httpClientFactory.CreateClient();
+            var http = _httpClientFactory.CreateClient("viber:default");
             using var request = new HttpRequestMessage(HttpMethod.Post, SendEndpoint);
             request.Headers.Add("X-Viber-Auth-Token", _options.BotAuthToken);
             request.Content = JsonContent.Create(body, options: JsonOptions);

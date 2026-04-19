@@ -55,4 +55,25 @@ public class NotifyResult
     /// Allows failed bulk results to be traced back to specific recipients.
     /// </summary>
     public string? Recipient { get; set; }
+
+    /// <summary>
+    /// The event name that triggered this send.
+    /// Populated by the Orchestrator from TriggerAsync / BulkTriggerAsync.
+    /// Null when the channel was invoked directly (not via an event).
+    /// </summary>
+    public string? EventName { get; set; }
+
+    /// <summary>
+    /// Groups all NotifyResults produced by a single BulkTriggerAsync call.
+    /// Null for results produced by TriggerAsync (single sends).
+    /// Use this to query all results from one bulk send as a unit.
+    /// </summary>
+    public string? BulkBatchId { get; set; }
+
+    /// <summary>
+    /// Passthrough from NotifyContext.Metadata.
+    /// Carry correlation IDs, request IDs, or any caller-defined context through to OnDelivery.
+    /// Null when no metadata was set on the context, or on direct channel sends.
+    /// </summary>
+    public Dictionary<string, object>? Metadata { get; set; }
 }

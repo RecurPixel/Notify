@@ -27,7 +27,10 @@ public static class ServiceCollectionExtensions
             o.WebhookUrl = options.WebhookUrl;
         });
 
-        services.AddHttpClient();
+        services.AddHttpClient("teams:default", http =>
+        {
+            http.Timeout = TimeSpan.FromSeconds(30);
+        });
 
         services.TryAddKeyedSingleton<INotificationChannel, TeamsChannel>("teams:default");
 

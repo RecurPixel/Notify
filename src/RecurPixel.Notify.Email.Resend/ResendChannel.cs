@@ -57,7 +57,7 @@ public sealed class ResendChannel : NotificationChannelBase
                 Text = IsHtml(payload.Body) ? null : payload.Body
             };
 
-            var http = _httpClientFactory.CreateClient();
+            var http = _httpClientFactory.CreateClient("email:resend");
             using var request = new HttpRequestMessage(HttpMethod.Post, SendEndpoint);
             request.Headers.Authorization =
                 new AuthenticationHeaderValue("Bearer", _options.ApiKey);

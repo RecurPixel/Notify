@@ -58,7 +58,7 @@ public sealed class FacebookChannel : NotificationChannelBase
                 }
             };
 
-            var http = _httpClientFactory.CreateClient();
+            var http = _httpClientFactory.CreateClient("facebook:default");
             var response = await http.PostAsJsonAsync(url, body, ct);
             var raw = await response.Content.ReadAsStringAsync(ct);
 

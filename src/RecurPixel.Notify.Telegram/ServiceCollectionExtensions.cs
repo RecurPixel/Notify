@@ -25,7 +25,10 @@ public static class ServiceCollectionExtensions
     {
         services.AddSingleton(Options.Create(options));
 
-        services.AddHttpClient<TelegramChannel>();
+        services.AddHttpClient("telegram:default", http =>
+        {
+            http.Timeout = TimeSpan.FromSeconds(30);
+        });
 
         services.TryAddKeyedSingleton<INotificationChannel, TelegramChannel>("telegram:default");
 

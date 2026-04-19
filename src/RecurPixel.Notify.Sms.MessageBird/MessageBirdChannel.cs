@@ -55,7 +55,7 @@ public sealed class MessageBirdChannel : NotificationChannelBase
                 Body = payload.Body ?? string.Empty
             };
 
-            var http = _httpClientFactory.CreateClient();
+            var http = _httpClientFactory.CreateClient("sms:messagebird");
             using var request = new HttpRequestMessage(HttpMethod.Post, SendEndpoint);
             request.Headers.Authorization =
                 new AuthenticationHeaderValue("AccessKey", _options.ApiKey);

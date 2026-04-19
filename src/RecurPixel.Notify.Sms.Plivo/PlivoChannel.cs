@@ -56,7 +56,7 @@ public sealed class PlivoChannel : NotificationChannelBase
                 Text = payload.Body ?? string.Empty
             };
 
-            var http = _httpClientFactory.CreateClient();
+            var http = _httpClientFactory.CreateClient("sms:plivo");
             using var request = new HttpRequestMessage(HttpMethod.Post, url);
 
             var credentials = Convert.ToBase64String(

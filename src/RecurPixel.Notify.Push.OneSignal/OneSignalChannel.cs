@@ -56,7 +56,7 @@ public sealed class OneSignalChannel : NotificationChannelBase
                 Contents = new OneSignalContent { En = payload.Body ?? string.Empty }
             };
 
-            var http = _httpClientFactory.CreateClient();
+            var http = _httpClientFactory.CreateClient("push:onesignal");
             using var request = new HttpRequestMessage(HttpMethod.Post, SendEndpoint);
             request.Headers.Authorization =
                 new AuthenticationHeaderValue("Basic", _options.ApiKey);
@@ -133,7 +133,7 @@ public sealed class OneSignalChannel : NotificationChannelBase
                     Contents = new OneSignalContent { En = first.Body ?? string.Empty }
                 };
 
-                var http = _httpClientFactory.CreateClient();
+                var http = _httpClientFactory.CreateClient("push:onesignal");
                 using var request = new HttpRequestMessage(HttpMethod.Post, SendEndpoint);
                 request.Headers.Authorization =
                     new AuthenticationHeaderValue("Basic", _options.ApiKey);

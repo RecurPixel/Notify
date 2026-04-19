@@ -121,6 +121,8 @@ internal sealed class NotifyService : INotifyService
             }
 
             var dispatchResult = await _dispatcher.DispatchAsync(channelName, ResolvePayload(context.Channels[channelName], channelName, context.User), retryOptions, ct);
+            dispatchResult.EventName = eventName;
+            dispatchResult.Metadata  = context.Metadata;
             channelResults.Add(dispatchResult);
             dispatchedResults.Add(dispatchResult);
         }
@@ -157,7 +159,11 @@ internal sealed class NotifyService : INotifyService
                 ct);
 
             if (fallbackResult is not null)
+            {
+                fallbackResult.EventName = eventName;
+                fallbackResult.Metadata  = context.Metadata;
                 channelResults.Add(fallbackResult);
+            }
         }
 
         return new TriggerResult
@@ -176,12 +182,13 @@ internal sealed class NotifyService : INotifyService
         IReadOnlyList<NotifyContext> contexts,
         CancellationToken ct = default)
     {
+        var batchId = Guid.NewGuid().ToString();
         var concurrencyLimit = _notifyOptions.Bulk?.ConcurrencyLimit ?? 10;
         var semaphore = new SemaphoreSlim(concurrencyLimit);
 
         _logger.LogDebug(
-            "BulkTrigger event={Event} contexts={Count} concurrency={Limit}",
-            eventName, contexts.Count, concurrencyLimit);
+            "BulkTrigger event={Event} contexts={Count} concurrency={Limit} batchId={BatchId}",
+            eventName, contexts.Count, concurrencyLimit, batchId);
 
         var tasks = contexts.Select(async ctx =>
         {
@@ -197,6 +204,10 @@ internal sealed class NotifyService : INotifyService
         });
 
         var results = await Task.WhenAll(tasks);
+
+        foreach (var triggerResult in results)
+            foreach (var notifyResult in triggerResult.ChannelResults)
+                notifyResult.BulkBatchId = batchId;
 
         return new BulkTriggerResult { Results = results };
     }

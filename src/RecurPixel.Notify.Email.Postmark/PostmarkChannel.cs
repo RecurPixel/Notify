@@ -50,7 +50,7 @@ public sealed class PostmarkChannel : NotificationChannelBase
         {
             var body = BuildMessage(payload);
 
-            var http = _httpClientFactory.CreateClient();
+            var http = _httpClientFactory.CreateClient("email:postmark");
             using var request = new HttpRequestMessage(HttpMethod.Post, SingleEndpoint);
             AddHeaders(request);
             request.Content = JsonContent.Create(body, options: JsonOptions);
@@ -118,7 +118,7 @@ public sealed class PostmarkChannel : NotificationChannelBase
             {
                 var messages = chunkList.Select(BuildMessage).ToList();
 
-                var http = _httpClientFactory.CreateClient();
+                var http = _httpClientFactory.CreateClient("email:postmark");
                 using var request = new HttpRequestMessage(HttpMethod.Post, BatchEndpoint);
                 AddHeaders(request);
                 request.Content = JsonContent.Create(messages, options: JsonOptions);

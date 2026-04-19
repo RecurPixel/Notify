@@ -26,7 +26,10 @@ public static class ServiceCollectionExtensions
     {
         services.AddSingleton(Options.Create(options));
 
-        services.AddHttpClient<FacebookChannel>();
+        services.AddHttpClient("facebook:default", http =>
+        {
+            http.Timeout = TimeSpan.FromSeconds(30);
+        });
 
         services.TryAddKeyedSingleton<INotificationChannel, FacebookChannel>("facebook:default");
 

@@ -29,7 +29,10 @@ public static class ServiceCollectionExtensions
             o.BotToken = options.BotToken;
         });
 
-        services.AddHttpClient();
+        services.AddHttpClient("slack:default", http =>
+        {
+            http.Timeout = TimeSpan.FromSeconds(30);
+        });
 
         services.TryAddKeyedSingleton<INotificationChannel, SlackChannel>("slack:default");
 

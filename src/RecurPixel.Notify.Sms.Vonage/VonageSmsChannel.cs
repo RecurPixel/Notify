@@ -56,7 +56,7 @@ public sealed class VonageSmsChannel : NotificationChannelBase
                 Text = payload.Body ?? string.Empty
             };
 
-            var http = _httpClientFactory.CreateClient();
+            var http = _httpClientFactory.CreateClient("sms:vonage");
             var response = await http.PostAsJsonAsync(SendEndpoint, body, ct);
             var raw = await response.Content.ReadAsStringAsync(ct);
 
