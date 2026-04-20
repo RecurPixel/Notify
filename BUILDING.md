@@ -347,27 +347,27 @@ No UI in this phase. Data layer only.
 
 ---
 
-## Phase 16 — Dashboard UI + REST API + auth 🔲
+## Phase 16 — Dashboard UI + REST API + auth ✅
 
 > Phase 15 must be complete first — the UI is only as good as the query layer behind it.
 > Pattern: Hangfire / Swagger. One middleware, one embedded HTML file, one JSON endpoint.
 > No Razor Pages, no Blazor, no MVC dependency.
 
-- 🔲 `NotifyDashboardMiddleware.cs` — intercepts requests to RoutePrefix
-- 🔲 REST endpoint: `GET /notify-dashboard/api/logs` — accepts query params, returns paged JSON
-- 🔲 REST endpoint: `GET /notify-dashboard/api/logs/batch/{batchId}` — returns all in a batch
-- 🔲 REST endpoint: `GET /notify-dashboard/api/stats` — today's summary numbers
-- 🔲 Authorization: check `HttpContext.User` against `RequireRole` / `PolicyName` before serving
-- 🔲 Warn at startup (ILogger) if `RequireRole` and `PolicyName` are both null in non-Development environment
-- 🔲 Embedded HTML dashboard — single file, served from middleware
-  - 🔲 Summary row: total sent today, success rate, failure count, active channel count
-  - 🔲 Filterable log table: time, channel badge, provider, recipient (truncated), subject (truncated), status badge, bulk icon
-  - 🔲 Bulk row expand: click to show all recipients in the batch inline
-  - 🔲 Failed row expand: click to show full error text
-  - 🔲 Filters: channel dropdown, status (all/success/failed), date range, recipient search
-- 🔲 `UseNotifyDashboard()` extension on `IApplicationBuilder`
-- 🔲 Integration test: middleware serves page, JSON endpoints return correct shape
-- 🔲 `dotnet test` — all green
+- ✅ `NotifyDashboardMiddleware.cs` — intercepts requests to RoutePrefix
+- ✅ REST endpoint: `GET /notify-dashboard/api/logs` — accepts query params, returns paged JSON
+- ✅ REST endpoint: `GET /notify-dashboard/api/logs/batch/{batchId}` — returns all in a batch
+- ✅ REST endpoint: `GET /notify-dashboard/api/stats` — today's summary numbers
+- ✅ Authorization: check `HttpContext.User` against `RequireRole` / `PolicyName` before serving
+- ✅ Warn at startup (ILogger) if `RequireRole` and `PolicyName` are both null in non-Development environment
+- ✅ Embedded HTML dashboard — single file, served from middleware
+  - ✅ Summary row: total sent today, success rate, failure count, active channel count
+  - ✅ Filterable log table: time, channel badge, provider, recipient (truncated), subject (truncated), status badge, bulk icon
+  - ✅ Bulk row expand: click to show all recipients in the batch inline
+  - ✅ Failed row expand: click to show full error text
+  - ✅ Filters: channel dropdown, status (all/success/failed), date range, recipient search
+- ✅ `UseNotifyDashboard()` extension on `IApplicationBuilder`
+- ✅ Integration test: middleware serves page, JSON endpoints return correct shape
+- ✅ `dotnet test` — all green (408 passed)
 
 **Resume prompt:**
 ```
