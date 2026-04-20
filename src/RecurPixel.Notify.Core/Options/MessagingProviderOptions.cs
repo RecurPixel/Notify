@@ -75,6 +75,19 @@ public class InAppOptions
     }
 }
 
+/// <summary>MSG91 WhatsApp Business messaging credentials.</summary>
+public class Msg91WhatsAppOptions
+{
+    /// <summary>MSG91 authentication key from the portal.</summary>
+    public string AuthKey { get; set; } = string.Empty;
+
+    /// <summary>MSG91 integrated WhatsApp number (with country code, e.g. "919XXXXXXXXX").</summary>
+    public string IntegratedNumber { get; set; } = string.Empty;
+
+    /// <summary>WhatsApp Business Account namespace for template messages.</summary>
+    public string Namespace { get; set; } = string.Empty;
+}
+
 /// <summary>Vonage WhatsApp Business messaging credentials.</summary>
 public class VonageWhatsAppOptions
 {

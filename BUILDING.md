@@ -394,21 +394,20 @@ the summary row stats if bandwidth allows — otherwise plain numbers.
 
 ---
 
-## Phase 17 — MSG91 adapters 🔲
+## Phase 17 — MSG91 adapters ✅
 
 > Can be built in parallel with phases 15-16. No dependency on dashboard.
 
-- 🔲 Create `src/RecurPixel.Notify.Sms.Msg91` project
-- 🔲 `Msg91SmsChannel : NotificationChannelBase`
-- 🔲 `Msg91SmsOptions` — AuthKey, SenderId, Route
-- 🔲 No native bulk API — base class loop handles it automatically
-- 🔲 Create `src/RecurPixel.Notify.WhatsApp.Msg91` project
-- 🔲 `Msg91WhatsAppChannel : NotificationChannelBase`
-- 🔲 `Msg91WhatsAppOptions` — AuthKey, IntegratedNumber, Namespace
-- 🔲 Add both to `RecurPixel.Notify.Sdk`
-- 🔲 Update adapter status table in README
-- 🔲 Unit tests for both
-- 🔲 `dotnet test` — all green
+- ✅ Create `src/RecurPixel.Notify.Sms.Msg91` project
+- ✅ `Msg91SmsChannel : NotificationChannelBase`
+- ✅ `Msg91SmsOptions` — AuthKey, SenderId, Route
+- ✅ No native bulk API — base class loop handles it automatically
+- ✅ Create `src/RecurPixel.Notify.WhatsApp.Msg91` project
+- ✅ `Msg91WhatsAppChannel : NotificationChannelBase`
+- ✅ `Msg91WhatsAppOptions` — AuthKey, IntegratedNumber, Namespace
+- ✅ Add both to `RecurPixel.Notify.Sdk`
+- ✅ Unit tests for both
+- ✅ `dotnet test` — all green (424 passed)
 
 **Resume prompt:**
 ```

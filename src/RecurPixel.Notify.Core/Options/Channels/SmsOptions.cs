@@ -24,4 +24,5 @@ public class SmsOptions
     public MessageBirdOptions? MessageBird { get; set; }
     public AwsSnsOptions? AwsSns { get; set; }
     public AzureCommSmsOptions? AzureCommSms { get; set; }
+    public Msg91SmsOptions? Msg91 { get; set; }
 }

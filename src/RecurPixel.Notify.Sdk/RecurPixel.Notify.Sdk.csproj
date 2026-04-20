@@ -34,6 +34,7 @@
     <ProjectReference Include="..\RecurPixel.Notify.Sms.Vonage\RecurPixel.Notify.Sms.Vonage.csproj" />
     <ProjectReference Include="..\RecurPixel.Notify.Sms.AwsSns\RecurPixel.Notify.Sms.AwsSns.csproj" />
     <ProjectReference Include="..\RecurPixel.Notify.Sms.AzureCommSms\RecurPixel.Notify.Sms.AzureCommSms.csproj" />
+    <ProjectReference Include="..\RecurPixel.Notify.Sms.Msg91\RecurPixel.Notify.Sms.Msg91.csproj" />
   </ItemGroup>
 
   <!-- Push adapters -->
@@ -49,6 +50,7 @@
     <ProjectReference Include="..\RecurPixel.Notify.WhatsApp.Twilio\RecurPixel.Notify.WhatsApp.Twilio.csproj" />
     <ProjectReference Include="..\RecurPixel.Notify.WhatsApp.MetaCloud\RecurPixel.Notify.WhatsApp.MetaCloud.csproj" />
     <ProjectReference Include="..\RecurPixel.Notify.WhatsApp.Vonage\RecurPixel.Notify.WhatsApp.Vonage.csproj" />
+    <ProjectReference Include="..\RecurPixel.Notify.WhatsApp.Msg91\RecurPixel.Notify.WhatsApp.Msg91.csproj" />
   </ItemGroup>
 
   <!-- Chat and Social adapters -->

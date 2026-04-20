@@ -49,11 +49,14 @@
     <ProjectReference Include="..\..\src\RecurPixel.Notify.Mattermost\RecurPixel.Notify.Mattermost.csproj" />
     <ProjectReference Include="..\..\src\RecurPixel.Notify.RocketChat\RecurPixel.Notify.RocketChat.csproj" />
     <ProjectReference Include="..\..\src\RecurPixel.Notify.Dashboard\RecurPixel.Notify.Dashboard.csproj" />
+    <ProjectReference Include="..\..\src\RecurPixel.Notify.Sms.Msg91\RecurPixel.Notify.Sms.Msg91.csproj" />
+    <ProjectReference Include="..\..\src\RecurPixel.Notify.WhatsApp.Msg91\RecurPixel.Notify.WhatsApp.Msg91.csproj" />
     <ProjectReference Include="..\..\src\RecurPixel.Notify.Dashboard.EfCore\RecurPixel.Notify.Dashboard.EfCore.csproj" />
   </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" Version="8.0.11" />
+    <PackageReference Include="Microsoft.AspNetCore.TestHost" Version="8.0.11" />
   </ItemGroup>
 
 </Project>

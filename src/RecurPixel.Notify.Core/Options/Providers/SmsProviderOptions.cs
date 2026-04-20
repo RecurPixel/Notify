@@ -50,3 +50,18 @@ public class AwsSnsOptions
     /// <summary>Optional sender ID (may not be supported in all regions).</summary>
     public string? SenderId { get; set; }
 }
+
+/// <summary>MSG91 SMS credentials.</summary>
+public class Msg91SmsOptions
+{
+    /// <summary>MSG91 authentication key from the portal.</summary>
+    public string AuthKey { get; set; } = string.Empty;
+
+    /// <summary>Sender ID registered with MSG91 (up to 6 characters).</summary>
+    public string SenderId { get; set; } = string.Empty;
+
+    /// <summary>
+    /// MSG91 route. "4" = transactional (default), "1" = promotional.
+    /// </summary>
+    public string Route { get; set; } = "4";
+}

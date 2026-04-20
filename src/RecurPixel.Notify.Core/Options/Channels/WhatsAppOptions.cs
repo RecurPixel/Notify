@@ -20,4 +20,5 @@ public class WhatsAppOptions
     public TwilioOptions? Twilio { get; set; }
     public MetaCloudOptions? MetaCloud { get; set; }
     public VonageWhatsAppOptions? Vonage { get; set; }
+    public Msg91WhatsAppOptions? Msg91 { get; set; }
 }
