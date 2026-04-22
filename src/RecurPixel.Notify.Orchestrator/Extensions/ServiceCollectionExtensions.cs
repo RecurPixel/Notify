@@ -40,7 +40,9 @@ public static class ServiceCollectionExtensions
         var registeredKeys = RegisterAdapters(services, notifyOptions);
         ValidateActiveProviders(notifyOptions, registeredKeys);
 
-        return services.AddRecurPixelNotifyOrchestrator(configureOrchestrator);
+        services.AddRecurPixelNotifyOrchestrator(configureOrchestrator);
+
+        return services;
     }
 
     // ── Orchestrator-only setup (use after AddRecurPixelNotify from Core) ─────
@@ -138,6 +140,7 @@ public static class ServiceCollectionExtensions
                 "messagebird" => !string.IsNullOrEmpty(options.Sms?.MessageBird?.ApiKey),
                 "awssns" => !string.IsNullOrEmpty(options.Sms?.AwsSns?.AccessKey),
                 "azurecommsms" => !string.IsNullOrEmpty(options.Sms?.AzureCommSms?.ConnectionString),
+                "msg91" => !string.IsNullOrEmpty(options.Sms?.Msg91?.AuthKey),
                 _ => false
             },
             "push" => provider switch
@@ -153,6 +156,7 @@ public static class ServiceCollectionExtensions
                 "twilio" => !string.IsNullOrEmpty(options.WhatsApp?.Twilio?.AccountSid),
                 "metacloud" => !string.IsNullOrEmpty(options.WhatsApp?.MetaCloud?.AccessToken),
                 "vonage" => !string.IsNullOrEmpty(options.WhatsApp?.Vonage?.ApiKey),
+                "msg91" => !string.IsNullOrEmpty(options.WhatsApp?.Msg91?.AuthKey),
                 _ => false
             },
             "slack" => !string.IsNullOrEmpty(options.Slack?.WebhookUrl) || !string.IsNullOrEmpty(options.Slack?.BotToken),
@@ -349,6 +353,14 @@ public static class ServiceCollectionExtensions
                 o.FromNumber = acs.FromNumber;
             });
 
+        if (notifyOptions.Sms?.Msg91 is { } smsMg)
+            services.Configure<Msg91SmsOptions>(o =>
+            {
+                o.AuthKey  = smsMg.AuthKey;
+                o.SenderId = smsMg.SenderId;
+                o.Route    = smsMg.Route;
+            });
+
         // ── Push ──────────────────────────────────────────────────────────────
         if (notifyOptions.Push?.Fcm is { } fcm)
             services.Configure<FcmOptions>(o =>
@@ -402,6 +414,14 @@ public static class ServiceCollectionExtensions
                 o.ApiKey = wv.ApiKey;
                 o.ApiSecret = wv.ApiSecret;
                 o.FromNumber = wv.FromNumber;
+            });
+
+        if (notifyOptions.WhatsApp?.Msg91 is { } waMg)
+            services.Configure<Msg91WhatsAppOptions>(o =>
+            {
+                o.AuthKey          = waMg.AuthKey;
+                o.IntegratedNumber = waMg.IntegratedNumber;
+                o.Namespace        = waMg.Namespace;
             });
 
         // ── Messaging channels ────────────────────────────────────────────────
