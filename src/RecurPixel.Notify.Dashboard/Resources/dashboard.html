@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PAGE_TITLE</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#f5f6fa;color:#1a1a2e;font-size:14px;line-height:1.5}
+.hdr{background:#1a1a2e;color:#fff;padding:0 24px;display:flex;align-items:center;height:56px}
+.hdr-brand{font-size:11px;font-weight:600;letter-spacing:.08em;color:#8b92f8;text-transform:uppercase;margin-right:14px}
+.hdr-title{font-size:17px;font-weight:600}
+.page{max-width:1480px;margin:0 auto;padding:24px 20px}
+.stats{display:flex;gap:14px;margin-bottom:20px;flex-wrap:wrap}
+.scard{background:#fff;border-radius:10px;padding:18px 22px;box-shadow:0 1px 4px rgba(0,0,0,.07);flex:1;min-width:140px}
+.scard-val{font-size:28px;font-weight:700;line-height:1;color:#1a1a2e}
+.scard-lbl{font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:#9ca3af;margin-top:6px}
+.scard.ok .scard-val{color:#16a34a}
+.scard.fail .scard-val{color:#dc2626}
+.scard.rate .scard-val{color:#2563eb}
+.filters{background:#fff;border-radius:10px;box-shadow:0 1px 4px rgba(0,0,0,.07);padding:14px 18px;margin-bottom:20px;display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end}
+.fg{display:flex;flex-direction:column;gap:4px}
+.fg label{font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:#6b7280}
+.fg input,.fg select{border:1.5px solid #e5e7eb;border-radius:7px;padding:6px 10px;font-size:13px;color:#1a1a2e;background:#fff;outline:none}
+.fg input:focus,.fg select:focus{border-color:#8b92f8;box-shadow:0 0 0 3px rgba(139,146,248,.15)}
+.fg select{min-width:130px}
+.fg input[type=datetime-local]{min-width:170px}
+.fg input[type=text]{min-width:180px}
+.btn{padding:6px 16px;border-radius:7px;font-size:13px;cursor:pointer;font-weight:500;border:1.5px solid #e5e7eb;background:#f9fafb;color:#374151;align-self:flex-end}
+.btn:hover{background:#f3f4f6}
+.tbox{background:#fff;border-radius:10px;box-shadow:0 1px 4px rgba(0,0,0,.07);overflow:hidden}
+table{width:100%;border-collapse:collapse}
+th{background:#f9fafb;padding:10px 14px;text-align:left;font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#6b7280;border-bottom:1.5px solid #e5e7eb;white-space:nowrap}
+td{padding:10px 14px;border-bottom:1px solid #f3f4f6;vertical-align:middle}
+tr.dr:hover td{background:#fafbff}
+tr.dr{cursor:default}
+tr.dr.exp-open td{background:#f5f6ff}
+tr.exrow td{background:#f8f9ff;padding:10px 14px 10px 42px;font-size:13px;color:#444;border-bottom:1px solid #ebebf5}
+tr.bmrow td{background:#f8f9ff;padding:7px 14px 7px 42px;font-size:12px;border-bottom:1px solid #eef0f7}
+tr.bmrow:last-child td{border-bottom:1px solid #f3f4f6}
+.badge{display:inline-block;padding:2px 9px;border-radius:100px;font-size:11px;font-weight:700;letter-spacing:.04em;text-transform:uppercase}
+.ch-email{background:#dbeafe;color:#1d4ed8}.ch-sms{background:#d1fae5;color:#065f46}
+.ch-push{background:#ede9fe;color:#6d28d9}.ch-whatsapp{background:#dcfce7;color:#166534}
+.ch-slack{background:#fef3c7;color:#92400e}.ch-discord{background:#ddd6fe;color:#4c1d95}
+.ch-teams{background:#dbeafe;color:#1e40af}.ch-telegram{background:#e0f2fe;color:#0369a1}
+.ch-facebook{background:#dbeafe;color:#1d4ed8}.ch-line{background:#d1fae5;color:#065f46}
+.ch-viber{background:#ede9fe;color:#6d28d9}.ch-inapp{background:#f3f4f6;color:#374151}
+.ch-default{background:#f3f4f6;color:#374151}
+.st-ok{background:#d1fae5;color:#065f46}.st-fail{background:#fee2e2;color:#b91c1c}
+.trunc{max-width:180px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:inline-block;vertical-align:middle}
+.bulk-dot{color:#8b92f8;font-size:16px;line-height:1;cursor:pointer;user-select:none;padding:0 4px}
+.xbtn{background:none;border:none;cursor:pointer;color:#9ca3af;font-size:17px;padding:0 2px;line-height:1;vertical-align:middle}
+.xbtn:hover{color:#374151}
+.mono{font-family:'SFMono-Regular',Consolas,'Liberation Mono',monospace;font-size:12px}
+.dim{color:#9ca3af;font-size:12px}
+.pager{display:flex;align-items:center;justify-content:flex-end;gap:10px;padding:12px 16px;border-top:1.5px solid #f3f4f6}
+.pager-info{font-size:13px;color:#6b7280}
+.pbtn{padding:5px 14px;border:1.5px solid #e5e7eb;border-radius:7px;background:#fff;cursor:pointer;font-size:13px}
+.pbtn:hover:not([disabled]){background:#f9fafb}
+.pbtn[disabled]{opacity:.4;cursor:not-allowed}
+.empty,.loader{text-align:center;padding:48px 20px;color:#b0b5c1;font-size:13px}
+@media(max-width:768px){.stats{flex-direction:column}.filters{flex-direction:column}}
+</style>
+</head>
+<body>
+<div class="hdr">
+  <span class="hdr-brand">RecurPixel.Notify</span>
+  <span class="hdr-title">PAGE_TITLE</span>
+</div>
+<div class="page">
+  <div class="stats">
+    <div class="scard">       <div class="scard-val" id="sv-total">—</div><div class="scard-lbl">Sent Today</div></div>
+    <div class="scard ok">   <div class="scard-val" id="sv-ok">—</div>   <div class="scard-lbl">Delivered</div></div>
+    <div class="scard fail"> <div class="scard-val" id="sv-fail">—</div> <div class="scard-lbl">Failed</div></div>
+    <div class="scard rate"> <div class="scard-val" id="sv-rate">—</div> <div class="scard-lbl">Success Rate</div></div>
+    <div class="scard">       <div class="scard-val" id="sv-ch">—</div>   <div class="scard-lbl">Active Channels</div></div>
+  </div>
+
+  <div class="filters">
+    <div class="fg"><label>Channel</label>
+      <select id="f-ch" onchange="reload()">
+        <option value="">All channels</option>
+        <option value="email">Email</option><option value="sms">SMS</option>
+        <option value="push">Push</option><option value="whatsapp">WhatsApp</option>
+        <option value="slack">Slack</option><option value="discord">Discord</option>
+        <option value="teams">Teams</option><option value="telegram">Telegram</option>
+        <option value="facebook">Facebook</option><option value="line">Line</option>
+        <option value="viber">Viber</option><option value="inapp">In-App</option>
+      </select>
+    </div>
+    <div class="fg"><label>Status</label>
+      <select id="f-st" onchange="reload()">
+        <option value="">All</option>
+        <option value="success">Success</option>
+        <option value="failed">Failed</option>
+      </select>
+    </div>
+    <div class="fg"><label>From</label><input type="datetime-local" id="f-from" onchange="reload()"></div>
+    <div class="fg"><label>To</label><input type="datetime-local" id="f-to" onchange="reload()"></div>
+    <div class="fg"><label>Recipient</label><input type="text" id="f-rec" placeholder="Search…" oninput="debounceReload()"></div>
+    <button class="btn" onclick="resetFilters()">Reset</button>
+  </div>
+
+  <div class="tbox">
+    <table>
+      <thead>
+        <tr><th>Time</th><th>Channel</th><th>Provider</th><th>Recipient</th><th>Subject</th><th>Status</th><th style="text-align:center">Bulk</th><th></th></tr>
+      </thead>
+      <tbody id="tbody"><tr><td colspan="8" class="loader">Loading…</td></tr></tbody>
+    </table>
+    <div class="pager">
+      <span class="pager-info" id="pager-info"></span>
+      <button class="pbtn" id="btn-prev" onclick="goPage(-1)" disabled>← Prev</button>
+      <button class="pbtn" id="btn-next" onclick="goPage(1)" disabled>Next →</button>
+    </div>
+  </div>
+</div>
+
+<script>
+var CFG={apiBase:'API_BASE',pageSize:PAGE_SIZE};
+var page=1,logs=[],batchCache={},debounceTimer=null;
+
+function debounceReload(){clearTimeout(debounceTimer);debounceTimer=setTimeout(reload,400)}
+
+function reload(){page=1;loadLogs()}
+
+function resetFilters(){
+  ['f-ch','f-st','f-from','f-to','f-rec'].forEach(function(id){
+    var el=document.getElementById(id);
+    if(el.tagName==='SELECT')el.value='';else el.value='';
+  });
+  reload();
+}
+
+function goPage(delta){page=Math.max(1,page+delta);loadLogs()}
+
+function q(){
+  var p=new URLSearchParams();
+  var ch=document.getElementById('f-ch').value;
+  var st=document.getElementById('f-st').value;
+  var from=document.getElementById('f-from').value;
+  var to=document.getElementById('f-to').value;
+  var rec=document.getElementById('f-rec').value.trim();
+  if(ch)p.set('channel',ch);
+  if(st)p.set('status',st);
+  if(from)p.set('from',new Date(from).toISOString());
+  if(to)p.set('to',new Date(to).toISOString());
+  if(rec)p.set('recipient',rec);
+  p.set('page',page);
+  p.set('pageSize',CFG.pageSize);
+  return p.toString();
+}
+
+async function loadStats(){
+  try{
+    var r=await fetch(CFG.apiBase+'/stats');
+    if(!r.ok)return;
+    var s=await r.json();
+    document.getElementById('sv-total').textContent=s.totalSent!=null?s.totalSent:'—';
+    document.getElementById('sv-ok').textContent=s.successCount!=null?s.successCount:'—';
+    document.getElementById('sv-fail').textContent=s.failureCount!=null?s.failureCount:'—';
+    document.getElementById('sv-rate').textContent=s.successRate!=null?s.successRate+'%':'—';
+    document.getElementById('sv-ch').textContent=s.activeChannelCount!=null?s.activeChannelCount:'—';
+  }catch(e){}
+}
+
+async function loadLogs(){
+  var tbody=document.getElementById('tbody');
+  tbody.innerHTML='<tr><td colspan="8" class="loader">Loading\u2026</td></tr>';
+  batchCache={};
+  try{
+    var r=await fetch(CFG.apiBase+'/logs?'+q());
+    if(!r.ok){
+      tbody.innerHTML='<tr><td colspan="8" class="empty">Error '+r.status+'</td></tr>';
+      updatePager(false,false);return;
+    }
+    logs=await r.json();
+    if(!logs||!logs.length){
+      tbody.innerHTML='<tr><td colspan="8" class="empty">No notifications found.</td></tr>';
+      updatePager(false,false);return;
+    }
+    tbody.innerHTML=logs.map(function(l,i){return rowHtml(l,i)}).join('');
+    updatePager(page>1,logs.length>=CFG.pageSize);
+    document.getElementById('pager-info').textContent='Page '+page;
+  }catch(e){
+    tbody.innerHTML='<tr><td colspan="8" class="empty">Failed to load data.</td></tr>';
+    updatePager(false,false);
+  }
+}
+
+function updatePager(hasPrev,hasNext){
+  document.getElementById('btn-prev').disabled=!hasPrev;
+  document.getElementById('btn-next').disabled=!hasNext;
+}
+
+function rowHtml(l,i){
+  var canExpand=(l.isBulk&&l.bulkBatchId)||(!l.success&&l.error);
+  return '<tr class="dr" id="row-'+i+'" onclick="toggle('+i+')"'+
+    (canExpand?' style="cursor:pointer"':'')+'>'+
+    '<td class="mono" style="white-space:nowrap">'+fmtTime(l.sentAt)+'</td>'+
+    '<td>'+chBadge(l.channel)+'</td>'+
+    '<td>'+esc(l.provider||'—')+'</td>'+
+    '<td>'+trunc(l.recipient,36)+'</td>'+
+    '<td>'+trunc(l.subject,42)+'</td>'+
+    '<td>'+stBadge(l.success)+'</td>'+
+    '<td style="text-align:center">'+(l.isBulk?'<span class="bulk-dot" title="Bulk batch">&#x25CF;</span>':'')+'</td>'+
+    '<td>'+(canExpand?'<button class="xbtn" title="Expand">&#x2295;</button>':'')+'</td>'+
+    '</tr>';
+}
+
+function toggle(i){
+  var l=logs[i];
+  if(!l)return;
+  var rid='row-'+i;
+  var row=document.getElementById(rid);
+  if(!row)return;
+  var existing=document.getElementById(rid+'-detail');
+  if(existing){
+    // Collapse: remove detail row(s)
+    while(existing){
+      var next=existing.nextSibling;
+      if(next&&next.id&&next.id===rid+'-bm'){var n2=next;while(n2&&n2.className==='bmrow'){var nx=n2.nextSibling;n2.remove();n2=nx;}}
+      existing.remove();
+      existing=null;
+    }
+    // Remove any lingering batch member rows
+    var bm=row.nextSibling;
+    while(bm&&bm.classList&&(bm.classList.contains('exrow')||bm.classList.contains('bmrow'))){
+      var nx=bm.nextSibling;bm.remove();bm=nx;
+    }
+    row.classList.remove('exp-open');
+    var xbtn=row.querySelector('.xbtn');if(xbtn)xbtn.innerHTML='&#x2295;';
+    return;
+  }
+  row.classList.add('exp-open');
+  var xbtn=row.querySelector('.xbtn');if(xbtn)xbtn.innerHTML='&#x2296;';
+
+  if(l.isBulk&&l.bulkBatchId){
+    showBatch(rid,row,l.bulkBatchId);
+  }else if(!l.success&&l.error){
+    showError(rid,row,l.error);
+  }
+}
+
+function showError(rid,row,err){
+  var tr=document.createElement('tr');
+  tr.id=rid+'-detail';tr.className='exrow';
+  tr.innerHTML='<td colspan="8"><strong>Error:</strong> <span class="mono">'+esc(err)+'</span></td>';
+  row.insertAdjacentElement('afterend',tr);
+}
+
+async function showBatch(rid,row,batchId){
+  var placeholder=document.createElement('tr');
+  placeholder.id=rid+'-detail';placeholder.className='exrow';
+  placeholder.innerHTML='<td colspan="8">Loading batch\u2026</td>';
+  row.insertAdjacentElement('afterend',placeholder);
+  try{
+    var data=batchCache[batchId];
+    if(!data){
+      var r=await fetch(CFG.apiBase+'/logs/batch/'+encodeURIComponent(batchId));
+      data=await r.json();
+      batchCache[batchId]=data;
+    }
+    var html='<tr id="'+rid+'-detail" class="exrow"><td colspan="8"><strong>Batch &mdash; '+data.length+' recipient(s)</strong></td></tr>';
+    data.forEach(function(m){
+      html+='<tr class="bmrow">'+
+        '<td class="mono">'+fmtTime(m.sentAt)+'</td>'+
+        '<td>'+chBadge(m.channel)+'</td>'+
+        '<td>'+esc(m.provider||'—')+'</td>'+
+        '<td colspan="3">'+trunc(m.recipient,55)+'</td>'+
+        '<td colspan="2">'+stBadge(m.success)+
+        (!m.success&&m.error?' <span class="dim mono">'+esc(m.error.substring(0,80))+'</span>':'')+
+        '</td></tr>';
+    });
+    placeholder.outerHTML=html;
+  }catch(e){
+    placeholder.innerHTML='<td colspan="8" style="color:#dc2626">Failed to load batch.</td>';
+  }
+}
+
+function chBadge(ch){
+  var c=ch?ch.toLowerCase():'';
+  var known=['email','sms','push','whatsapp','slack','discord','teams','telegram','facebook','line','viber','inapp'];
+  var cls=known.indexOf(c)>=0?'ch-'+c:'ch-default';
+  return '<span class="badge '+cls+'">'+esc(ch||'—')+'</span>';
+}
+function stBadge(ok){return ok?'<span class="badge st-ok">\u2713 Success</span>':'<span class="badge st-fail">\u2717 Failed</span>';}
+function trunc(s,max){
+  if(!s)return '<span class="dim">\u2014</span>';
+  var e=esc(s);
+  return s.length>max?'<span class="trunc" title="'+e+'">'+esc(s.substring(0,max))+'\u2026</span>':e;
+}
+function fmtTime(iso){
+  var d=new Date(iso);
+  return d.toLocaleDateString()+' '+d.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit',second:'2-digit'});
+}
+function esc(s){
+  if(s==null)return '';
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+loadStats();
+loadLogs();
+</script>
+</body>
+</html>
