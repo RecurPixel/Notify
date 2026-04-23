@@ -172,7 +172,59 @@ public class AdapterRegistrarTests
         Assert.True(registrar.IsConfigured(new NotifyOptions()));
     }
 
-    // ── Test 9: End-to-end auto-scan registers only configured adapters ───────
+    // ── Test 9: InApp handler survives when AddInAppChannel is called first ─────
+
+    [Fact]
+    public async Task InApp_AddInAppChannel_BeforeAddRecurPixelNotify_HandlerIsPreserved()
+    {
+        var invoked = false;
+        var services = new ServiceCollection();
+        services.AddLogging();
+
+        services.AddInAppChannel(o => o.UseHandler(n =>
+        {
+            invoked = true;
+            return Task.FromResult(new NotifyResult { Success = true });
+        }));
+
+        services.AddRecurPixelNotify(_ => { }, _ => { });
+
+        var sp = services.BuildServiceProvider();
+        var channel = sp.GetKeyedService<INotificationChannel>("inapp:default");
+        Assert.NotNull(channel);
+
+        var result = await channel!.SendAsync(new NotificationPayload { To = "u1", Body = "test" });
+        Assert.True(result.Success, result.Error);
+        Assert.True(invoked);
+    }
+
+    // ── Test 10: InApp handler works when AddInAppChannel is called after ───────
+
+    [Fact]
+    public async Task InApp_AddInAppChannel_AfterAddRecurPixelNotify_HandlerIsUsed()
+    {
+        var invoked = false;
+        var services = new ServiceCollection();
+        services.AddLogging();
+
+        services.AddRecurPixelNotify(_ => { }, _ => { });
+
+        services.AddInAppChannel(o => o.UseHandler(n =>
+        {
+            invoked = true;
+            return Task.FromResult(new NotifyResult { Success = true });
+        }));
+
+        var sp = services.BuildServiceProvider();
+        var channel = sp.GetKeyedService<INotificationChannel>("inapp:default");
+        Assert.NotNull(channel);
+
+        var result = await channel!.SendAsync(new NotificationPayload { To = "u1", Body = "test" });
+        Assert.True(result.Success, result.Error);
+        Assert.True(invoked);
+    }
+
+    // ── Test 11: End-to-end auto-scan registers only configured adapters ──────
 
     [Fact]
     public void AddRecurPixelNotify_WithVonageOnly_RegistersVonage_NotTwilio()
