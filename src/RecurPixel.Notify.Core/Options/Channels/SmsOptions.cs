@@ -7,7 +7,8 @@ namespace RecurPixel.Notify.Configuration;
 public class SmsOptions
 {
     /// <summary>
-    /// Active provider key. e.g. "twilio", "vonage", "plivo", "sinch", "messagebird", "awssns".
+    /// Active provider key. Accepted values: "twilio", "vonage", "plivo", "sinch",
+    /// "messagebird", "awssns", "azurecommsms", "msg91".
     /// </summary>
     public string Provider { get; set; } = string.Empty;
 

@@ -7,7 +7,7 @@ namespace RecurPixel.Notify.Configuration;
 public class WhatsAppOptions
 {
     /// <summary>
-    /// Active provider key. e.g. "twilio", "metacloud", "vonage".
+    /// Active provider key. Accepted values: "twilio", "metacloud", "vonage", "msg91".
     /// </summary>
     public string Provider { get; set; } = string.Empty;
 

@@ -4,6 +4,24 @@ Quick reference for each released version. For comprehensive change details, see
 
 ---
 
+## v0.3.0 (April 2026)
+
+**Dashboard observability + MSG91 adapters + auto-registration refactor.**
+
+**What's new:**
+- `RecurPixel.Notify.Dashboard` + `RecurPixel.Notify.Dashboard.EfCore` — delivery log dashboard, filterable UI, batch drill-down, bring-your-own-store support
+- `RecurPixel.Notify.Sms.Msg91` + `RecurPixel.Notify.WhatsApp.Msg91` — MSG91 SMS and WhatsApp Business adapters
+- `NotifyResult` gains `EventName`, `BulkBatchId`, `Metadata` — full context in `OnDelivery` hooks, batch correlation for dashboard
+- IAdapterRegistrar refactor — 10 auto-registration bugs fixed including Twilio credential isolation, FCM/AwsSns/AwsSes/AzureComm crash fixes, HTTP named clients with timeouts on all adapters
+
+**No breaking changes.** All v0.2.0 code compiles and runs without modification.
+
+**Package Count:** 39 (adds Dashboard, Dashboard.EfCore, Sms.Msg91, WhatsApp.Msg91)
+
+**Tests:** 433 passing
+
+---
+
 ## v0.2.0-beta.2 (March 2026)
 
 **Patch on top of beta.1 — no new breaking changes.**

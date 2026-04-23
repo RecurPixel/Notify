@@ -4,6 +4,131 @@ All notable changes to RecurPixel.Notify will be documented here.
 
 ---
 
+## [0.3.0] — April 2026
+
+### New Packages
+
+- `RecurPixel.Notify.Dashboard` — delivery observability middleware, embedded UI, REST API, `INotificationLogStore`
+- `RecurPixel.Notify.Dashboard.EfCore` — EF Core implementation, `NotifyDashboardDbContext`, `AddNotifyDashboard()` integration
+- `RecurPixel.Notify.Sms.Msg91` — MSG91 SMS adapter
+- `RecurPixel.Notify.WhatsApp.Msg91` — MSG91 WhatsApp Business adapter
+
+Both MSG91 packages are included in `RecurPixel.Notify.Sdk` alongside both Dashboard packages.
+
+### New Features
+
+**NotifyResult improvements**
+
+Three new fields on every `NotifyResult`, with zero breaking changes:
+
+```csharp
+public string?  EventName   { get; set; }  // which event triggered this send
+public string?  BulkBatchId { get; set; }  // groups all results from one BulkTriggerAsync call
+public Dictionary<string, object>? Metadata { get; set; }  // passthrough from NotifyContext
+```
+
+`BulkBatchId` is a `Guid` generated once per `BulkTriggerAsync` call and stamped on every result in the batch — this is what makes the dashboard's "view all in this batch" drill-down possible. `EventName` and `Metadata` give `OnDelivery` handlers full context without any changes to existing hook code.
+
+**Dashboard**
+
+Drop-in delivery log dashboard. Pattern is identical to Hangfire — one middleware call, zero Razor/Blazor dependencies.
+
+```csharp
+// Program.cs
+builder.Services.AddNotifyDashboard(options =>
+{
+    options.RoutePrefix = "notify-dashboard";
+    options.RequireRole = "Admin";
+});
+builder.Services.AddNotifyDashboardEfCore(
+    builder.Configuration.GetConnectionString("Default")
+);
+app.UseNotifyDashboard();
+```
+
+What it shows: summary row (total today, success rate, failure count, active channels), filterable log table with channel/provider/status badges, bulk row expansion (all recipients in a batch grouped inline), failed row expansion (full error text), filters by channel, status, date range, and recipient.
+
+Bring-your-own-store: implement `INotificationLogStore` and skip the EfCore package entirely.
+
+**MSG91 adapters**
+
+```json
+"Sms":      { "Provider": "msg91", "Msg91": { "AuthKey": "...", "SenderId": "NOTIFY" } }
+"WhatsApp": { "Provider": "msg91", "Msg91": { "AuthKey": "...", "IntegratedNumber": "91XXXXXXXXXX" } }
+```
+
+No native bulk API on either — base class loop handles bulk automatically.
+
+**IAdapterRegistrar refactor — 10 bug fixes**
+
+Auto-registration is now driven by one `IAdapterRegistrar` per adapter package rather than two monolithic switch/case tables in the Orchestrator. Fixes shipped in this refactor:
+
+| Bug | Fix |
+|-----|-----|
+| FCM gated on `ProjectId` instead of `ServiceAccountJson` | FCM registrar gates on `ServiceAccountJson` |
+| FCM crash — `IFcmMessagingClient` not registered | FCM registrar registers `IFcmMessagingClient` |
+| AwsSns crash — `IAmazonSimpleNotificationService` not registered | AwsSns registrar registers it |
+| AwsSes crash — `IAmazonSimpleEmailServiceV2` not registered | AwsSes registrar registers it |
+| AzureCommSms crash — `IAzureCommSmsClient` not registered | AzureCommSms registrar registers it |
+| AzureCommEmail crash — `IAzureCommEmailClient` not registered | AzureCommEmail registrar registers it |
+| Twilio SMS and WhatsApp credentials overwrite each other | Named options isolation: `"sms:twilio"` / `"whatsapp:twilio"` |
+| 19 HTTP adapters used unnamed `HttpClient` — no timeout, no DNS rotation | All HTTP registrars register named clients with 30s timeout |
+| MetaCloud used key `"whatsapp:metacloud"` in channel, `"whatsapp:metacloudwhatsapp"` in registrar | Both normalised to `"whatsapp:metacloud"` |
+| `All Add{X}Channel()` explicit methods bypassed the registrar | All explicit methods delegate to their registrar |
+
+### Bug Fixes
+
+- `NotifyOptionsValidator` now accepts `"msg91"` as a valid SMS provider and WhatsApp provider
+- `NotifyOptionsValidator` now accepts `"azurecommsms"` as a valid SMS provider
+- `NotifyOptionsValidator` now accepts `"azurecommemail"` as a valid Email provider
+- `SmsOptions.Provider` and `WhatsAppOptions.Provider` doc comments updated to list all accepted values
+
+### No Breaking Changes
+
+All existing code compiles without modification. New `NotifyResult` fields default to `null`. Existing `OnDelivery` handlers work unchanged. `Add{X}Channel()` explicit methods still exist with the same signatures.
+
+### Adapter Status in v0.3.0
+
+| Package | Provider | Channel | Unit Tested | Integration Tested |
+|---|---|---|---|---|
+| `Email.SendGrid` | Twilio SendGrid | Email | ✅ | ✅ |
+| `Email.Smtp` | Any SMTP server | Email | ✅ | ✅ |
+| `Email.Mailgun` | Mailgun | Email | ✅ | 🔲 |
+| `Email.Resend` | Resend | Email | ✅ | 🔲 |
+| `Email.Postmark` | Postmark | Email | ✅ | 🔲 |
+| `Email.AwsSes` | AWS SES | Email | ✅ | 🔲 |
+| `Email.AzureCommEmail` | Azure Communication Services | Email | ✅ | 🔲 |
+| `Sms.Twilio` | Twilio | SMS | ✅ | ✅ |
+| `Sms.Vonage` | Vonage (Nexmo) | SMS | ✅ | 🔲 |
+| `Sms.Plivo` | Plivo | SMS | ✅ | 🔲 |
+| `Sms.Sinch` | Sinch | SMS | ✅ | 🔲 |
+| `Sms.MessageBird` | MessageBird | SMS | ✅ | 🔲 |
+| `Sms.AwsSns` | AWS SNS | SMS | ✅ | 🔲 |
+| `Sms.AzureCommSms` | Azure Communication Services | SMS | ✅ | 🔲 |
+| `Sms.Msg91` | MSG91 | SMS | ✅ | ✅ |
+| `Push.Fcm` | Firebase Cloud Messaging | Push | ✅ | 🔲 |
+| `Push.Apns` | Apple Push Notification Service | Push | ✅ | 🔲 |
+| `Push.OneSignal` | OneSignal | Push | ✅ | 🔲 |
+| `Push.Expo` | Expo Push | Push | ✅ | 🔲 |
+| `WhatsApp.Twilio` | Twilio WhatsApp | WhatsApp | ✅ | ✅ |
+| `WhatsApp.MetaCloud` | Meta Cloud API | WhatsApp | ✅ | 🔲 |
+| `WhatsApp.Vonage` | Vonage WhatsApp | WhatsApp | ✅ | 🔲 |
+| `WhatsApp.Msg91` | MSG91 WhatsApp | WhatsApp | ✅ | ✅ |
+| `Slack` | Slack Webhooks / Bot API | Team Chat | ✅ | ✅ |
+| `Discord` | Discord Webhooks | Team Chat | ✅ | ✅ |
+| `Teams` | Microsoft Teams Webhooks | Team Chat | ✅ | 🔲 |
+| `Mattermost` | Mattermost Webhooks | Team Chat | ✅ | 🔲 |
+| `RocketChat` | Rocket.Chat Webhooks | Team Chat | ✅ | 🔲 |
+| `Facebook` | Meta Messenger API | Social | ✅ | 🔲 |
+| `Telegram` | Telegram Bot API | Social | ✅ | ✅ |
+| `Line` | LINE Messaging API | Social | ✅ | 🔲 |
+| `Viber` | Viber Business Messages | Social | ✅ | 🔲 |
+| `InApp` | Hook-based (user-defined storage) | In-App | ✅ | ✅ |
+
+**Tests:** 433 passing
+
+---
+
 ## [0.2.0] — March 2026 — STABLE
 
 **🎉 STABLE RELEASE — Production Ready**
