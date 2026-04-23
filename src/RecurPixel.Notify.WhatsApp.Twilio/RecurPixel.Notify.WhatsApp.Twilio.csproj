@@ -10,6 +10,8 @@
 
   <ItemGroup>
     <PackageReference Include="Twilio" Version="7.14.3" />
+    <!-- Pin transitive dep to fix NU1903 high-severity vulnerability in 9.0.0 -->
+    <PackageReference Include="Microsoft.Bcl.Memory" Version="10.0.7" />
     <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="10.0.3" />
     <PackageReference Include="Microsoft.Extensions.Options" Version="10.0.3" />
   </ItemGroup>

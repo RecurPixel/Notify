@@ -1,0 +1,41 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "10.0.x"
+
+      - name: Restore dependencies
+        run: dotnet restore
+
+      - name: Build
+        run: dotnet build --configuration Release --no-restore
+
+      - name: Run tests
+        run: dotnet test --configuration Release --no-build --verbosity normal
+
+      - name: Verify all packages pack cleanly
+        run: |
+          mkdir -p ./nupkgs
+          dotnet pack --configuration Release --no-restore --output ./nupkgs
+          pkg_count=$(ls ./nupkgs/*.nupkg | wc -l)
+          echo "Packed $pkg_count .nupkg files"
+          if [ "$pkg_count" -lt 39 ]; then
+            echo "❌ Expected at least 39 packages, got $pkg_count"
+            exit 1
+          fi
+          echo "✅ All packages packed"

@@ -18,7 +18,7 @@ jobs:
       - name: Setup .NET
         uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: "8.0.x"
+          dotnet-version: "10.0.x"
 
       - name: Restore dependencies
         run: dotnet restore
@@ -45,10 +45,16 @@ jobs:
             exit 1
           fi
 
-          # Define package tiers (dependency order)
+          # Tier 0 — Core (no dependencies)
           declare -a TIER0=("RecurPixel.Notify.Core")
+
+          # Tier 1 — Orchestrator (depends on Core)
           declare -a TIER1=("RecurPixel.Notify.Orchestrator")
+
+          # Tier 2 — RecurPixel.Notify meta-package (depends on Core + Orchestrator)
           declare -a TIER2=("RecurPixel.Notify")
+
+          # Tier 3 — All adapters + Dashboard (depend on Core / Orchestrator)
           declare -a TIER3=(
             "RecurPixel.Notify.Email.SendGrid"
             "RecurPixel.Notify.Email.Smtp"
@@ -64,6 +70,7 @@ jobs:
             "RecurPixel.Notify.Sms.Vonage"
             "RecurPixel.Notify.Sms.AwsSns"
             "RecurPixel.Notify.Sms.AzureCommSms"
+            "RecurPixel.Notify.Sms.Msg91"
             "RecurPixel.Notify.Push.Fcm"
             "RecurPixel.Notify.Push.Apns"
             "RecurPixel.Notify.Push.Expo"
@@ -71,6 +78,7 @@ jobs:
             "RecurPixel.Notify.WhatsApp.Twilio"
             "RecurPixel.Notify.WhatsApp.MetaCloud"
             "RecurPixel.Notify.WhatsApp.Vonage"
+            "RecurPixel.Notify.WhatsApp.Msg91"
             "RecurPixel.Notify.Slack"
             "RecurPixel.Notify.Discord"
             "RecurPixel.Notify.Teams"
@@ -81,30 +89,36 @@ jobs:
             "RecurPixel.Notify.Mattermost"
             "RecurPixel.Notify.RocketChat"
             "RecurPixel.Notify.InApp"
+            "RecurPixel.Notify.Dashboard"
           )
-          declare -a TIER4=("RecurPixel.Notify.Sdk")
+
+          # Tier 4 — Dashboard.EfCore (depends on Dashboard)
+          declare -a TIER4=("RecurPixel.Notify.Dashboard.EfCore")
+
+          # Tier 5 — Sdk meta-package (depends on everything)
+          declare -a TIER5=("RecurPixel.Notify.Sdk")
 
           # Helper function to push a tier
           push_tier() {
             local tier_name=$1
             shift
             local packages=("$@")
-            
+
             echo ""
             echo "🚀 Publishing $tier_name (${#packages[@]} packages)"
-            
+
             for pkg in "${packages[@]}"; do
               if [ -z "$pkg" ]; then
                 continue
               fi
-              
+
               # Find the nupkg file
               nupkg=$(ls ./nupkgs/${pkg}.*.nupkg 2>/dev/null | head -1)
               if [ -z "$nupkg" ]; then
                 echo "❌ $pkg -- .nupkg not found"
                 exit 1
               fi
-              
+
               # Push the package
               echo "  → $pkg"
               push_output=$(dotnet nuget push "$nupkg" \
@@ -119,11 +133,11 @@ jobs:
                 exit 1
               fi
             done
-            
+
             echo "  ✅ Tier complete"
           }
 
-          # Push each tier with waits
+          # Push each tier with waits for NuGet indexing
           push_tier "Tier 0 - Core" "${TIER0[@]}"
           echo "⏳ Waiting 120s for NuGet indexing..."
           sleep 120
@@ -136,11 +150,15 @@ jobs:
           echo "⏳ Waiting 120s for NuGet indexing..."
           sleep 120
 
-          push_tier "Tier 3 - Adapters" "${TIER3[@]}"
+          push_tier "Tier 3 - Adapters + Dashboard" "${TIER3[@]}"
           echo "⏳ Waiting 120s for NuGet indexing..."
           sleep 120
 
-          push_tier "Tier 4 - SDK" "${TIER4[@]}"
+          push_tier "Tier 4 - Dashboard.EfCore" "${TIER4[@]}"
+          echo "⏳ Waiting 120s for NuGet indexing..."
+          sleep 120
+
+          push_tier "Tier 5 - Sdk" "${TIER5[@]}"
 
           echo ""
           echo "✅ All packages published successfully!"
@@ -159,6 +177,6 @@ jobs:
           echo ""
           echo "📦 Release Summary:"
           echo "  Version: ${{ github.event.release.tag_name }}"
-          echo "  Packages: 35 total (5 tiers)"
+          echo "  Packages: 39 total (6 tiers)"
           echo "  GitHub: https://github.com/${{ github.repository }}/releases/tag/${{ github.event.release.tag_name }}"
           echo "  NuGet: https://www.nuget.org/packages?q=RecurPixel.Notify"

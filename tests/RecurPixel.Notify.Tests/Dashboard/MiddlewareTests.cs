@@ -11,26 +11,30 @@ public class MiddlewareTests
 {
     // ── Test server builder ───────────────────────────────────────────────────
 
-    private static TestServer BuildServer(
+    private static Task<IHost> BuildHostAsync(
         DashboardOptions? options = null,
         Mock<INotificationLogStore>? storeMock = null)
     {
         options ??= new DashboardOptions();
         storeMock ??= DefaultStore();
 
-        var builder = new WebHostBuilder()
-            .ConfigureServices(services =>
+        return new HostBuilder()
+            .ConfigureWebHost(web =>
             {
-                services.AddLogging();
-                services.AddSingleton(options);
-                services.AddScoped<INotificationLogStore>(_ => storeMock.Object);
-                services.AddAuthorization();
-                services.AddAuthentication();
+                web.UseTestServer()
+                   .ConfigureServices(services =>
+                   {
+                       services.AddLogging();
+                       services.AddRouting();
+                       services.AddSingleton(options);
+                       services.AddScoped<INotificationLogStore>(_ => storeMock.Object);
+                       services.AddAuthorization();
+                       services.AddAuthentication();
+                   })
+                   .UseEnvironment("Development")
+                   .Configure(app => app.UseNotifyDashboard());
             })
-            .UseEnvironment("Development")
-            .Configure(app => app.UseNotifyDashboard());
-
-        return new TestServer(builder);
+            .StartAsync();
     }
 
     private static Mock<INotificationLogStore> DefaultStore()
@@ -57,8 +61,8 @@ public class MiddlewareTests
     [Fact]
     public async Task Get_DashboardRoot_ReturnsHtml()
     {
-        using var server = BuildServer();
-        var client = server.CreateClient();
+        using var host = await BuildHostAsync();
+        var client = host.GetTestClient();
 
         var response = await client.GetAsync("/notify-dashboard");
 
@@ -71,8 +75,8 @@ public class MiddlewareTests
     [Fact]
     public async Task Get_DashboardRoot_ContainsConfiguredTitle()
     {
-        using var server = BuildServer(new DashboardOptions { PageTitle = "My Alerts" });
-        var response = await server.CreateClient().GetAsync("/notify-dashboard");
+        using var host = await BuildHostAsync(new DashboardOptions { PageTitle = "My Alerts" });
+        var response = await host.GetTestClient().GetAsync("/notify-dashboard");
         var body = await response.Content.ReadAsStringAsync();
         Assert.Contains("My Alerts", body);
     }
@@ -80,8 +84,8 @@ public class MiddlewareTests
     [Fact]
     public async Task Get_DashboardRoot_ContainsApiBase()
     {
-        using var server = BuildServer(new DashboardOptions { RoutePrefix = "notify-dashboard" });
-        var response = await server.CreateClient().GetAsync("/notify-dashboard");
+        using var host = await BuildHostAsync(new DashboardOptions { RoutePrefix = "notify-dashboard" });
+        var response = await host.GetTestClient().GetAsync("/notify-dashboard");
         var body = await response.Content.ReadAsStringAsync();
         Assert.Contains("/notify-dashboard/api", body);
     }
@@ -89,8 +93,8 @@ public class MiddlewareTests
     [Fact]
     public async Task Get_DashboardRoot_ContainsPageSize()
     {
-        using var server = BuildServer(new DashboardOptions { PageSize = 75 });
-        var response = await server.CreateClient().GetAsync("/notify-dashboard");
+        using var host = await BuildHostAsync(new DashboardOptions { PageSize = 75 });
+        var response = await host.GetTestClient().GetAsync("/notify-dashboard");
         var body = await response.Content.ReadAsStringAsync();
         Assert.Contains("75", body);
     }
@@ -101,8 +105,8 @@ public class MiddlewareTests
     public async Task Get_UnrelatedPath_PassesToNext_Returns404()
     {
         // The test server has no other middleware, so unhandled requests → 404
-        using var server = BuildServer();
-        var response = await server.CreateClient().GetAsync("/some-other-path");
+        using var host = await BuildHostAsync();
+        var response = await host.GetTestClient().GetAsync("/some-other-path");
         Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
     }
 
@@ -111,8 +115,8 @@ public class MiddlewareTests
     [Fact]
     public async Task Get_ApiStats_ReturnsJson()
     {
-        using var server = BuildServer();
-        var response = await server.CreateClient().GetAsync("/notify-dashboard/api/stats");
+        using var host = await BuildHostAsync();
+        var response = await host.GetTestClient().GetAsync("/notify-dashboard/api/stats");
 
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
         Assert.StartsWith("application/json", response.Content.Headers.ContentType?.MediaType);
@@ -121,8 +125,8 @@ public class MiddlewareTests
     [Fact]
     public async Task Get_ApiStats_ContainsRequiredFields()
     {
-        using var server = BuildServer();
-        var body = await server.CreateClient().GetStringAsync("/notify-dashboard/api/stats");
+        using var host = await BuildHostAsync();
+        var body = await host.GetTestClient().GetStringAsync("/notify-dashboard/api/stats");
         var doc = JsonDocument.Parse(body);
 
         Assert.True(doc.RootElement.TryGetProperty("totalSent",         out _));
@@ -135,8 +139,8 @@ public class MiddlewareTests
     [Fact]
     public async Task Get_ApiStats_ValuesMatchStore()
     {
-        using var server = BuildServer();
-        var body = await server.CreateClient().GetStringAsync("/notify-dashboard/api/stats");
+        using var host = await BuildHostAsync();
+        var body = await host.GetTestClient().GetStringAsync("/notify-dashboard/api/stats");
         var doc = JsonDocument.Parse(body);
 
         Assert.Equal(10, doc.RootElement.GetProperty("totalSent").GetInt32());
@@ -150,8 +154,8 @@ public class MiddlewareTests
     [Fact]
     public async Task Get_ApiLogs_ReturnsJsonArray()
     {
-        using var server = BuildServer();
-        var response = await server.CreateClient().GetAsync("/notify-dashboard/api/logs");
+        using var host = await BuildHostAsync();
+        var response = await host.GetTestClient().GetAsync("/notify-dashboard/api/logs");
 
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
         var body = await response.Content.ReadAsStringAsync();
@@ -162,8 +166,8 @@ public class MiddlewareTests
     [Fact]
     public async Task Get_ApiLogs_FirstItemContainsExpectedFields()
     {
-        using var server = BuildServer();
-        var body = await server.CreateClient().GetStringAsync("/notify-dashboard/api/logs");
+        using var host = await BuildHostAsync();
+        var body = await host.GetTestClient().GetStringAsync("/notify-dashboard/api/logs");
         var arr = JsonDocument.Parse(body).RootElement;
 
         Assert.True(arr.GetArrayLength() >= 1);
@@ -183,8 +187,8 @@ public class MiddlewareTests
             It.IsAny<CancellationToken>()))
          .ReturnsAsync(new List<NotificationLog>());
 
-        using var server = BuildServer(storeMock: storeMock);
-        var response = await server.CreateClient()
+        using var host = await BuildHostAsync(storeMock: storeMock);
+        var response = await host.GetTestClient()
             .GetAsync("/notify-dashboard/api/logs?channel=email&status=success");
 
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
@@ -198,8 +202,8 @@ public class MiddlewareTests
     [Fact]
     public async Task Get_ApiBatch_ReturnsJsonArray()
     {
-        using var server = BuildServer();
-        var response = await server.CreateClient().GetAsync("/notify-dashboard/api/logs/batch/batch-1");
+        using var host = await BuildHostAsync();
+        var response = await host.GetTestClient().GetAsync("/notify-dashboard/api/logs/batch/batch-1");
 
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
         var arr = JsonDocument.Parse(await response.Content.ReadAsStringAsync()).RootElement;
@@ -211,8 +215,8 @@ public class MiddlewareTests
     public async Task Get_ApiBatch_PassesBatchIdToStore()
     {
         var storeMock = DefaultStore();
-        using var server = BuildServer(storeMock: storeMock);
-        await server.CreateClient().GetAsync("/notify-dashboard/api/logs/batch/my-batch-id");
+        using var host = await BuildHostAsync(storeMock: storeMock);
+        await host.GetTestClient().GetAsync("/notify-dashboard/api/logs/batch/my-batch-id");
 
         storeMock.Verify(
             s => s.GetBatchAsync("my-batch-id", It.IsAny<CancellationToken>()),
@@ -224,8 +228,8 @@ public class MiddlewareTests
     [Fact]
     public async Task Get_UnknownApiPath_Returns404()
     {
-        using var server = BuildServer();
-        var response = await server.CreateClient().GetAsync("/notify-dashboard/api/unknown-endpoint");
+        using var host = await BuildHostAsync();
+        var response = await host.GetTestClient().GetAsync("/notify-dashboard/api/unknown-endpoint");
         Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
     }
 
@@ -234,18 +238,23 @@ public class MiddlewareTests
     [Fact]
     public async Task Get_ApiStats_NoStore_Returns503()
     {
-        var builder = new WebHostBuilder()
-            .ConfigureServices(services =>
+        using var host = await new HostBuilder()
+            .ConfigureWebHost(web =>
             {
-                services.AddLogging();
-                services.AddSingleton(new DashboardOptions());
-                // No INotificationLogStore registered
+                web.UseTestServer()
+                   .ConfigureServices(services =>
+                   {
+                       services.AddLogging();
+                       services.AddRouting();
+                       services.AddSingleton(new DashboardOptions());
+                       // No INotificationLogStore registered
+                   })
+                   .UseEnvironment("Development")
+                   .Configure(app => app.UseNotifyDashboard());
             })
-            .UseEnvironment("Development")
-            .Configure(app => app.UseNotifyDashboard());
+            .StartAsync();
 
-        using var server = new TestServer(builder);
-        var response = await server.CreateClient().GetAsync("/notify-dashboard/api/stats");
+        var response = await host.GetTestClient().GetAsync("/notify-dashboard/api/stats");
 
         Assert.Equal(HttpStatusCode.ServiceUnavailable, response.StatusCode);
     }
@@ -256,9 +265,9 @@ public class MiddlewareTests
     public async Task Get_WithRequireRole_UnauthenticatedRequest_Returns401()
     {
         var options = new DashboardOptions { RequireRole = "Admin" };
-        using var server = BuildServer(options);
+        using var host = await BuildHostAsync(options);
         // Request with no authentication cookies/headers → unauthenticated
-        var response = await server.CreateClient().GetAsync("/notify-dashboard");
+        var response = await host.GetTestClient().GetAsync("/notify-dashboard");
         Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
     }
 
@@ -267,28 +276,32 @@ public class MiddlewareTests
     {
         var options = new DashboardOptions { RequireRole = "Admin" };
 
-        var builder = new WebHostBuilder()
-            .ConfigureServices(services =>
+        using var host = await new HostBuilder()
+            .ConfigureWebHost(web =>
             {
-                services.AddLogging();
-                services.AddRouting();
-                services.AddSingleton(options);
-                services.AddScoped<INotificationLogStore>(_ => DefaultStore().Object);
-                services.AddAuthorization();
-                services.AddAuthentication(TestAuthHandler.SchemeName)
-                    .AddScheme<TestAuthOptions, TestAuthHandler>(TestAuthHandler.SchemeName, _ => { });
+                web.UseTestServer()
+                   .ConfigureServices(services =>
+                   {
+                       services.AddLogging();
+                       services.AddRouting();
+                       services.AddSingleton(options);
+                       services.AddScoped<INotificationLogStore>(_ => DefaultStore().Object);
+                       services.AddAuthorization();
+                       services.AddAuthentication(TestAuthHandler.SchemeName)
+                           .AddScheme<TestAuthOptions, TestAuthHandler>(TestAuthHandler.SchemeName, _ => { });
+                   })
+                   .UseEnvironment("Development")
+                   .Configure(app =>
+                   {
+                       app.UseRouting();
+                       app.UseAuthentication();
+                       app.UseAuthorization();
+                       app.UseNotifyDashboard();
+                   });
             })
-            .UseEnvironment("Development")
-            .Configure(app =>
-            {
-                app.UseRouting();
-                app.UseAuthentication();
-                app.UseAuthorization();
-                app.UseNotifyDashboard();
-            });
+            .StartAsync();
 
-        using var server = new TestServer(builder);
-        var client = server.CreateClient();
+        var client = host.GetTestClient();
         client.DefaultRequestHeaders.Add(TestAuthHandler.RoleHeader, "Admin");
 
         var response = await client.GetAsync("/notify-dashboard");
@@ -300,31 +313,35 @@ public class MiddlewareTests
     {
         var options = new DashboardOptions { RequireRole = "Admin" };
 
-        var builder = new WebHostBuilder()
-            .ConfigureServices(services =>
+        using var host = await new HostBuilder()
+            .ConfigureWebHost(web =>
             {
-                services.AddLogging();
-                services.AddRouting();
-                services.AddSingleton(options);
-                services.AddScoped<INotificationLogStore>(_ => DefaultStore().Object);
-                services.AddAuthorization();
-                services.AddAuthentication(TestAuthHandler.SchemeName)
-                    .AddScheme<TestAuthOptions, TestAuthHandler>(TestAuthHandler.SchemeName, _ => { });
+                web.UseTestServer()
+                   .ConfigureServices(services =>
+                   {
+                       services.AddLogging();
+                       services.AddRouting();
+                       services.AddSingleton(options);
+                       services.AddScoped<INotificationLogStore>(_ => DefaultStore().Object);
+                       services.AddAuthorization();
+                       services.AddAuthentication(TestAuthHandler.SchemeName)
+                           .AddScheme<TestAuthOptions, TestAuthHandler>(TestAuthHandler.SchemeName, _ => { });
+                   })
+                   .UseEnvironment("Development")
+                   .Configure(app =>
+                   {
+                       app.UseRouting();
+                       app.UseAuthentication();
+                       app.UseAuthorization();
+                       app.UseNotifyDashboard();
+                   });
             })
-            .UseEnvironment("Development")
-            .Configure(app =>
-            {
-                app.UseRouting();
-                app.UseAuthentication();
-                app.UseAuthorization();
-                app.UseNotifyDashboard();
-            });
+            .StartAsync();
 
-        using var server = new TestServer(builder);
-        var client = server.CreateClient();
+        var client = host.GetTestClient();
         client.DefaultRequestHeaders.Add(TestAuthHandler.RoleHeader, "Viewer"); // wrong role
 
-        var response = await server.CreateClient().GetAsync("/notify-dashboard");
+        var response = await host.GetTestClient().GetAsync("/notify-dashboard");
         Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
     }
 
@@ -334,9 +351,9 @@ public class MiddlewareTests
     public async Task Get_CustomRoutePrefix_ServesAtConfiguredPath()
     {
         var options = new DashboardOptions { RoutePrefix = "admin/notifications" };
-        using var server = BuildServer(options);
+        using var host = await BuildHostAsync(options);
 
-        var response = await server.CreateClient().GetAsync("/admin/notifications");
+        var response = await host.GetTestClient().GetAsync("/admin/notifications");
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
         Assert.Equal("text/html; charset=utf-8", response.Content.Headers.ContentType?.ToString());
     }
@@ -345,9 +362,9 @@ public class MiddlewareTests
     public async Task Get_CustomRoutePrefix_DefaultPrefixNotServed()
     {
         var options = new DashboardOptions { RoutePrefix = "admin/notifications" };
-        using var server = BuildServer(options);
+        using var host = await BuildHostAsync(options);
 
-        var response = await server.CreateClient().GetAsync("/notify-dashboard");
+        var response = await host.GetTestClient().GetAsync("/notify-dashboard");
         Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
     }
 
