@@ -1,8 +1,8 @@
 # RecurPixel.Notify — Roadmap
 
 > Last updated: April 2026
-> Current stable: v0.2.0
-> In progress: v0.3.0-beta
+> Current stable: v0.3.0
+> Next: v0.4.0 (planned)
 
 ---
 
@@ -11,8 +11,8 @@
 | Version | Headline | Status |
 |---|---|---|
 | v0.2.0 | 35 adapters across all channels | Stable |
-| v0.3.0 | Dashboard observability + MSG91 + NotifyResult improvements | In progress |
-| v0.4.0 | Polly hooks, OpenTelemetry, circuit breaker, Dashboard v2 | Planned |
+| v0.3.0 | Dashboard observability + MSG91 + NotifyResult improvements | Stable |
+| v0.4.0 | Polly hooks, OpenTelemetry, additional adapters, Dashboard v2 | Planned |
 
 ---
 
@@ -260,42 +260,31 @@ builder.Services.AddOpenTelemetry()
 
 Emits one `Activity` per send attempt with tags: `notify.channel`, `notify.provider`, `notify.event_name`, `notify.success`, `notify.recipient_hash` (hashed, not raw PII).
 
----
-
-**Circuit breaker (Phase 20)**
-
-First-class circuit breaker inside the Orchestrator. Per-provider state tracking, configurable failure threshold, automatic half-open probe after cooldown.
-
-```csharp
-options.CircuitBreaker(cb => cb
-    .FailureThreshold(5)          // 5 failures in window
-    .SamplingWindow(TimeSpan.FromMinutes(1))
-    .BreakDuration(TimeSpan.FromMinutes(5))
-    .OnBreak(ctx => logger.LogWarning("Provider {Provider} circuit open", ctx.Provider))
-    .OnReset(ctx => logger.LogInformation("Provider {Provider} circuit reset", ctx.Provider))
-);
-```
-
-When a provider's circuit is open, the Orchestrator skips it and immediately tries the configured fallback. You can query circuit state via `INotifyService.GetCircuitStateAsync(channel, provider)`.
+> **PII constraint:** Activity tags will never include raw recipient values (email address, phone number, device token). Only `notify.recipient_hash` (SHA-256, first 8 chars) is emitted. This is a hard rule — do not weaken it.
 
 ---
 
-**Additional adapters (Phase 21)**
+**Additional adapters (Phase 20)**
 
 Candidates based on adoption and testability:
 - `Sms.Kaleyra` — strong India coverage
 - `WhatsApp.Gupshup` — widely used in India, free sandbox
 - `WhatsApp.AiSensy` — popular managed WhatsApp BSP
-- Any community-submitted adapters that pass integration tests
+- Community-submitted adapters that pass the integration test requirement
+
+Community adapters must: extend `NotificationChannelBase`, include a unit test suite, and provide an integration test skeleton with a `SkippableFact` that gates on credentials. See `CONTRIBUTING.md` for the full checklist.
 
 ---
 
-**Dashboard v2 (Phase 22)**
+**Dashboard v2 (Phase 21)**
 
-- Retry actions — resend a failed notification from the dashboard
-- Batch detail page — dedicated view for a bulk batch with per-recipient status
-- Provider health indicators — success rate per provider over the last 24h shown in the summary row
-- Export — download filtered results as CSV
+Read-only enhancements on top of the v0.3.0 Dashboard:
+
+- Batch detail page — dedicated view for a single bulk batch with per-recipient status rows
+- Provider health indicators — per-provider success rate over the last 24h in the summary row
+- CSV export — download filtered log results from the UI
+
+**Not in v0.4.0 — retry actions:** Resending a failed notification from the dashboard requires storing the original `NotificationPayload` (not currently persisted), reconstructing a valid `NotifyContext`, and solving idempotency. This needs a dedicated design document before any code is written.
 
 ---
 
@@ -307,6 +296,7 @@ Candidates based on adoption and testability:
 | Queue / background dispatcher | Core philosophy: "user calls TriggerAsync from their own worker" |
 | User preference storage | User owns this — passed via conditions at event definition time |
 | Notification log storage (without Dashboard) | User owns persistence — `OnDelivery` hook exists for this |
+| First-class circuit breaker | Phase 18 (Polly hooks) gives users full Polly `CircuitBreakerStrategy` in ~10 lines. Building a duplicate in-library adds stateful infrastructure and contradicts "you own the resilience policy." |
 | Load balancing / round-robin across providers | Over-engineering for a notification library |
 | A/B testing across providers | Same |
 

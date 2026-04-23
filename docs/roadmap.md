@@ -12,21 +12,26 @@ nav_order: 10
 
 ### Phase 18 — Polly Resilience Hooks
 
-Opt-in Polly policy integration per channel. Configure retry, circuit-breaker, timeout, and bulkhead policies without coupling your app code to Polly.
+Opt-in Polly policy integration per adapter. Every HTTP-based adapter will expose an `IHttpClientBuilder` hook so you can attach your own Polly policies — retry, timeout, circuit breaker, bulkhead — without any Polly dependency inside the library.
 
 ```csharp
-// Per-event policy wiring (planned API — subject to change)
-orchestratorOptions.DefineEvent("auth.otp", e => e
-    .UseChannels("sms")
-    .WithPolicy(Policy
-        .Handle<HttpRequestException>()
-        .WaitAndRetryAsync(3, i => TimeSpan.FromSeconds(Math.Pow(2, i))))
-);
+// Planned API — subject to change before release
+builder.Services.AddRecurPixelNotify(options => { ... })
+    .ConfigureEmailHttpClient(http => http
+        .AddResiliencePipeline("email", pipeline => pipeline
+            .AddRetry(new RetryStrategyOptions { MaxRetryAttempts = 3 })
+            .AddCircuitBreaker(new CircuitBreakerStrategyOptions
+            {
+                FailureRatio    = 0.5,
+                SamplingDuration = TimeSpan.FromSeconds(30),
+                BreakDuration   = TimeSpan.FromSeconds(60),
+            })
+            .AddTimeout(TimeSpan.FromSeconds(10))));
 ```
 
-- Per-channel policy or global default
-- Works alongside existing `WithRetry` — Polly takes over when configured
-- No Polly dependency in Core; opt-in via a separate `RecurPixel.Notify.Polly` package
+**What this means:** you own the resilience policy entirely. The library owns the `HttpClient` lifetime and named client wiring. No Polly dependency in `RecurPixel.Notify.Core` — you bring Polly if you want it.
+
+**Circuit breaking today (no library needed):** Wrap `TriggerAsync` in a Polly `ResiliencePipeline` in your own service layer. It's roughly 10–15 lines and gives you full control over failure thresholds, sampling windows, and break duration.
 
 ---
 
@@ -34,66 +39,68 @@ orchestratorOptions.DefineEvent("auth.otp", e => e
 
 Full distributed tracing via `System.Diagnostics.ActivitySource`. Every `TriggerAsync` call, channel dispatch, and provider API call becomes a traceable span.
 
-- `ActivitySource` named `RecurPixel.Notify`
-- Spans: `notify.trigger`, `notify.channel.dispatch`, `notify.provider.send`
-- Attributes: `notify.event`, `notify.channel`, `notify.provider`, `notify.success`
-- Exportable to OTLP, Zipkin, Jaeger, or any OpenTelemetry collector
-- Zero-config opt-in via `AddOpenTelemetry().WithTracing(b => b.AddRecurPixelNotifyInstrumentation())`
-
----
-
-### Phase 20 — Circuit Breaker
-
-Auto-disable a channel after consecutive failures. Prevents hammering a broken provider and lets the fallback chain take over automatically.
-
-- Configurable failure threshold and recovery window per channel
-- State: Closed → Open → Half-Open (same model as Polly's circuit breaker)
-- Dashboard shows tripped channels with open-since timestamp
-- No code changes required to benefit — purely configuration
-
-```json
-"Notify": {
-  "CircuitBreaker": {
-    "FailureThreshold": 5,
-    "RecoveryWindowSeconds": 60
-  }
-}
+```csharp
+builder.Services.AddOpenTelemetry()
+    .WithTracing(tracing => tracing
+        .AddRecurPixelNotifyInstrumentation());
 ```
 
+**Activity tags per send attempt:**
+
+| Tag | Value |
+|-----|-------|
+| `notify.channel` | `"email"`, `"sms"`, `"push"`, etc. |
+| `notify.provider` | `"sendgrid"`, `"twilio"`, etc. |
+| `notify.event_name` | Event name from `TriggerAsync` |
+| `notify.success` | `"true"` or `"false"` |
+| `notify.recipient_hash` | SHA-256 first 8 chars — never raw PII |
+| `notify.used_fallback` | `"true"` when a fallback channel fired |
+| `notify.bulk_batch_id` | Batch ID when part of a `BulkTriggerAsync` call |
+
+Exportable to OTLP, Zipkin, Jaeger, or any OpenTelemetry collector. No `Activity` is emitted if no listener is registered — zero overhead when OpenTelemetry is not configured.
+
+{: .note }
+> **Privacy:** `notify.recipient_hash` is a one-way hash — raw email addresses, phone numbers, and device tokens are never written to traces.
+
 ---
 
-### Phase 21 — Additional Adapters
+### Phase 20 — Additional Adapters
 
-Planned new providers:
+New provider adapters based on adoption:
 
-| Package                         | Provider             | Channel |
-| ------------------------------- | -------------------- | ------- |
-| `RecurPixel.Notify.Sms.Infobip` | Infobip              | SMS     |
-| `RecurPixel.Notify.Email.Brevo` | Brevo (Sendinblue)   | Email   |
-| `RecurPixel.Notify.Sms.Pinpoint`| AWS Pinpoint         | SMS     |
+| Package | Provider | Channel |
+|---|---|---|
+| `RecurPixel.Notify.Sms.Kaleyra` | Kaleyra | SMS |
+| `RecurPixel.Notify.WhatsApp.Gupshup` | Gupshup | WhatsApp |
+| `RecurPixel.Notify.WhatsApp.AiSensy` | AiSensy | WhatsApp |
 
-Community contributions welcome — see [Contributing](https://github.com/RecurPixel/Notify/blob/main/CONTRIBUTING.md).
+Community contributions welcome. Requirements: extend `NotificationChannelBase`, include a full unit test suite, provide a `SkippableFact` integration test that skips when credentials are absent. See [Contributing](https://github.com/RecurPixel/Notify/blob/main/CONTRIBUTING.md).
 
 ---
 
-### Phase 22 — Dashboard v2
+### Phase 21 — Dashboard v2
 
-Enhancements to the v0.3.0 Dashboard:
+Read-only enhancements to the [Dashboard](dashboard) introduced in v0.3.0:
 
-- **Real-time delivery feed** via SignalR — notifications appear live without page refresh
-- **Per-provider latency charts** — p50/p95/p99 send time over a rolling 24-hour window
-- **Failure rate alerts** — configurable threshold triggers a configurable webhook
-- **Log retention policy** — auto-prune records older than N days
-- **CSV export** — export filtered log results to CSV from the UI
+- **Batch detail page** — dedicated view for a single bulk send with per-recipient status rows
+- **Provider health indicators** — per-provider success rate over the last 24h in the summary row
+- **CSV export** — download filtered log results from the UI
+
+{: .warning }
+> **Retry actions are not in v0.4.0.** Resending a failed notification from the dashboard requires storing the original payload (not currently persisted) and solving idempotency. This needs a design document before any implementation.
 
 ---
 
 ## What Will Never Be Built
 
-These are explicitly out of scope. If you need them, build them in your application layer:
+These are explicitly out of scope. Build them in your application layer if you need them.
 
-- **Template engine** — you own subject, body, and HTML. We deliver the payload, we don't build it.
-- **Background queue / dispatcher** — call `TriggerAsync` from your own Hangfire, Quartz, or MassTransit job.
-- **Scheduled send** — a `SendAt` field requires a persistent scheduler. Wire your own.
-- **Load balancing or A/B testing** across providers — use Named Provider Routing for routing by intent, not volume.
-- **Log storage in Core** — `OnDelivery` hook exists; you write to your own DB (or use the optional Dashboard package).
+| Feature | Why not |
+|---|---|
+| **Template engine** | You own subject, body, and HTML. We deliver the payload, we don't build it. |
+| **Background queue / dispatcher** | Call `TriggerAsync` from your own Hangfire, Quartz, or MassTransit job. |
+| **Scheduled send** | Requires a persistent scheduler — wire your own, call `TriggerAsync` at fire time. |
+| **First-class circuit breaker** | Phase 18 (Polly hooks) gives you a full circuit breaker in ~15 lines using Polly's own `CircuitBreakerStrategy`. Building a duplicate inside the library adds stateful infrastructure and duplicates work Polly already does better. |
+| **Load balancing / round-robin across providers** | Use Named Provider Routing for intent-based routing; random distribution across providers is not a notification library concern. |
+| **A/B testing across providers** | Same reason. |
+| **Notification log storage (without Dashboard)** | `OnDelivery` hook exists; you write to your own DB. The Dashboard package is opt-in for those who want a built-in store. |

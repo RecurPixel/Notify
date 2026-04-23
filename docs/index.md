@@ -112,11 +112,10 @@ See [Usage Tiers](usage-tiers) to understand which option fits your use case.
 
 ## Coming in v0.4.0
 
-- **Polly Resilience Hooks** — opt-in `IAsyncPolicy` per channel
+- **Polly Resilience Hooks** — expose `IHttpClientBuilder` per adapter so you attach your own Polly policies
 - **OpenTelemetry Integration** — full distributed tracing via `ActivitySource`
-- **Circuit Breaker** — auto-disable broken channels without code changes
-- **Additional Adapters** — Infobip, Brevo, AWS Pinpoint
-- **Dashboard v2** — real-time feed, latency charts, failure rate alerts
+- **Additional Adapters** — Kaleyra SMS, Gupshup WhatsApp, AiSensy WhatsApp
+- **Dashboard v2** — batch detail page, provider health indicators, CSV export
 
 See the [Roadmap](roadmap) for full details.
 

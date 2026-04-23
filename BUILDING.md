@@ -509,17 +509,7 @@ No Activity emitted if OpenTelemetry is not registered — guard with ActivitySo
 
 ---
 
-## Phase 20 — Circuit breaker 🔲
-
-> Per-provider circuit state inside the Orchestrator.
-> Design doc required before implementation — write it as a supplement (like Bulk and MultiProvider docs).
-
-- 🔲 Write `RecurPixel.Notify-CircuitBreaker.md` design document first
-- 🔲 Implement after design is approved
-
----
-
-## Phase 21 — Additional adapters 🔲
+## Phase 20 — Additional adapters 🔲
 
 Candidates:
 - `Sms.Kaleyra`
@@ -527,14 +517,16 @@ Candidates:
 - `WhatsApp.AiSensy`
 - Community-submitted adapters that pass integration tests
 
+Community adapter requirements: extends `NotificationChannelBase`, full unit test suite, integration test skeleton with `SkippableFact` that gates on credentials.
+
 ---
 
-## Phase 22 — Dashboard v2 🔲
+## Phase 21 — Dashboard v2 🔲
 
-> Builds on Dashboard v1 (Phase 16). Adds write operations and richer views.
+> Builds on Dashboard v1 (Phase 16). Read-only enhancements only.
+> Retry actions are NOT in scope — they require a separate design doc (payload storage + idempotency unsolved).
 
-- 🔲 Retry action — resend a failed notification from the dashboard
-- 🔲 Batch detail page — dedicated URL for a single bulk batch
+- 🔲 Batch detail page — dedicated URL for a single bulk batch with per-recipient rows
 - 🔲 Provider health row — per-provider success rate in last 24h in summary row
 - 🔲 CSV export — download filtered log results
 
