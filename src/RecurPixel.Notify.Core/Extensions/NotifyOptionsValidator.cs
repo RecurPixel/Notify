@@ -48,6 +48,10 @@ internal static class NotifyOptionsValidator
                 RequireField("Email:AwsSes:SecretKey", options.Email.AwsSes?.SecretKey);
                 RequireField("Email:AwsSes:Region", options.Email.AwsSes?.Region);
                 break;
+            case "azurecommemail":
+                RequireField("Email:AzureCommEmail:ConnectionString", options.Email.AzureCommEmail?.ConnectionString);
+                RequireField("Email:AzureCommEmail:FromEmail", options.Email.AzureCommEmail?.FromEmail);
+                break;
             default:
                 throw new InvalidOperationException(
                     $"Notify:Email:Provider '{options.Email.Provider}' is not a recognised provider.");
@@ -89,6 +93,14 @@ internal static class NotifyOptionsValidator
                 RequireField("Sms:AwsSns:AccessKey", options.Sms.AwsSns?.AccessKey);
                 RequireField("Sms:AwsSns:SecretKey", options.Sms.AwsSns?.SecretKey);
                 RequireField("Sms:AwsSns:Region", options.Sms.AwsSns?.Region);
+                break;
+            case "msg91":
+                RequireField("Sms:Msg91:AuthKey", options.Sms.Msg91?.AuthKey);
+                RequireField("Sms:Msg91:SenderId", options.Sms.Msg91?.SenderId);
+                break;
+            case "azurecommsms":
+                RequireField("Sms:AzureCommSms:ConnectionString", options.Sms.AzureCommSms?.ConnectionString);
+                RequireField("Sms:AzureCommSms:FromNumber", options.Sms.AzureCommSms?.FromNumber);
                 break;
             default:
                 throw new InvalidOperationException(
@@ -148,6 +160,10 @@ internal static class NotifyOptionsValidator
                 RequireField("WhatsApp:Vonage:ApiKey", options.WhatsApp.Vonage?.ApiKey);
                 RequireField("WhatsApp:Vonage:ApiSecret", options.WhatsApp.Vonage?.ApiSecret);
                 break;
+            case "msg91":
+                RequireField("WhatsApp:Msg91:AuthKey", options.WhatsApp.Msg91?.AuthKey);
+                RequireField("WhatsApp:Msg91:IntegratedNumber", options.WhatsApp.Msg91?.IntegratedNumber);
+                break;
             default:
                 throw new InvalidOperationException(
                     $"Notify:WhatsApp:Provider '{options.WhatsApp.Provider}' is not a recognised provider.");
@@ -196,12 +212,13 @@ internal static class NotifyOptionsValidator
     private static bool IsEmailProviderConfigured(EmailOptions email, string key) =>
         key switch
         {
-            "sendgrid" => email.SendGrid is not null,
-            "smtp" => email.Smtp is not null,
-            "mailgun" => email.Mailgun is not null,
-            "resend" => email.Resend is not null,
-            "postmark" => email.Postmark is not null,
-            "awsses" => email.AwsSes is not null,
+            "sendgrid"       => email.SendGrid is not null,
+            "smtp"           => email.Smtp is not null,
+            "mailgun"        => email.Mailgun is not null,
+            "resend"         => email.Resend is not null,
+            "postmark"       => email.Postmark is not null,
+            "awsses"         => email.AwsSes is not null,
+            "azurecommemail" => email.AzureCommEmail is not null,
             _ => false
         };
 }

@@ -6,9 +6,10 @@
     <IsPackable>false</IsPackable>
   </PropertyGroup>
 
-  <!-- Tier 1: single provider, no orchestrator -->
+  <!-- Tier 1: two independent providers, no orchestrator -->
   <ItemGroup>
     <ProjectReference Include="..\..\..\src\RecurPixel.Notify.Email.SendGrid\RecurPixel.Notify.Email.SendGrid.csproj" />
+    <ProjectReference Include="..\..\..\src\RecurPixel.Notify.Sms.Msg91\RecurPixel.Notify.Sms.Msg91.csproj" />
   </ItemGroup>
 
   <ItemGroup>

@@ -11,6 +11,7 @@
     <ProjectReference Include="..\..\..\src\RecurPixel.Notify\RecurPixel.Notify.csproj" />
     <ProjectReference Include="..\..\..\src\RecurPixel.Notify.Email.SendGrid\RecurPixel.Notify.Email.SendGrid.csproj" />
     <ProjectReference Include="..\..\..\src\RecurPixel.Notify.Sms.Twilio\RecurPixel.Notify.Sms.Twilio.csproj" />
+    <ProjectReference Include="..\..\..\src\RecurPixel.Notify.WhatsApp.Msg91\RecurPixel.Notify.WhatsApp.Msg91.csproj" />
   </ItemGroup>
 
   <ItemGroup>
