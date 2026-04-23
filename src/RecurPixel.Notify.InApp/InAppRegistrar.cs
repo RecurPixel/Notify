@@ -14,7 +14,7 @@ internal sealed class InAppRegistrar : IAdapterRegistrar
 
     public void Register(IServiceCollection services, NotifyOptions options)
     {
-        services.AddSingleton(Options.Create(new InAppOptions()));
+        services.TryAddSingleton(Options.Create(new InAppOptions()));
         services.TryAddKeyedSingleton<INotificationChannel, InAppChannel>("inapp:default");
     }
 }
