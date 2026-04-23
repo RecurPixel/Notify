@@ -150,7 +150,21 @@ public class OrderService(INotifyService notify, ILogger<OrderService> logger)
 - `EventName` — the event name you passed in
 - `UserId` — the user ID from the context (for tracing)
 
-Each `NotifyResult` contains: `Channel`, `Provider`, `Success`, `Recipient`, `ProviderId` (message ID), `Error`, `UsedFallback`, and `SentAt`.
+Each `NotifyResult` contains:
+
+| Property       | Type                        | Description |
+| -------------- | --------------------------- | ----------- |
+| `Channel`      | `string`                    | Logical channel name: `"email"`, `"sms"`, etc. |
+| `Provider`     | `string?`                   | Provider that sent the message: `"sendgrid"`, `"twilio"`, etc. |
+| `Success`      | `bool`                      | Whether the send succeeded |
+| `Recipient`    | `string?`                   | Email address, phone number, device token, etc. |
+| `ProviderId`   | `string?`                   | Provider's own message ID for delivery tracking |
+| `Error`        | `string?`                   | Error message (null when `Success` is true) |
+| `UsedFallback` | `bool`                      | True if this channel fired as a fallback |
+| `SentAt`       | `DateTime`                  | UTC timestamp of the send attempt |
+| `EventName`    | `string?`                   | Event name from `TriggerAsync` (null for direct sends) |
+| `BulkBatchId`  | `string?`                   | Shared ID across all results in a `BulkTriggerAsync` call |
+| `Subject`      | `string?`                   | Notification subject, populated from the payload |
 
 ---
 
@@ -242,6 +256,43 @@ builder.Services.AddRecurPixelNotify(
 
 ---
 
+## Step 8 — (Optional) Dashboard
+
+The Dashboard package captures every send result automatically and serves a delivery log UI + REST API from inside your app. Install the two packages, register the store, and add the middleware:
+
+```bash
+dotnet add package RecurPixel.Notify.Dashboard
+dotnet add package RecurPixel.Notify.Dashboard.EfCore
+```
+
+```csharp
+// Program.cs — add BEFORE AddRecurPixelNotify
+builder.Services.AddNotifyDashboard(opts =>
+{
+    opts.RequireRole = "Admin";  // secure it before production
+});
+builder.Services.AddNotifyDashboardEfCore(options =>
+    options.UseSqlServer(builder.Configuration.GetConnectionString("NotifyDashboard")));
+```
+
+```csharp
+// Program.cs — add middleware
+app.UseAuthentication();
+app.UseAuthorization();
+app.UseNotifyDashboard();  // serves at /notify-dashboard by default
+```
+
+Run the EF Core migration once:
+
+```bash
+dotnet ef migrations add AddNotifyDashboard --context NotifyDashboardDbContext
+dotnet ef database update --context NotifyDashboardDbContext
+```
+
+The dashboard is now at `/notify-dashboard`. See [Dashboard](dashboard) for the full reference including the REST API, custom stores, and auth options.
+
+---
+
 ## Next steps
 
 - [Quick Start](quick-start) — minimal code examples for each channel
@@ -249,3 +300,5 @@ builder.Services.AddRecurPixelNotify(
 - [Examples](examples) — complete Tier 1, 2, and 3 setups with real code
 - [Adapter Reference](adapters) — all providers, their config fields, and native bulk support
 - [Features](features) — retry, fallback chains, conditions, bulk send, delivery hooks
+- [Dashboard](dashboard) — delivery log UI, REST API, and observability
+- [Migration Guide](migration) — upgrading from an older version

@@ -416,6 +416,35 @@ dotnet add package RecurPixel.Notify.Sms.AzureCommSms
 
 ---
 
+### MSG91
+
+```bash
+dotnet add package RecurPixel.Notify.Sms.Msg91
+```
+
+```json
+"Sms": {
+  "Provider": "msg91",
+  "Msg91": {
+    "AuthKey": "xxxxxxxxxxxxxxxxxxxxxxxxxx",
+    "SenderId": "NOTIFY",
+    "Country": "91"
+  }
+}
+```
+
+| Field | Required | Description |
+|---|---|---|
+| `AuthKey` | ✅ | MSG91 API authentication key |
+| `SenderId` | ✅ | 6-character alphanumeric sender ID registered in your MSG91 account |
+| `Country` | ❌ | Country code without `+` prefix (default: `"91"` for India) |
+
+**Payload fields used:** `To` = recipient phone number (digits only, no `+`). `Body` = message text.
+
+**Native bulk:** ✅ Yes — uses MSG91 batch SMS API; all recipients submitted in a single call.
+
+---
+
 ## Push Notifications
 
 ### FCM (Firebase Cloud Messaging)
@@ -631,6 +660,33 @@ dotnet add package RecurPixel.Notify.WhatsApp.Vonage
 **Payload fields:** `To` = recipient phone number. `Subject` and `Body` are combined as the message text.
 
 **Native bulk:** ❌ No — Meta policy restricts bulk WhatsApp sends. Base class loops.
+
+---
+
+### MSG91 WhatsApp
+
+```bash
+dotnet add package RecurPixel.Notify.WhatsApp.Msg91
+```
+
+```json
+"WhatsApp": {
+  "Provider": "msg91",
+  "Msg91": {
+    "AuthKey": "xxxxxxxxxxxxxxxxxxxxxxxxxx",
+    "IntegratedNumber": "919876543210"
+  }
+}
+```
+
+| Field | Required | Description |
+|---|---|---|
+| `AuthKey` | ✅ | MSG91 API authentication key |
+| `IntegratedNumber` | ✅ | WhatsApp Business number without `+` (e.g. `919876543210` for +91 98765 43210) |
+
+**Payload fields:** `To` = recipient phone number (digits only, no `+`). `Body` = message text.
+
+**Native bulk:** ❌ No — Meta messaging policy restricts bulk WhatsApp sends. Base class loops with rate cap.
 
 ---
 
@@ -943,13 +999,14 @@ You own the schema, the table, and the read/unread logic. We call your hook.
 | SMS | AwsSns | ✅ | Topic publish |
 | SMS | AzureCommSms | ✅ | 100/call |
 | SMS | Sinch | ✅ | Batch SMS API |
+| SMS | MSG91 | ✅ | Batch SMS API |
 | SMS | Plivo | ❌ | Loop |
 | SMS | MessageBird | ❌ | Loop |
 | Push | FCM | ✅ | 500 tokens/call |
 | Push | APNs | ❌ | Loop |
 | Push | OneSignal | ✅ | Bulk API |
 | Push | Expo | ✅ | Batch tickets |
-| WhatsApp | Any | ❌ | Loop (Meta policy) |
+| WhatsApp | Twilio, MetaCloud, Vonage, MSG91 | ❌ | Loop (Meta policy) |
 | Slack | — | ❌ | Loop |
 | Discord | — | ❌ | Loop |
 | Teams | — | ❌ | Loop |

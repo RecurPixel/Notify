@@ -1,31 +1,20 @@
 ---
 layout: default
-title: Home
-nav_order: 1
-permalink: /
+title: "Home (v0.2.0 Archive)"
+nav_exclude: true
+search_exclude: true
 ---
+
+> **This is an archived snapshot of the v0.2.0 documentation.**  
+> For the current v0.3.0 docs see the [Home page](/).
 
 # RecurPixel.Notify
 
 A modular, DI-native NuGet notification library for ASP.NET Core. Drop it in. Bring your own API keys. Own your data.
 {: .fs-6 .fw-300 }
 
-**✅ v0.3.0 STABLE** — 39 packages across 14+ channels
+**✅ v0.2.0 STABLE** — Production-ready with 35+ adapters across 13+ channels
 {: .fs-5 }
-
-[Get Started](getting-started){: .btn .btn-primary .fs-5 .mb-4 .mb-md-0 .mr-2 }
-[Quick Start](quick-start){: .btn .fs-5 .mb-4 .mb-md-0 }
-
-> **Migrating from an older version?** See the [Migration Guide](migration).
-
----
-
-## What It Is
-
-RecurPixel.Notify is a pure .NET library — not a platform, not SaaS, no external dependency. It handles multi-channel notification delivery (Email, SMS, Push, WhatsApp, Slack, Discord, Teams, Mattermost, Rocket.Chat, Telegram, Facebook, LINE, Viber, In-App) through a single consistent interface.
-
-**You bring:** your API keys, your message content, your delivery log table.
-**We handle:** provider API calls, retry with exponential backoff, cross-channel fallback chains, parallel dispatch, and delivery hooks.
 
 ---
 
@@ -33,19 +22,17 @@ RecurPixel.Notify is a pure .NET library — not a platform, not SaaS, no extern
 
 ```bash
 # Full SDK — everything included
-dotnet add package RecurPixel.Notify.Sdk
+dotnet add package RecurPixel.Notify.Sdk --version 0.2.0
 
 # Or install only what you need
-dotnet add package RecurPixel.Notify
-dotnet add package RecurPixel.Notify.Email.SendGrid
-dotnet add package RecurPixel.Notify.Sms.Twilio
+dotnet add package RecurPixel.Notify --version 0.2.0
+dotnet add package RecurPixel.Notify.Email.SendGrid --version 0.2.0
+dotnet add package RecurPixel.Notify.Sms.Twilio --version 0.2.0
 ```
-
-See [Usage Tiers](usage-tiers) to understand which option fits your use case.
 
 ---
 
-## Adapter Status
+## Adapter Status (v0.2.0)
 
 | Package                | Provider                          | Channel   | Unit Tested | Integration Tested | Community Approved |
 | ---------------------- | --------------------------------- | --------- | ----------- | ------------------ | ------------------ |
@@ -63,7 +50,6 @@ See [Usage Tiers](usage-tiers) to understand which option fits your use case.
 | `Sms.MessageBird`      | MessageBird                       | SMS       | ✅           | 🔲                  | 🔲                  |
 | `Sms.AwsSns`           | AWS SNS                           | SMS       | ✅           | 🔲                  | 🔲                  |
 | `Sms.AzureCommSms`     | Azure Communication Services      | SMS       | ✅           | 🔲                  | 🔲                  |
-| `Sms.Msg91`            | MSG91                             | SMS       | ✅           | ✅                  | 🔲                  |
 | `Push.Fcm`             | Firebase Cloud Messaging          | Push      | ✅           | 🔲                  | 🔲                  |
 | `Push.Apns`            | Apple Push Notification Service   | Push      | ✅           | 🔲                  | 🔲                  |
 | `Push.OneSignal`       | OneSignal                         | Push      | ✅           | 🔲                  | 🔲                  |
@@ -71,7 +57,6 @@ See [Usage Tiers](usage-tiers) to understand which option fits your use case.
 | `WhatsApp.Twilio`      | Twilio WhatsApp                   | WhatsApp  | ✅           | ✅                  | 🔲                  |
 | `WhatsApp.MetaCloud`   | Meta Cloud API                    | WhatsApp  | ✅           | 🔲                  | 🔲                  |
 | `WhatsApp.Vonage`      | Vonage WhatsApp                   | WhatsApp  | ✅           | 🔲                  | 🔲                  |
-| `WhatsApp.Msg91`       | MSG91 WhatsApp Business           | WhatsApp  | ✅           | ✅                  | 🔲                  |
 | `Slack`                | Slack Webhooks / Bot API          | Team Chat | ✅           | ✅                  | 🔲                  |
 | `Discord`              | Discord Webhooks                  | Team Chat | ✅           | ✅                  | 🔲                  |
 | `Teams`                | Microsoft Teams Webhooks          | Team Chat | ✅           | 🔲                  | 🔲                  |
@@ -83,8 +68,7 @@ See [Usage Tiers](usage-tiers) to understand which option fits your use case.
 | `Viber`                | Viber Business Messages           | Social    | ✅           | 🔲                  | 🔲                  |
 | `InApp`                | Hook-based (user-defined storage) | In-App    | ✅           | ✅                  | 🔲                  |
 
-**Legend:** ✅ Complete · 🔲 Not yet · ⚠️ Partial  
-**Package count:** 39 (Core + Orchestrator + RecurPixel.Notify meta-package + 35 adapters + Dashboard + Dashboard.EfCore + Sdk)
+**Legend:** ✅ Complete · 🔲 Not yet · ⚠️ Partial
 
 ---
 
@@ -96,29 +80,6 @@ See [Usage Tiers](usage-tiers) to understand which option fits your use case.
 - **Config agnostic** — accepts `IConfiguration`, options builder, or a raw POCO
 - **Content agnostic** — we deliver the payload, you build the subject and body
 - **Hook-based logging** — `OnDelivery()` callback, you write to your own DB
-
----
-
-## What's New in v0.3.0
-
-- **[Dashboard](dashboard)** — `RecurPixel.Notify.Dashboard` + `RecurPixel.Notify.Dashboard.EfCore`: delivery log UI, filterable table, batch drill-down, REST API, bring-your-own-store design
-- **MSG91 Adapters** — `RecurPixel.Notify.Sms.Msg91` and `RecurPixel.Notify.WhatsApp.Msg91`
-- **Richer `NotifyResult`** — new `EventName`, `BulkBatchId`, and `Subject` fields for full context in `OnDelivery` hooks
-- **10 auto-registration fixes** — Twilio credential isolation, FCM/AwsSns/AwsSes/AzureComm crash fixes, HTTP named clients with timeouts on all adapters
-
-**No breaking changes.** All v0.2.0 code compiles and runs without modification.
-
----
-
-## Coming in v0.4.0
-
-- **Polly Resilience Hooks** — opt-in `IAsyncPolicy` per channel
-- **OpenTelemetry Integration** — full distributed tracing via `ActivitySource`
-- **Circuit Breaker** — auto-disable broken channels without code changes
-- **Additional Adapters** — Infobip, Brevo, AWS Pinpoint
-- **Dashboard v2** — real-time feed, latency charts, failure rate alerts
-
-See the [Roadmap](roadmap) for full details.
 
 ---
 

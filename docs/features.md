@@ -431,6 +431,9 @@ Multiple `OnDelivery` registrations are composable — all fire in registration 
 | `Recipient`     | Recipient identifier (`NotificationPayload.To`)                  |
 | `Error`         | Error message if `Success` is `false`                            |
 | `SentAt`        | UTC timestamp of the send attempt                                |
+| `EventName`     | Event name passed to `TriggerAsync`. `null` for direct sends.    |
+| `BulkBatchId`   | Shared ID across all results in one `BulkTriggerAsync` call.     |
+| `Subject`       | Notification subject from the payload.                           |
 
 You own the log table. We call the hook. The hook is the only persistence boundary.
 
@@ -582,3 +585,42 @@ await notify.TriggerAsync("critical.alert", new NotifyContext
 ```
 
 Extend `NotificationChannelBase` (not `INotificationChannel` directly) so your channel gets bulk loop support automatically.
+
+---
+
+## Dashboard
+
+The optional `RecurPixel.Notify.Dashboard` package automatically captures every send result and stores it via `INotificationLogStore`. It then serves a filterable delivery log UI and REST API from inside your ASP.NET Core app — no separate service required.
+
+```
+TriggerAsync → INotifyDeliveryObserver → INotificationLogStore → Dashboard UI + REST API
+```
+
+**What it captures per send:**
+
+- Channel, provider, recipient, subject
+- Success / failure + error message + provider message ID
+- Event name, bulk batch ID, fallback flag, named provider
+- UTC timestamp
+
+**UI features:** filterable table, per-channel/per-status filter, date range, bulk batch drill-down.
+
+**REST API endpoints** (all under `/<prefix>/api/`):
+
+| Endpoint | Description |
+|---|---|
+| `GET /api/logs` | Paged, filtered log list |
+| `GET /api/logs/batch/{batchId}` | All entries for one bulk send |
+| `GET /api/stats` | Today's counts and success rate |
+
+**Minimal setup:**
+
+```csharp
+builder.Services.AddNotifyDashboard(opts => opts.RequireRole = "Admin");
+builder.Services.AddNotifyDashboardEfCore(options =>
+    options.UseSqlServer(connectionString));
+
+app.UseNotifyDashboard();
+```
+
+See [Dashboard](dashboard) for the full reference, auth options, custom stores, and migration steps.
