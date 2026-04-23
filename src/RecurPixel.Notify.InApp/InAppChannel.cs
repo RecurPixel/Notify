@@ -9,7 +9,6 @@ namespace RecurPixel.Notify.Channels;
 /// Invokes the handler registered via <c>OnDeliver</c> on every send.
 /// Storage, SignalR, queuing, and persistence are entirely user-owned.
 /// </summary>
-[ChannelAdapter("inapp", "default")]
 public sealed class InAppChannel : NotificationChannelBase
 {
     private readonly InAppOptions _options;

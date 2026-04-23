@@ -10,7 +10,6 @@ namespace RecurPixel.Notify.Channels;
 /// Delivers messages via Teams Incoming Webhooks using a simple MessageCard payload.
 /// Subject maps to the card title; Body maps to the card text.
 /// </summary>
-[ChannelAdapter("teams", "default")]
 public sealed class TeamsChannel : NotificationChannelBase
 {
     private readonly TeamsOptions _options;

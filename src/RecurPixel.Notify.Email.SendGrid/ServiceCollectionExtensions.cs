@@ -1,6 +1,4 @@
-﻿using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.DependencyInjection.Extensions;
-using RecurPixel.Notify.Channels;
+using Microsoft.Extensions.DependencyInjection;
 using RecurPixel.Notify.Configuration;
 
 namespace RecurPixel.Notify;
@@ -11,22 +9,14 @@ namespace RecurPixel.Notify;
 public static class ServiceCollectionExtensions
 {
     /// <summary>
-    /// Registers the SendGrid email channel adapter keyed as "email:sendgrid".
-    /// Called internally by AddRecurPixelNotify() — do not call directly.
+    /// Registers the SendGrid email channel adapter. Delegates to <see cref="SendGridRegistrar"/>.
     /// </summary>
     public static IServiceCollection AddSendGridChannel(
         this IServiceCollection services,
         SendGridOptions options)
     {
-        services.Configure<SendGridOptions>(o =>
-        {
-            o.ApiKey = options.ApiKey;
-            o.FromEmail = options.FromEmail;
-            o.FromName = options.FromName;
-        });
-
-        services.TryAddKeyedSingleton<INotificationChannel, SendGridChannel>("email:sendgrid");
-
+        new SendGridRegistrar().Register(services,
+            new NotifyOptions { Email = new EmailOptions { SendGrid = options } });
         return services;
     }
 }

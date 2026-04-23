@@ -1,7 +1,4 @@
-﻿using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.DependencyInjection.Extensions;
-using Microsoft.Extensions.Options;
-using RecurPixel.Notify.Channels;
+using Microsoft.Extensions.DependencyInjection;
 using RecurPixel.Notify.Configuration;
 
 namespace RecurPixel.Notify;
@@ -12,25 +9,15 @@ namespace RecurPixel.Notify;
 public static class ServiceCollectionExtensions
 {
     /// <summary>
-    /// Registers <see cref="ResendChannel"/> with a named <see cref="System.Net.Http.HttpClient"/>
-    /// into the service collection.
+    /// Registers <see cref="Channels.ResendChannel"/> and its typed <see cref="System.Net.Http.HttpClient"/>
+    /// into the service collection. Delegates to <see cref="ResendRegistrar"/>.
     /// </summary>
-    /// <param name="services">The service collection to register into.</param>
-    /// <param name="options">The Resend options resolved from <see cref="NotifyOptions"/>.</param>
-    /// <returns>The same <see cref="IServiceCollection"/> for chaining.</returns>
     public static IServiceCollection AddResendChannel(
         this IServiceCollection services,
         ResendOptions options)
     {
-        services.AddSingleton(Options.Create(options));
-
-        services.AddHttpClient("email:resend", http =>
-        {
-            http.Timeout = TimeSpan.FromSeconds(30);
-        });
-
-        services.TryAddKeyedSingleton<INotificationChannel, ResendChannel>("email:resend");
-
+        new ResendRegistrar().Register(services,
+            new NotifyOptions { Email = new EmailOptions { Resend = options } });
         return services;
     }
 }

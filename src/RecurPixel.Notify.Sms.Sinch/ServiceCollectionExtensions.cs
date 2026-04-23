@@ -1,7 +1,4 @@
-﻿using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.DependencyInjection.Extensions;
-using Microsoft.Extensions.Options;
-using RecurPixel.Notify.Channels;
+using Microsoft.Extensions.DependencyInjection;
 using RecurPixel.Notify.Configuration;
 
 namespace RecurPixel.Notify;
@@ -12,25 +9,15 @@ namespace RecurPixel.Notify;
 public static class ServiceCollectionExtensions
 {
     /// <summary>
-    /// Registers <see cref="SinchChannel"/> and its typed <see cref="System.Net.Http.HttpClient"/>
-    /// into the service collection.
+    /// Registers <see cref="Channels.SinchChannel"/> and its typed <see cref="System.Net.Http.HttpClient"/>.
+    /// Delegates to <see cref="SinchRegistrar"/>.
     /// </summary>
-    /// <param name="services">The service collection to register into.</param>
-    /// <param name="options">The Sinch options resolved from <see cref="NotifyOptions"/>.</param>
-    /// <returns>The same <see cref="IServiceCollection"/> for chaining.</returns>
     public static IServiceCollection AddSinchChannel(
         this IServiceCollection services,
         SinchOptions options)
     {
-        services.AddSingleton(Options.Create(options));
-
-        services.AddHttpClient("sms:sinch", http =>
-        {
-            http.Timeout = TimeSpan.FromSeconds(30);
-        });
-
-        services.TryAddKeyedSingleton<INotificationChannel, SinchChannel>("sms:sinch");
-
+        new SinchRegistrar().Register(services,
+            new NotifyOptions { Sms = new SmsOptions { Sinch = options } });
         return services;
     }
 }

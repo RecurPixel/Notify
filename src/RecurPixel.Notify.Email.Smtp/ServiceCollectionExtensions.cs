@@ -1,6 +1,4 @@
-﻿using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.DependencyInjection.Extensions;
-using RecurPixel.Notify.Channels;
+using Microsoft.Extensions.DependencyInjection;
 using RecurPixel.Notify.Configuration;
 
 namespace RecurPixel.Notify;
@@ -11,26 +9,14 @@ namespace RecurPixel.Notify;
 public static class ServiceCollectionExtensions
 {
     /// <summary>
-    /// Registers the SMTP email channel adapter keyed as "email:smtp".
-    /// Called internally by AddRecurPixelNotify() — do not call directly.
+    /// Registers the SMTP email channel adapter. Delegates to <see cref="SmtpRegistrar"/>.
     /// </summary>
     public static IServiceCollection AddSmtpChannel(
         this IServiceCollection services,
         SmtpOptions options)
     {
-        services.Configure<SmtpOptions>(o =>
-        {
-            o.Host = options.Host;
-            o.Port = options.Port;
-            o.Username = options.Username;
-            o.Password = options.Password;
-            o.UseSsl = options.UseSsl;
-            o.FromEmail = options.FromEmail;
-            o.FromName = options.FromName;
-        });
-
-        services.TryAddKeyedSingleton<INotificationChannel, SmtpChannel>("email:smtp");
-
+        new SmtpRegistrar().Register(services,
+            new NotifyOptions { Email = new EmailOptions { Smtp = options } });
         return services;
     }
 }

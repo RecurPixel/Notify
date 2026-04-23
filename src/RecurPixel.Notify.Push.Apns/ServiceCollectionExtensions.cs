@@ -1,6 +1,4 @@
-﻿using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.DependencyInjection.Extensions;
-using RecurPixel.Notify.Channels;
+using Microsoft.Extensions.DependencyInjection;
 using RecurPixel.Notify.Configuration;
 
 namespace RecurPixel.Notify;
@@ -11,11 +9,10 @@ namespace RecurPixel.Notify;
 public static class ServiceCollectionExtensions
 {
     /// <summary>
-    /// Adds the APNs channel adapter. Registers the adapter under the keyed service key
-    /// <c>"push:apns"</c> so the Orchestrator can resolve it by provider name.
+    /// Adds the APNs channel adapter. Delegates to <see cref="ApnsRegistrar"/>.
     /// </summary>
     /// <exception cref="InvalidOperationException">
-    /// Thrown at registration time if any required APNs credential is missing.
+    /// Thrown if any required APNs credential is missing.
     /// </exception>
     public static IServiceCollection AddRecurPixelApns(
         this IServiceCollection services,
@@ -24,36 +21,19 @@ public static class ServiceCollectionExtensions
         ArgumentNullException.ThrowIfNull(options);
 
         if (string.IsNullOrWhiteSpace(options.KeyId))
-            throw new InvalidOperationException(
-                "ApnsOptions.KeyId is required.");
+            throw new InvalidOperationException("ApnsOptions.KeyId is required.");
 
         if (string.IsNullOrWhiteSpace(options.TeamId))
-            throw new InvalidOperationException(
-                "ApnsOptions.TeamId is required.");
+            throw new InvalidOperationException("ApnsOptions.TeamId is required.");
 
         if (string.IsNullOrWhiteSpace(options.BundleId))
-            throw new InvalidOperationException(
-                "ApnsOptions.BundleId is required.");
+            throw new InvalidOperationException("ApnsOptions.BundleId is required.");
 
         if (string.IsNullOrWhiteSpace(options.PrivateKey))
-            throw new InvalidOperationException(
-                "ApnsOptions.PrivateKey is required. Provide the .p8 file content.");
+            throw new InvalidOperationException("ApnsOptions.PrivateKey is required. Provide the .p8 file content.");
 
-        services.Configure<ApnsOptions>(o =>
-        {
-            o.KeyId = options.KeyId;
-            o.TeamId = options.TeamId;
-            o.BundleId = options.BundleId;
-            o.PrivateKey = options.PrivateKey;
-        });
-
-        services.AddHttpClient("push:apns", http =>
-        {
-            http.Timeout = TimeSpan.FromSeconds(30);
-        });
-
-        services.TryAddKeyedSingleton<INotificationChannel, ApnsChannel>("push:apns");
-
+        new ApnsRegistrar().Register(services,
+            new NotifyOptions { Push = new PushOptions { Apns = options } });
         return services;
     }
 }

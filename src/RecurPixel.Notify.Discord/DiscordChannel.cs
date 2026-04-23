@@ -10,7 +10,6 @@ namespace RecurPixel.Notify.Channels;
 /// Delivers messages via Discord Incoming Webhooks.
 /// Subject is rendered as a bold header prepended to the message content.
 /// </summary>
-[ChannelAdapter("discord", "default")]
 public sealed class DiscordChannel : NotificationChannelBase
 {
     private readonly DiscordOptions _options;

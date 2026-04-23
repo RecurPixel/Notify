@@ -11,15 +11,18 @@ public class TwilioWhatsAppChannelTests
     // ── Helpers ───────────────────────────────────────────────────────────────
 
     private static TwilioWhatsAppChannel MakeChannel(
-        string fromNumber = "+1234567890") =>
-        new(
-            Options.Create(new TwilioOptions
-            {
-                AccountSid = "ACtest",
-                AuthToken = "test_token",
-                FromNumber = fromNumber
-            }),
-            NullLogger<TwilioWhatsAppChannel>.Instance);
+        string fromNumber = "+1234567890")
+    {
+        var monitor = new Mock<IOptionsMonitor<TwilioOptions>>();
+        monitor.Setup(m => m.Get(TwilioWhatsAppRegistrar.OptionsName))
+               .Returns(new TwilioOptions
+               {
+                   AccountSid = "ACtest",
+                   AuthToken  = "test_token",
+                   FromNumber = fromNumber
+               });
+        return new TwilioWhatsAppChannel(monitor.Object, NullLogger<TwilioWhatsAppChannel>.Instance);
+    }
 
     private static NotificationPayload MakePayload(string to = "+9876543210") =>
         new() { To = to, Body = "Hello from WhatsApp" };

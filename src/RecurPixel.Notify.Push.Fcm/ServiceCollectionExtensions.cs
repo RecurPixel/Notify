@@ -1,8 +1,5 @@
-﻿using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.DependencyInjection.Extensions;
-using RecurPixel.Notify.Channels;
+using Microsoft.Extensions.DependencyInjection;
 using RecurPixel.Notify.Configuration;
-using RecurPixel.Notify.Push.Fcm;
 
 namespace RecurPixel.Notify;
 
@@ -12,12 +9,11 @@ namespace RecurPixel.Notify;
 public static class ServiceCollectionExtensions
 {
     /// <summary>
-    /// Adds the FCM channel adapter. Registers the adapter under the keyed service key
-    /// <c>"push:fcm"</c> so the Orchestrator can resolve it by provider name.
-    /// Initialises the Firebase app from <see cref="FcmOptions.ServiceAccountJson"/>.
+    /// Adds the FCM channel adapter. Validates <see cref="FcmOptions.ServiceAccountJson"/>,
+    /// then delegates to <see cref="FcmRegistrar"/>.
     /// </summary>
     /// <exception cref="InvalidOperationException">
-    /// Thrown at registration time if <see cref="FcmOptions.ServiceAccountJson"/> is empty.
+    /// Thrown if <see cref="FcmOptions.ServiceAccountJson"/> is empty.
     /// </exception>
     public static IServiceCollection AddRecurPixelFcm(
         this IServiceCollection services,
@@ -30,18 +26,8 @@ public static class ServiceCollectionExtensions
                 "FcmOptions.ServiceAccountJson is required. " +
                 "Provide the full JSON string or an absolute file path.");
 
-        // Initialise Firebase app once at registration time — not at first send
-        FirebaseMessagingClient.EnsureInitialized(options.ServiceAccountJson);
-
-        services.Configure<FcmOptions>(o =>
-        {
-            o.ProjectId = options.ProjectId;
-            o.ServiceAccountJson = options.ServiceAccountJson;
-        });
-
-        services.AddSingleton<IFcmMessagingClient, FirebaseMessagingClient>();
-        services.TryAddKeyedSingleton<INotificationChannel, FcmChannel>("push:fcm");
-
+        new FcmRegistrar().Register(services,
+            new NotifyOptions { Push = new PushOptions { Fcm = options } });
         return services;
     }
 }

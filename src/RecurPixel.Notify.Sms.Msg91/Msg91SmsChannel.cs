@@ -11,7 +11,6 @@ namespace RecurPixel.Notify.Channels;
 /// Notification channel adapter for MSG91 SMS delivery.
 /// Uses the MSG91 v2 Send SMS API. No native bulk — base class loop handles bulk.
 /// </summary>
-[ChannelAdapter("sms", "msg91")]
 public sealed class Msg91SmsChannel : NotificationChannelBase
 {
     private readonly Msg91SmsOptions _options;

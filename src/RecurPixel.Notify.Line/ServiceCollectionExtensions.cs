@@ -1,9 +1,4 @@
-﻿using System;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.DependencyInjection.Extensions;
-using Microsoft.Extensions.Options;
-using RecurPixel.Notify;
-using RecurPixel.Notify.Channels;
 using RecurPixel.Notify.Configuration;
 
 namespace RecurPixel.Notify;
@@ -14,25 +9,15 @@ namespace RecurPixel.Notify;
 public static class ServiceCollectionExtensions
 {
     /// <summary>
-    /// Registers <see cref="LineChannel"/> and its typed <see cref="System.Net.Http.HttpClient"/>
-    /// into the service collection.
+    /// Registers <see cref="Channels.LineChannel"/> and its typed <see cref="System.Net.Http.HttpClient"/>.
+    /// Delegates to <see cref="LineRegistrar"/>.
     /// </summary>
-    /// <param name="services">The service collection to register into.</param>
-    /// <param name="options">The LINE options resolved from <see cref="NotifyOptions"/>.</param>
-    /// <returns>The same <see cref="IServiceCollection"/> for chaining.</returns>
     public static IServiceCollection AddLineChannel(
         this IServiceCollection services,
         LineOptions options)
     {
-        services.AddSingleton(Options.Create(options));
-
-        services.AddHttpClient("line:default", http =>
-        {
-            http.Timeout = TimeSpan.FromSeconds(30);
-        });
-
-        services.TryAddKeyedSingleton<INotificationChannel, LineChannel>("line:default");
-
+        new LineRegistrar().Register(services,
+            new NotifyOptions { Line = options });
         return services;
     }
 }

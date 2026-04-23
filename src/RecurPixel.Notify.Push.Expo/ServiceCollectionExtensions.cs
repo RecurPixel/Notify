@@ -1,7 +1,4 @@
-﻿using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.DependencyInjection.Extensions;
-using Microsoft.Extensions.Options;
-using RecurPixel.Notify.Channels;
+using Microsoft.Extensions.DependencyInjection;
 using RecurPixel.Notify.Configuration;
 
 namespace RecurPixel.Notify;
@@ -12,25 +9,15 @@ namespace RecurPixel.Notify;
 public static class ServiceCollectionExtensions
 {
     /// <summary>
-    /// Registers <see cref="ExpoChannel"/> and its typed <see cref="System.Net.Http.HttpClient"/>
-    /// into the service collection.
+    /// Registers <see cref="Channels.ExpoChannel"/> and its typed <see cref="System.Net.Http.HttpClient"/>.
+    /// Delegates to <see cref="ExpoRegistrar"/>.
     /// </summary>
-    /// <param name="services">The service collection to register into.</param>
-    /// <param name="options">The Expo options resolved from <see cref="NotifyOptions"/>.</param>
-    /// <returns>The same <see cref="IServiceCollection"/> for chaining.</returns>
     public static IServiceCollection AddExpoChannel(
         this IServiceCollection services,
         ExpoOptions options)
     {
-        services.AddSingleton(Options.Create(options));
-
-        services.AddHttpClient("push:expo", http =>
-        {
-            http.Timeout = TimeSpan.FromSeconds(30);
-        });
-
-        services.TryAddKeyedSingleton<INotificationChannel, ExpoChannel>("push:expo");
-
+        new ExpoRegistrar().Register(services,
+            new NotifyOptions { Push = new PushOptions { Expo = options } });
         return services;
     }
 }

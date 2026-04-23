@@ -12,7 +12,6 @@ namespace RecurPixel.Notify.Channels;
 /// Notification channel adapter for OneSignal push notification delivery.
 /// Supports native bulk sending via the OneSignal notifications API.
 /// </summary>
-[ChannelAdapter("push", "onesignal")]
 public sealed class OneSignalChannel : NotificationChannelBase
 {
     private readonly OneSignalOptions _options;

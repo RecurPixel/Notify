@@ -1,9 +1,4 @@
-﻿using Amazon.Runtime;
-using Amazon.SimpleEmailV2;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.DependencyInjection.Extensions;
-using Microsoft.Extensions.Options;
-using RecurPixel.Notify.Channels;
 using RecurPixel.Notify.Configuration;
 
 namespace RecurPixel.Notify;
@@ -14,33 +9,15 @@ namespace RecurPixel.Notify;
 public static class ServiceCollectionExtensions
 {
     /// <summary>
-    /// Registers <see cref="AwsSesChannel"/> and the <see cref="IAmazonSimpleEmailServiceV2"/>
-    /// client into the service collection.
+    /// Registers <see cref="Channels.AwsSesChannel"/> and the <see cref="Amazon.SimpleEmailV2.IAmazonSimpleEmailServiceV2"/>
+    /// client. Delegates to <see cref="AwsSesRegistrar"/>.
     /// </summary>
-    /// <param name="services">The service collection to register into.</param>
-    /// <param name="options">The AWS SES options resolved from <see cref="NotifyOptions"/>.</param>
-    /// <returns>The same <see cref="IServiceCollection"/> for chaining.</returns>
     public static IServiceCollection AddAwsSesChannel(
         this IServiceCollection services,
         AwsSesOptions options)
     {
-        services.AddSingleton(Options.Create(options));
-
-        services.AddSingleton<IAmazonSimpleEmailServiceV2>(_ =>
-        {
-            var credentials = new BasicAWSCredentials(
-                options.AccessKey,
-                options.SecretKey);
-
-            var region = Amazon.RegionEndpoint.GetBySystemName(options.Region);
-
-            return new AmazonSimpleEmailServiceV2Client(credentials, region);
-        });
-
-        services.AddSingleton<AwsSesChannel>();
-
-        services.TryAddKeyedSingleton<INotificationChannel, AwsSesChannel>("email:awsses");
-
+        new AwsSesRegistrar().Register(services,
+            new NotifyOptions { Email = new EmailOptions { AwsSes = options } });
         return services;
     }
 }

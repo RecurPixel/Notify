@@ -10,7 +10,6 @@ namespace RecurPixel.Notify.Channels;
 /// SMS channel adapter for Twilio.
 /// No native bulk API — bulk is handled automatically by the base class loop.
 /// </summary>
-[ChannelAdapter("sms", "twilio")]
 public sealed class TwilioSmsChannel : NotificationChannelBase
 {
     private readonly TwilioOptions _options;
@@ -23,10 +22,10 @@ public sealed class TwilioSmsChannel : NotificationChannelBase
     /// Initialises a new instance of <see cref="TwilioSmsChannel"/>.
     /// </summary>
     public TwilioSmsChannel(
-        IOptions<TwilioOptions> options,
+        IOptionsMonitor<TwilioOptions> options,
         ILogger<TwilioSmsChannel> logger)
     {
-        _options = options.Value;
+        _options = options.Get(TwilioSmsRegistrar.OptionsName);
         _logger = logger;
     }
 

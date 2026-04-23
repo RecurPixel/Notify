@@ -1,11 +1,5 @@
-﻿using Azure.Communication.Email;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.DependencyInjection.Extensions;
-using Microsoft.Extensions.Options;
-using RecurPixel.Notify;
-using RecurPixel.Notify.Channels;
 using RecurPixel.Notify.Configuration;
-using RecurPixel.Notify.Email.AzureCommEmail;
 
 namespace RecurPixel.Notify;
 
@@ -15,24 +9,15 @@ namespace RecurPixel.Notify;
 public static class ServiceCollectionExtensions
 {
     /// <summary>
-    /// Registers <see cref="AzureCommEmailChannel"/> and its dependencies
-    /// into the service collection.
+    /// Registers <see cref="Channels.AzureCommEmailChannel"/> and its <see cref="Email.AzureCommEmail.IAzureCommEmailClient"/>.
+    /// Delegates to <see cref="AzureCommEmailRegistrar"/>.
     /// </summary>
     public static IServiceCollection AddAzureCommEmailChannel(
         this IServiceCollection services,
         AzureCommEmailOptions options)
     {
-        services.AddSingleton(Options.Create(options));
-
-        services.AddSingleton<IAzureCommEmailClient>(_ =>
-            new AzureCommEmailClientWrapper(
-                new EmailClient(options.ConnectionString)));
-
-        services.AddSingleton<AzureCommEmailChannel>();
-
-        services.TryAddKeyedSingleton<INotificationChannel, AzureCommEmailChannel>(
-            "email:azurecommemail");
-
+        new AzureCommEmailRegistrar().Register(services,
+            new NotifyOptions { Email = new EmailOptions { AzureCommEmail = options } });
         return services;
     }
 }

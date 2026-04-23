@@ -13,7 +13,6 @@ namespace RecurPixel.Notify.Channels;
 /// Notification channel adapter for Plivo SMS delivery.
 /// Plivo has no native bulk API — bulk is handled by the base class loop.
 /// </summary>
-[ChannelAdapter("sms", "plivo")]
 public sealed class PlivoChannel : NotificationChannelBase
 {
     private readonly PlivoOptions _options;

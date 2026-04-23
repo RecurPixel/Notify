@@ -442,6 +442,35 @@ Standard adapter rules apply:
 
 ---
 
+## Phase 17.5 — IAdapterRegistrar refactor (10-bug fix) ✅
+
+> Post-Phase 17 bug fix for v0.3.x. Eliminates two monolithic switch/case methods
+> (`IsAdapterConfigured`, `ConfigureAllKnownOptions`) from the Orchestrator and fixes
+> 10 confirmed bugs in the auto-registration path.
+
+- ✅ `IAdapterRegistrar` interface added to Core (`Channels/IAdapterRegistrar.cs`)
+- ✅ `ChannelAdapterAttribute` moved from channel classes to registrar classes
+- ✅ Orchestrator scanner rewritten — `DiscoverRegistrars()` replaces `DiscoverAdapters()`
+- ✅ `IsAdapterConfigured` deleted from Orchestrator
+- ✅ `ConfigureAllKnownOptions` deleted from Orchestrator
+- ✅ 34 registrar classes written (one per adapter package, `internal sealed`)
+- ✅ FCM gates on `ServiceAccountJson` (not `ProjectId`) — bug fix
+- ✅ FCM registrar registers `IFcmMessagingClient` — crash bug fix
+- ✅ AwsSns registrar registers `IAmazonSimpleNotificationService` — crash bug fix
+- ✅ AwsSes registrar registers `IAmazonSimpleEmailServiceV2` — crash bug fix
+- ✅ AzureCommSms registrar registers `IAzureCommSmsClient` — crash bug fix
+- ✅ AzureCommEmail registrar registers `IAzureCommEmailClient` — crash bug fix
+- ✅ Twilio named options isolation (`"sms:twilio"` / `"whatsapp:twilio"`) — credential corruption fix
+- ✅ `TwilioSmsChannel` and `TwilioWhatsAppChannel` updated to `IOptionsMonitor<TwilioOptions>.Get(name)`
+- ✅ All HTTP registrars register named clients with 30s timeout — timeout bug fix (19+ adapters)
+- ✅ MetaCloud registrar and channel both use key `"whatsapp:metacloud"` — naming bug fix
+- ✅ All `Add{X}Channel()` explicit methods delegate to their registrar
+- ✅ Twilio channel tests updated for `IOptionsMonitor` constructor change
+- ✅ `AdapterRegistrarTests.cs` — 9 test cases covering all bug fixes
+- ✅ `dotnet test` — all green (433 passed)
+
+---
+
 ## Phase 18 — Polly hooks (IHttpClientBuilder per adapter) 🔲
 
 > Expose IHttpClientBuilder per adapter so users can attach Polly policies.

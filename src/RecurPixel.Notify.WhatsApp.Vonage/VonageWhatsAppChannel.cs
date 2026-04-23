@@ -14,7 +14,6 @@ namespace RecurPixel.Notify.Channels;
 /// Uses the Vonage Messages API to deliver WhatsApp messages.
 /// Bulk is handled by the base class loop — Meta policy restricts bulk WhatsApp.
 /// </summary>
-[ChannelAdapter("whatsapp", "vonage")]
 public sealed class VonageWhatsAppChannel : NotificationChannelBase
 {
     private readonly VonageWhatsAppOptions _options;

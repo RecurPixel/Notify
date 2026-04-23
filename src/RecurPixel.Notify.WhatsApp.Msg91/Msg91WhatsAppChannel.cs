@@ -11,7 +11,6 @@ namespace RecurPixel.Notify.Channels;
 /// Notification channel adapter for MSG91 WhatsApp Business messaging.
 /// Uses the MSG91 WhatsApp outbound message API. No native bulk — Meta policy restricts bulk WhatsApp.
 /// </summary>
-[ChannelAdapter("whatsapp", "msg91")]
 public sealed class Msg91WhatsAppChannel : NotificationChannelBase
 {
     private readonly Msg91WhatsAppOptions _options;

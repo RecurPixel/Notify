@@ -11,7 +11,6 @@ namespace RecurPixel.Notify.Channels;
 /// Notification channel adapter for Vonage SMS delivery.
 /// Supports native bulk sending via the Vonage SMS API.
 /// </summary>
-[ChannelAdapter("sms", "vonage")]
 public sealed class VonageSmsChannel : NotificationChannelBase
 {
     private readonly VonageOptions _options;

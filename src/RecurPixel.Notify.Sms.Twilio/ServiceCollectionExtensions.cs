@@ -1,6 +1,4 @@
-﻿using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.DependencyInjection.Extensions;
-using RecurPixel.Notify.Channels;
+using Microsoft.Extensions.DependencyInjection;
 using RecurPixel.Notify.Configuration;
 
 namespace RecurPixel.Notify;
@@ -11,22 +9,15 @@ namespace RecurPixel.Notify;
 public static class ServiceCollectionExtensions
 {
     /// <summary>
-    /// Registers the Twilio SMS channel adapter keyed as "sms:twilio".
-    /// Called internally by AddRecurPixelNotify() — do not call directly.
+    /// Registers the Twilio SMS channel adapter. Delegates to <see cref="TwilioSmsRegistrar"/>.
+    /// Uses named options (<c>"sms:twilio"</c>) to isolate credentials from the WhatsApp adapter.
     /// </summary>
     public static IServiceCollection AddTwilioSmsChannel(
         this IServiceCollection services,
         TwilioOptions options)
     {
-        services.Configure<TwilioOptions>(o =>
-        {
-            o.AccountSid = options.AccountSid;
-            o.AuthToken = options.AuthToken;
-            o.FromNumber = options.FromNumber;
-        });
-
-        services.TryAddKeyedSingleton<INotificationChannel, TwilioSmsChannel>("sms:twilio");
-
+        new TwilioSmsRegistrar().Register(services,
+            new NotifyOptions { Sms = new SmsOptions { Twilio = options } });
         return services;
     }
 }

@@ -1,9 +1,5 @@
-﻿using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.DependencyInjection.Extensions;
-using RecurPixel.Notify;
-using RecurPixel.Notify.Channels;
+using Microsoft.Extensions.DependencyInjection;
 using RecurPixel.Notify.Configuration;
-
 
 namespace RecurPixel.Notify;
 
@@ -13,29 +9,15 @@ namespace RecurPixel.Notify;
 public static class ServiceCollectionExtensions
 {
     /// <summary>
-    /// Registers <see cref="DiscordChannel"/> in the DI container keyed as <c>discord:default</c>.
-    /// For direct-injection usage without <c>AddRecurPixelNotify()</c>.
-    /// When using <c>AddRecurPixelNotify()</c>, this channel is registered automatically via assembly scanning.
+    /// Registers <see cref="Channels.DiscordChannel"/> in the DI container keyed as <c>discord:default</c>.
+    /// Delegates to <see cref="DiscordRegistrar"/>.
     /// </summary>
-    /// <param name="services">The service collection.</param>
-    /// <param name="options">The resolved Discord options.</param>
-    /// <returns>The same <see cref="IServiceCollection"/> for chaining.</returns>
     public static IServiceCollection AddDiscordChannel(
         this IServiceCollection services,
         DiscordOptions options)
     {
-        services.Configure<DiscordOptions>(o =>
-        {
-            o.WebhookUrl = options.WebhookUrl;
-        });
-
-        services.AddHttpClient("discord:default", http =>
-        {
-            http.Timeout = TimeSpan.FromSeconds(30);
-        });
-
-        services.TryAddKeyedSingleton<INotificationChannel, DiscordChannel>("discord:default");
-
+        new DiscordRegistrar().Register(services,
+            new NotifyOptions { Discord = options });
         return services;
     }
 }

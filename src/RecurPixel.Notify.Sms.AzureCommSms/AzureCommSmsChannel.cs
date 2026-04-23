@@ -9,7 +9,6 @@ namespace RecurPixel.Notify.Channels;
 /// Notification channel adapter for Azure Communication Services SMS.
 /// Supports native bulk sending via the ACS SMS batch API.
 /// </summary>
-[ChannelAdapter("sms", "azurecommsms")]
 public sealed class AzureCommSmsChannel : NotificationChannelBase
 {
     private readonly AzureCommSmsOptions _options;

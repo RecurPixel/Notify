@@ -1,8 +1,4 @@
-﻿using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.DependencyInjection.Extensions;
-using Microsoft.Extensions.Options;
-using RecurPixel.Notify;
-using RecurPixel.Notify.Channels;
+using Microsoft.Extensions.DependencyInjection;
 using RecurPixel.Notify.Configuration;
 
 namespace RecurPixel.Notify;
@@ -13,26 +9,15 @@ namespace RecurPixel.Notify;
 public static class ServiceCollectionExtensions
 {
     /// <summary>
-    /// Registers <see cref="MattermostChannel"/> and its typed <see cref="System.Net.Http.HttpClient"/>
-    /// into the service collection.
+    /// Registers <see cref="Channels.MattermostChannel"/> and its typed <see cref="System.Net.Http.HttpClient"/>.
+    /// Delegates to <see cref="MattermostRegistrar"/>.
     /// </summary>
-    /// <param name="services">The service collection to register into.</param>
-    /// <param name="options">The Mattermost options resolved from <see cref="NotifyOptions"/>.</param>
-    /// <returns>The same <see cref="IServiceCollection"/> for chaining.</returns>
     public static IServiceCollection AddMattermostChannel(
         this IServiceCollection services,
         MattermostOptions options)
     {
-        services.AddSingleton(Options.Create(options));
-
-        services.AddHttpClient("mattermost:default", http =>
-        {
-            http.Timeout = TimeSpan.FromSeconds(30);
-        });
-
-        services.TryAddKeyedSingleton<INotificationChannel, MattermostChannel>(
-            "mattermost:default");
-
+        new MattermostRegistrar().Register(services,
+            new NotifyOptions { Mattermost = options });
         return services;
     }
 }

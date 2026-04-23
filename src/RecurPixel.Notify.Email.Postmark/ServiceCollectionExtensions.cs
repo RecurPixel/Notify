@@ -1,7 +1,4 @@
-﻿using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.DependencyInjection.Extensions;
-using Microsoft.Extensions.Options;
-using RecurPixel.Notify.Channels;
+using Microsoft.Extensions.DependencyInjection;
 using RecurPixel.Notify.Configuration;
 
 namespace RecurPixel.Notify;
@@ -12,25 +9,15 @@ namespace RecurPixel.Notify;
 public static class ServiceCollectionExtensions
 {
     /// <summary>
-    /// Registers <see cref="PostmarkChannel"/> with a named <see cref="System.Net.Http.HttpClient"/>
-    /// into the service collection.
+    /// Registers <see cref="Channels.PostmarkChannel"/> and its typed <see cref="System.Net.Http.HttpClient"/>
+    /// into the service collection. Delegates to <see cref="PostmarkRegistrar"/>.
     /// </summary>
-    /// <param name="services">The service collection to register into.</param>
-    /// <param name="options">The Postmark options resolved from <see cref="NotifyOptions"/>.</param>
-    /// <returns>The same <see cref="IServiceCollection"/> for chaining.</returns>
     public static IServiceCollection AddPostmarkChannel(
         this IServiceCollection services,
         PostmarkOptions options)
     {
-        services.AddSingleton(Options.Create(options));
-
-        services.AddHttpClient("email:postmark", http =>
-        {
-            http.Timeout = TimeSpan.FromSeconds(30);
-        });
-
-        services.TryAddKeyedSingleton<INotificationChannel, PostmarkChannel>("email:postmark");
-
+        new PostmarkRegistrar().Register(services,
+            new NotifyOptions { Email = new EmailOptions { Postmark = options } });
         return services;
     }
 }

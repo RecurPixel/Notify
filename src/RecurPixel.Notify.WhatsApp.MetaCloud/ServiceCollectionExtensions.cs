@@ -1,6 +1,4 @@
-﻿using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.DependencyInjection.Extensions;
-using RecurPixel.Notify.Channels;
+using Microsoft.Extensions.DependencyInjection;
 using RecurPixel.Notify.Configuration;
 
 namespace RecurPixel.Notify;
@@ -11,11 +9,11 @@ namespace RecurPixel.Notify;
 public static class ServiceCollectionExtensions
 {
     /// <summary>
-    /// Adds the Meta Cloud WhatsApp adapter. Registers under the keyed service key
-    /// <c>"whatsapp:metacloud"</c> so the Orchestrator can resolve it by provider name.
+    /// Adds the Meta Cloud WhatsApp adapter. Delegates to <see cref="MetaCloudRegistrar"/>.
+    /// Registers under the keyed service key <c>"whatsapp:metacloud"</c>.
     /// </summary>
     /// <exception cref="InvalidOperationException">
-    /// Thrown at registration time if any required credential is missing.
+    /// Thrown if any required credential is missing.
     /// </exception>
     public static IServiceCollection AddRecurPixelWhatsAppMetaCloud(
         this IServiceCollection services,
@@ -29,15 +27,8 @@ public static class ServiceCollectionExtensions
         if (string.IsNullOrWhiteSpace(options.PhoneNumberId))
             throw new InvalidOperationException("MetaCloudOptions.PhoneNumberId is required.");
 
-        services.Configure<MetaCloudOptions>(o =>
-        {
-            o.AccessToken = options.AccessToken;
-            o.PhoneNumberId = options.PhoneNumberId;
-        });
-
-        services.AddHttpClient(nameof(MetaCloudWhatsAppChannel));
-        services.TryAddKeyedSingleton<INotificationChannel, MetaCloudWhatsAppChannel>("whatsapp:metacloud");
-
+        new MetaCloudRegistrar().Register(services,
+            new NotifyOptions { WhatsApp = new WhatsAppOptions { MetaCloud = options } });
         return services;
     }
 }

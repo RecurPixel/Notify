@@ -2,15 +2,18 @@ namespace RecurPixel.Notify.Tests.Sms;
 
 public class TwilioSmsChannelTests
 {
-    private static TwilioSmsChannel BuildChannel() =>
-        new TwilioSmsChannel(
-            Options.Create(new TwilioOptions
-            {
-                AccountSid = "ACinvalid",
-                AuthToken = "invalid",
-                FromNumber = "+10000000000"
-            }),
-            NullLogger<TwilioSmsChannel>.Instance);
+    private static TwilioSmsChannel BuildChannel()
+    {
+        var monitor = new Mock<IOptionsMonitor<TwilioOptions>>();
+        monitor.Setup(m => m.Get(TwilioSmsRegistrar.OptionsName))
+               .Returns(new TwilioOptions
+               {
+                   AccountSid = "ACinvalid",
+                   AuthToken  = "invalid",
+                   FromNumber = "+10000000000"
+               });
+        return new TwilioSmsChannel(monitor.Object, NullLogger<TwilioSmsChannel>.Instance);
+    }
 
     // ── ChannelName ───────────────────────────────────────────────────────────
 
@@ -30,7 +33,7 @@ public class TwilioSmsChannelTests
 
         var result = await channel.SendAsync(new NotificationPayload
         {
-            To = "+919999999999",
+            To   = "+919999999999",
             Body = "Test message"
         });
 
@@ -48,7 +51,7 @@ public class TwilioSmsChannelTests
 
         var result = await channel.SendAsync(new NotificationPayload
         {
-            To = "+919999999999",
+            To   = "+919999999999",
             Body = "Test message"
         });
 
@@ -62,7 +65,7 @@ public class TwilioSmsChannelTests
 
         var ex = await Record.ExceptionAsync(() => channel.SendAsync(new NotificationPayload
         {
-            To = "+919999999999",
+            To   = "+919999999999",
             Body = "Test message"
         }));
 

@@ -1,6 +1,4 @@
-﻿using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.DependencyInjection.Extensions;
-using RecurPixel.Notify.Channels;
+using Microsoft.Extensions.DependencyInjection;
 using RecurPixel.Notify.Configuration;
 
 namespace RecurPixel.Notify;
@@ -11,11 +9,11 @@ namespace RecurPixel.Notify;
 public static class ServiceCollectionExtensions
 {
     /// <summary>
-    /// Adds the Twilio WhatsApp adapter. Registers under the keyed service key
-    /// <c>"whatsapp:twilio"</c> so the Orchestrator can resolve it by provider name.
+    /// Adds the Twilio WhatsApp adapter. Delegates to <see cref="TwilioWhatsAppRegistrar"/>.
+    /// Uses named options (<c>"whatsapp:twilio"</c>) to isolate credentials from the SMS adapter.
     /// </summary>
     /// <exception cref="InvalidOperationException">
-    /// Thrown at registration time if any required credential is missing.
+    /// Thrown if any required credential is missing.
     /// </exception>
     public static IServiceCollection AddRecurPixelWhatsAppTwilio(
         this IServiceCollection services,
@@ -34,15 +32,8 @@ public static class ServiceCollectionExtensions
                 "TwilioOptions.FromNumber is required. " +
                 "Use the whatsapp:+1234567890 format or a plain number — the adapter adds the prefix.");
 
-        services.Configure<TwilioOptions>(o =>
-        {
-            o.AccountSid = options.AccountSid;
-            o.AuthToken = options.AuthToken;
-            o.FromNumber = options.FromNumber;
-        });
-
-        services.TryAddKeyedSingleton<INotificationChannel, TwilioWhatsAppChannel>("whatsapp:twilio");
-
+        new TwilioWhatsAppRegistrar().Register(services,
+            new NotifyOptions { WhatsApp = new WhatsAppOptions { Twilio = options } });
         return services;
     }
 }

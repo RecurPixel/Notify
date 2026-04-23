@@ -10,7 +10,6 @@ namespace RecurPixel.Notify.Channels;
 /// Delivers messages via Slack Incoming Webhooks.
 /// Extend with Bot API (chat.postMessage) by setting <see cref="SlackOptions.BotToken"/>.
 /// </summary>
-[ChannelAdapter("slack", "default")]
 public sealed class SlackChannel : NotificationChannelBase
 {
     private readonly SlackOptions _options;

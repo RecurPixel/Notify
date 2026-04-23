@@ -12,7 +12,6 @@ namespace RecurPixel.Notify.Channels;
 /// Notification channel adapter for Expo push notification delivery.
 /// Supports native batch sending via the Expo push tickets API.
 /// </summary>
-[ChannelAdapter("push", "expo")]
 public sealed class ExpoChannel : NotificationChannelBase
 {
     private readonly ExpoOptions _options;

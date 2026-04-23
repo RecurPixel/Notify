@@ -12,7 +12,6 @@ namespace RecurPixel.Notify.Channels;
 /// Sends messages via POST to the configured Rocket.Chat webhook URL.
 /// Bulk is handled by the base class loop — Rocket.Chat webhooks are per-message.
 /// </summary>
-[ChannelAdapter("rocketchat", "default")]
 public sealed class RocketChatChannel : NotificationChannelBase
 {
     private readonly RocketChatOptions _options;

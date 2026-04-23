@@ -9,7 +9,6 @@ namespace RecurPixel.Notify.Channels;
 /// Notification channel adapter for Azure Communication Services Email.
 /// Bulk is handled by the base class loop — ACS Email has no native batch API.
 /// </summary>
-[ChannelAdapter("email", "azurecommemail")]
 public sealed class AzureCommEmailChannel : NotificationChannelBase
 {
     private readonly AzureCommEmailOptions _options;
