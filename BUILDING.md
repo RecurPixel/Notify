@@ -407,7 +407,8 @@ the summary row stats if bandwidth allows — otherwise plain numbers.
 - ✅ `Msg91WhatsAppOptions` — AuthKey, IntegratedNumber, Namespace
 - ✅ Add both to `RecurPixel.Notify.Sdk`
 - ✅ Unit tests for both
-- ✅ `dotnet test` — all green (424 passed)
+- ✅ Integration tests for both (skip when credentials absent)
+- ✅ `dotnet test` — all green (433 passed)
 
 **Resume prompt:**
 ```
@@ -559,7 +560,7 @@ Candidates:
 | `Sms.MessageBird` | MessageBird | SMS | ✅ | 🔲 | 🔲 |
 | `Sms.AwsSns` | AWS SNS | SMS | ✅ | 🔲 | 🔲 |
 | `Sms.AzureCommSms` | Azure Communication Services | SMS | ✅ | 🔲 | 🔲 |
-| `Sms.Msg91` | MSG91 | SMS | 🔲 | 🔲 | 🔲 |
+| `Sms.Msg91` | MSG91 | SMS | ✅ | ✅ | 🔲 |
 | `Push.Fcm` | Firebase Cloud Messaging | Push | ✅ | 🔲 | 🔲 |
 | `Push.Apns` | Apple Push Notification Service | Push | ✅ | 🔲 | 🔲 |
 | `Push.OneSignal` | OneSignal | Push | ✅ | 🔲 | 🔲 |
@@ -567,7 +568,7 @@ Candidates:
 | `WhatsApp.Twilio` | Twilio WhatsApp | WhatsApp | ✅ | ✅ | 🔲 |
 | `WhatsApp.MetaCloud` | Meta Cloud API | WhatsApp | ✅ | 🔲 | 🔲 |
 | `WhatsApp.Vonage` | Vonage WhatsApp | WhatsApp | ✅ | 🔲 | 🔲 |
-| `WhatsApp.Msg91` | MSG91 WhatsApp | WhatsApp | 🔲 | 🔲 | 🔲 |
+| `WhatsApp.Msg91` | MSG91 WhatsApp | WhatsApp | ✅ | ✅ | 🔲 |
 | `Slack` | Slack Webhooks / Bot API | Team Chat | ✅ | ✅ | 🔲 |
 | `Discord` | Discord Webhooks | Team Chat | ✅ | ✅ | 🔲 |
 | `Teams` | Microsoft Teams Webhooks | Team Chat | ✅ | 🔲 | 🔲 |

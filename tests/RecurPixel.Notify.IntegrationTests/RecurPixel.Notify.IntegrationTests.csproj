@@ -90,6 +90,12 @@
     <ProjectReference Include="..\..\src\RecurPixel.Notify.WhatsApp.Vonage\RecurPixel.Notify.WhatsApp.Vonage.csproj" />
   </ItemGroup>
 
+  <!-- ─── Phase 17 — MSG91 SMS + WhatsApp ─────────────────────────────── -->
+  <ItemGroup Label="Phase 17">
+    <ProjectReference Include="..\..\src\RecurPixel.Notify.Sms.Msg91\RecurPixel.Notify.Sms.Msg91.csproj" />
+    <ProjectReference Include="..\..\src\RecurPixel.Notify.WhatsApp.Msg91\RecurPixel.Notify.WhatsApp.Msg91.csproj" />
+  </ItemGroup>
+
   <!-- ─── Phase 12B — Azure Communication Services + Mattermost + RocketChat ───────────────────────── -->
   <ItemGroup Label="Phase 12B">
     <ProjectReference Include="..\..\src\RecurPixel.Notify.Email.AzureCommEmail\RecurPixel.Notify.Email.AzureCommEmail.csproj" />
